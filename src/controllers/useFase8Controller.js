@@ -23,7 +23,12 @@ export const useFase8Controller = () => {
     faseId: 8,
     totalPasos: 7,
     clavesDeGuardado: ['operacion'],
-    estructuraJSON: true
+    estructuraJSON: true,
+    defaultData: {
+      pasosProduccion: [],
+      cuadriculaLayout: Array(36).fill(null),
+      diagramaVerificado: false
+    }
   });
 
   const { data, updateData, step, cargando, guardando, irAPaso, siguientePaso, pasoAnterior } = baseController;

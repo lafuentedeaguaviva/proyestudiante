@@ -10,7 +10,7 @@ export const useFase11Controller = () => {
   // Todo el estado se guardará en `documento_final`
   const baseController = useFaseController({
     faseId: 11,
-    totalPasos: 10,
+    totalPasos: 11,
     clavesDeGuardado: ['documento_final'],
     estructuraJSON: true
   });

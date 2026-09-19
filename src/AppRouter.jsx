@@ -51,9 +51,9 @@ const AppRouter = () => {
             <Route path="/fase/8" element={<Fase8_Operacion />} />
             <Route path="/fase/9" element={<ErrorBoundary><Fase9_Estructura /></ErrorBoundary>} />
             <Route path="/fase/10" element={<ErrorBoundary><Fase10_PlanFinanciero /></ErrorBoundary>} />
-            <Route path="/fase/11" element={<Fase11_DocumentoFinal />} />
-            <Route path="/fase/12" element={<Fase12_ProyectoVida />} />
-            <Route path="/fase/13" element={<Fase13_DocumentoIA />} />
+            <Route path="/fase/11" element={<ErrorBoundary><Fase11_DocumentoFinal /></ErrorBoundary>} />
+            <Route path="/fase/12" element={<ErrorBoundary><Fase12_ProyectoVida /></ErrorBoundary>} />
+            <Route path="/fase/13" element={<ErrorBoundary><Fase13_DocumentoIA /></ErrorBoundary>} />
             <Route path="/gameover" element={<GameOverNexus />} />
             <Route path="/encuesta/:projectId" element={<EncuestaPublica />} />
             <Route path="/admin/prompts" element={<AdminPrompts />} />

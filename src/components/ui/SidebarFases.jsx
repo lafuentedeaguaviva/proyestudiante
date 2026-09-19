@@ -56,17 +56,24 @@ const SidebarFases = () => {
         { id: 6, titulo: 'Localización y Distribución', path: '/fase/6', pasos: [
           'Video Localización', 'Identificación', 'Canales', 
           'Elección Lugar', 'Croquis', 'Pagos', 
-          'Video Plan Dist.', 'Plan Acción', 'Presupuesto', 'Resumen IA'
+          'Video Plan Dist.', 'Plan Acción', 'Resumen IA'
         ] },
-        { id: 7, titulo: 'Planteamiento del Emprendimiento', path: '/fase/7', pasos: ['Diagnóstico del contexto', 'Objetivos y Misión/Visión', 'Justificación'] },
+        { id: 7, titulo: 'Planteamiento del Emprendimiento', path: '/fase/7', pasos: [
+          'Video Diagnóstico', 'Diagnóstico del contexto',
+          'Video Objetivos', 'Objetivos',
+          'Video Misión', 'Misión',
+          'Video Visión', 'Visión',
+          'Video Justificación', 'Justificación',
+          'Resumen IA'
+        ] },
         { id: 8, titulo: 'La Operación', path: '/fase/8', pasos: [
           '1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos',
           '5. Juego: Clasificación de Procesos', '6. Video: Layout del Negocio', '7. Juego: Zonas de Trabajo'
         ] },
-        { id: 9, titulo: 'Estructura Organizacional', path: '/fase/9', pasos: ['Organigrama', 'Roles'] },
+        { id: 9, titulo: 'Estructura Organizacional', path: '/fase/9', pasos: ['Organigrama', 'Roles', 'Resumen IA'] },
         { id: 10, titulo: 'Viabilidad y Sostenibilidad', path: '/fase/10', pasos: ['Inversión Inicial', 'Costos Fijos y Variables', 'Precios y Equilibrio', 'Video Utilidad', 'Utilidad e Impuestos', 'Video Equilibrio', 'Punto de Equilibrio', 'Video Evaluación', 'VAN y TIR'] },
-        { id: 11, titulo: 'Consolidación del Documento', path: '/fase/11', pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria'] },
-        { id: 12, titulo: 'Proyecto de Vida', path: '/fase/12', pasos: ['Alineación', 'Metas', 'Equilibrio', 'Legado'] },
+        { id: 11, titulo: 'Consolidación del Documento', path: '/fase/11', pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },
+        { id: 12, titulo: 'Proyecto de Vida', path: '/fase/12', pasos: ['Alineación', 'Metas', 'Equilibrio', 'Legado', 'Resumen IA'] },
         { id: 13, titulo: 'Documento Final IA', path: '/fase/13', pasos: ['Configuración IA'] }
       ];
 

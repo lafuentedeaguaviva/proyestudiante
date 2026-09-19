@@ -14,8 +14,8 @@ const Fase11_DocumentoFinal = () => {
     cargando, step, irAPaso, siguientePaso, pasoAnterior,
     globalData, setGlobalData,
     guardando, errorStr,
-    handleFinalizar
-  , setPendingSave } = useFase11Controller();
+    handleFinalizar,
+    setPendingSave, forceSave } = useFase11Controller();
 
   const data = globalData;
   const updateGlobalData = (newData) => {
@@ -23,21 +23,27 @@ const Fase11_DocumentoFinal = () => {
     if (typeof setPendingSave === 'function') setPendingSave(true);
   };
 
+  const [generandoIA, setGenerandoIA] = useState(false);
+  const [nivelIA, setNivelIA] = useState('medio');
+  const [todosData, setTodosData] = useState(null);
+
   useEffect(() => {
     const autoFill = async () => {
       if (!cargando && data) {
         let needsUpdate = false;
         const updates = {};
         
-        if (!data.intro_problema || !data.intro_objetivos || !data.intro_estructura) {
+        if (!data.intro_problema || !data.intro_objetivos || !data.intro_estructura || !todosData) {
           try {
             const todos = await obtenerTodoElContenidoProyecto();
+            setTodosData(todos);
             
             const safeString = (val) => {
               if (!val) return null;
               if (typeof val === 'string') {
                 try {
                   const parsed = JSON.parse(val);
+                  if (typeof parsed === 'string' && parsed === val) return val;
                   return safeString(parsed);
                 } catch (e) {
                   return val;
@@ -74,12 +80,13 @@ const Fase11_DocumentoFinal = () => {
               } else {
                 const baseF = todos[6]?.obj_verbo ? todos[6] : (todos[7]?.obj_verbo ? todos[7] : null);
                 if (baseF) {
-                  const oG = `${safeString(baseF.obj_verbo) || ''} ${safeString(baseF.obj_producto) || ''} para ${safeString(baseF.obj_publico) || ''} en ${safeString(baseF.obj_plazo) || ''}`.trim();
+                  const oG = `${safeString(baseF.obj_verbo) || ''} ${safeString(baseF.obj_producto) || ''} para ${safeString(baseF.obj_publico) || ''} ${safeString(baseF.obj_ubicacion) || ''} ${safeString(baseF.obj_plazo) || ''}`.trim();
                   if (oG) {
                     const esp1 = baseF.obj_especifico_1 ? `- ${safeString(baseF.obj_especifico_1)}` : '';
                     const esp2 = baseF.obj_especifico_2 ? `\n- ${safeString(baseF.obj_especifico_2)}` : '';
                     const esp3 = baseF.obj_especifico_3 ? `\n- ${safeString(baseF.obj_especifico_3)}` : '';
-                    updates.intro_objetivos = `Objetivo General:\n${oG}\n\nObjetivos Específicos:\n${esp1}${esp2}${esp3}`;
+                    const esp4 = baseF.obj_especifico_4 ? `\n- ${safeString(baseF.obj_especifico_4)}` : '';
+                    updates.intro_objetivos = `Objetivo General:\n${oG}\n\nObjetivos Específicos:\n${esp1}${esp2}${esp3}${esp4}`;
                     needsUpdate = true;
                   }
                 }
@@ -108,9 +115,6 @@ const Fase11_DocumentoFinal = () => {
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
     </div>
   );
-
-  const [generandoIA, setGenerandoIA] = useState(false);
-  const [nivelIA, setNivelIA] = useState('medio');
 
   const handleCompletarSeccionIA = async () => {
     setGenerandoIA(true);
@@ -160,6 +164,120 @@ const Fase11_DocumentoFinal = () => {
     }
   };
 
+  const handleCompletarTodoIA = async () => {
+    const sobreescribir = window.confirm("¿Deseas sobreescribir TODO el documento con IA? (Acepta para regenerar todo, o Cancela para solo llenar los campos vacíos)");
+    setGenerandoIA(true);
+    try {
+      const todos = await obtenerTodoElContenidoProyecto();
+      const contexto = JSON.stringify(todos);
+      let updates = {};
+      
+      const checkAndGen = async (field, promptName, extraInst = "Redacta de 1 a 2 párrafos concisos y directos en tiempo PASADO (evita futuro como 'se completará').") => {
+        if (sobreescribir || !data[field] || String(data[field]).trim() === '' || String(data[field]).includes('completara')) {
+          const res = await generarRedaccionMediaIA(contexto, promptName, extraInst, nivelIA);
+          updates[field] = res;
+        }
+      };
+
+      // Paso 2
+      await checkAndGen('intro_contexto', 'Contexto general del problema u oportunidad de negocio');
+      await checkAndGen('intro_problema', 'Problema o necesidad que resuelve el emprendimiento');
+      if (!data.intro_objetivos || String(data.intro_objetivos).trim() === '') {
+        updates.intro_objetivos = await generarRedaccionMediaIA(contexto, 'Objetivos general y específicos', "Genera un Objetivo General y 3 Específicos basados en el contexto.", nivelIA);
+      }
+      await checkAndGen('intro_estructura', 'Estructura o capítulos de los que consta el documento final');
+      
+      // Paso 4
+      await checkAndGen('resultados_mercado', 'Resultados del estudio de mercado y segmentación de clientes');
+      await checkAndGen('resultados_tecnico', 'Resultados del estudio técnico y productivo');
+      await checkAndGen('resultados_financiero', 'Resultados del estudio financiero y rentabilidad');
+      
+      // Paso 6
+      const parseObjetivosIA = (texto) => {
+        let general = [];
+        let especificos = [];
+        
+        if (texto) {
+          const lines = texto.split('\n').filter(l => l.trim() !== '');
+          let mode = 'general';
+          for (const line of lines) {
+             const lower = line.toLowerCase();
+             if (lower.includes('objetivo general') && !lower.includes('específic')) { mode = 'general'; continue; }
+             if (lower.includes('específic') || lower.includes('especific')) { mode = 'especificos'; continue; }
+             
+             const cleanLine = line.replace(/^[-\d.)]+\s*/, '').trim();
+             if (!cleanLine) continue;
+
+             if (mode === 'general') general.push(cleanLine);
+             else especificos.push(cleanLine);
+          }
+        }
+
+        // Fallback
+        if (general.length === 0 && todos && (todos[7]?.obj_verbo || todos[6]?.obj_verbo)) {
+          const baseF = todos[7]?.obj_verbo ? todos[7] : todos[6];
+          general = [`${baseF.obj_verbo || ''} ${baseF.obj_producto || ''} para ${baseF.obj_publico || ''}`.trim()];
+        }
+
+        if (especificos.length === 0 && todos) {
+          const baseF = todos[7]?.obj_especifico_1 ? todos[7] : todos[6];
+          if (baseF) {
+            if (baseF.obj_especifico_1) especificos.push(baseF.obj_especifico_1);
+            if (baseF.obj_especifico_2) especificos.push(baseF.obj_especifico_2);
+            if (baseF.obj_especifico_3) especificos.push(baseF.obj_especifico_3);
+            if (baseF.obj_especifico_4) especificos.push(baseF.obj_especifico_4);
+          }
+        }
+
+        return {
+          general: general.length ? general.join(' ') : 'Objetivo General',
+          especificos: especificos.length ? especificos : ['Objetivo Específico 1']
+        };
+      };
+
+      const objs = parseObjetivosIA(updates.intro_objetivos || data.intro_objetivos);
+      let concEspecificas = Array.isArray(data.conclusiones_especificas) ? [...data.conclusiones_especificas] : [];
+      let especificasModificadas = false;
+      
+      for (let i = 0; i < objs.especificos.length; i++) {
+        if (sobreescribir || !concEspecificas[i] || String(concEspecificas[i]).trim() === '' || String(concEspecificas[i]).includes('completara')) {
+          concEspecificas[i] = await generarRedaccionMediaIA(
+            contexto, 
+            `Conclusión específica para el objetivo: ${objs.especificos[i]}`, 
+            'Escribe una conclusión afirmativa en TIEMPO PASADO indicando cómo YA SE CUMPLIÓ este objetivo en 1 párrafo corto. NO uses futuro (ej. "se completará"). No uses etiquetas como "Objetivo:" o "Conclusión:".', 
+            nivelIA
+          );
+          especificasModificadas = true;
+        }
+      }
+      if (especificasModificadas) {
+        updates.conclusiones_especificas = concEspecificas;
+      }
+
+      if (sobreescribir || !data.conclusion_general || String(data.conclusion_general).trim() === '' || String(data.conclusion_general).includes('completara')) {
+        updates.conclusion_general = await generarRedaccionMediaIA(contexto, 'Conclusión general del proyecto de emprendimiento', 'Resume en un párrafo el éxito técnico, de mercado y financiero en TIEMPO PASADO, sin usar viñetas ni etiquetas ni hablar en futuro.', nivelIA);
+      }
+      await checkAndGen('recomendaciones', 'Recomendaciones futuras para la empresa o proyecto');
+      
+      // Paso 8 y 10
+      await checkAndGen('agradecimientos', 'Agradecimientos institucionales y personales por el apoyo en el proyecto');
+      await checkAndGen('dedicatoria', 'Dedicatoria personal emotiva a familia o amigos (corto)');
+
+      if (Object.keys(updates).length > 0) {
+        updateGlobalData(updates);
+        // Force save immediately so AI results aren't lost if user navigates away
+        setTimeout(() => { if (typeof forceSave === 'function') forceSave(); }, 100);
+      } else {
+        alert("¡Todos los campos del documento ya están llenos!");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al generar con IA");
+    } finally {
+      setGenerandoIA(false);
+    }
+  };
+
   const getPasoContent = () => {
     switch(step) {
       case 1: return (
@@ -192,7 +310,7 @@ const Fase11_DocumentoFinal = () => {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">1. Contexto general (¿Por qué es importante el tema en la actualidad?)</label>
               <textarea 
-                value={data.intro_contexto}
+                value={data?.intro_contexto || ''}
                 onChange={(e) => updateGlobalData({ intro_contexto: e.target.value })}
                 className="w-full h-24 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all resize-none"
                 placeholder="Ej: En los últimos años, el consumo de productos naturales ha experimentado un crecimiento..."
@@ -201,7 +319,7 @@ const Fase11_DocumentoFinal = () => {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">2. Problema o necesidad (¿Qué problema específico abordas?)</label>
               <textarea 
-                value={data.intro_problema}
+                value={data?.intro_problema || ''}
                 onChange={(e) => updateGlobalData({ intro_problema: e.target.value })}
                 className="w-full h-24 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all resize-none"
                 placeholder="Ej: A pesar de esta tendencia, los emprendedores enfrentan dificultades por falta de planificación..."
@@ -361,31 +479,54 @@ const Fase11_DocumentoFinal = () => {
       );
       case 6: 
         const parseObjetivos = (texto) => {
-          if (!texto) return { general: 'Objetivo General', especificos: ['Objetivo Específico 1', 'Objetivo Específico 2'] };
-          const lines = texto.split('\n').filter(l => l.trim() !== '');
-          const general = [];
-          const especificos = [];
-          let mode = 'general';
-          for (const line of lines) {
-             const lower = line.toLowerCase();
-             if (lower.includes('objetivo general:')) { mode = 'general'; continue; }
-             if (lower.includes('específicos:')) { mode = 'especificos'; continue; }
-             
-             const cleanLine = line.replace(/^-\s*/, '').trim();
-             if (mode === 'general') general.push(cleanLine);
-             else especificos.push(cleanLine);
+          let general = [];
+          let especificos = [];
+          
+          if (texto) {
+            const lines = texto.split('\n').filter(l => l.trim() !== '');
+            let mode = 'general';
+            for (const line of lines) {
+               const lower = line.toLowerCase();
+               if (lower.includes('objetivo general') && !lower.includes('específic')) { mode = 'general'; continue; }
+               if (lower.includes('específic') || lower.includes('especific')) { mode = 'especificos'; continue; }
+               
+               const cleanLine = line.replace(/^[-\d.)]+\s*/, '').trim();
+               if (!cleanLine) continue;
+
+               if (mode === 'general') general.push(cleanLine);
+               else especificos.push(cleanLine);
+            }
           }
+
+          // Fallback to Phase 7 data if parsing fails
+          if (general.length === 0 && todosData && (todosData[7]?.obj_verbo || todosData[6]?.obj_verbo)) {
+            const baseF = todosData[7]?.obj_verbo ? todosData[7] : todosData[6];
+            general = [`${baseF.obj_verbo || ''} ${baseF.obj_producto || ''} para ${baseF.obj_publico || ''}`.trim()];
+          }
+
+          if (especificos.length === 0 && todosData) {
+            const baseF = todosData[7]?.obj_especifico_1 ? todosData[7] : todosData[6];
+            if (baseF) {
+              if (baseF.obj_especifico_1) especificos.push(baseF.obj_especifico_1);
+              if (baseF.obj_especifico_2) especificos.push(baseF.obj_especifico_2);
+              if (baseF.obj_especifico_3) especificos.push(baseF.obj_especifico_3);
+              if (baseF.obj_especifico_4) especificos.push(baseF.obj_especifico_4);
+            }
+          }
+
           return {
             general: general.length ? general.join(' ') : 'Objetivo General',
             especificos: especificos.length ? especificos : ['Objetivo Específico 1', 'Objetivo Específico 2']
           };
         };
 
-        const objs = parseObjetivos(data.intro_objetivos);
-        const concEspecificas = data.conclusiones_especificas || Array(objs.especificos.length).fill('');
+        const objs = parseObjetivos(data?.intro_objetivos);
+        const concEspecificas = Array.isArray(data?.conclusiones_especificas) 
+          ? data.conclusiones_especificas 
+          : Array(objs.especificos.length).fill('');
         
         const updateConclEspecifica = (index, val) => {
-          const nuevas = [...concEspecificas];
+          const nuevas = Array.isArray(concEspecificas) ? [...concEspecificas] : [];
           nuevas[index] = val;
           updateGlobalData({ conclusiones_especificas: nuevas });
         };
@@ -488,8 +629,9 @@ const Fase11_DocumentoFinal = () => {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Redacta tus agradecimientos</label>
               <textarea 
-                value={data.agradecimientos}
+                value={data?.agradecimientos || ''}
                 onChange={(e) => updateGlobalData({ agradecimientos: e.target.value })}
+                onBlur={() => { if (typeof forceSave === 'function') forceSave(); }}
                 className="w-full h-64 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all resize-none"
                 placeholder="Quiero expresar mi más sincero agradecimiento a..."
               />
@@ -527,11 +669,89 @@ const Fase11_DocumentoFinal = () => {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Escribe aquí tu dedicatoria</label>
               <textarea 
-                value={data.dedicatoria}
+                value={data?.dedicatoria || ''}
                 onChange={(e) => updateGlobalData({ dedicatoria: e.target.value })}
-                className="w-full h-64 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 transition-all resize-none text-center italic"
-                placeholder="A mis padres por su apoyo incondicional..."
+                onBlur={() => { if (typeof forceSave === 'function') forceSave(); }}
+                className="w-full h-64 p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 transition-all resize-none"
+                placeholder="Este proyecto está dedicado a..."
               />
+            </div>
+          </div>
+        </div>
+      );
+      case 11: return (
+        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-indigo-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
+              <BookOpen size={24} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-black text-slate-800">Resumen IA</h2>
+              <p className="text-slate-500 font-medium">Revisa todo el contenido generado en un solo lugar.</p>
+            </div>
+            <button 
+              onClick={handleCompletarTodoIA}
+              disabled={generandoIA}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl shadow-lg flex items-center gap-2 transition-transform hover:scale-105 disabled:opacity-50"
+            >
+              {generandoIA ? <span className="animate-spin text-xl">⏳</span> : '✨'}
+              {generandoIA ? 'Generando...' : 'Completar Todo con IA'}
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">1. Introducción</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {[
+                  data?.intro_contexto,
+                  data?.intro_problema,
+                  data?.intro_objetivos ? data.intro_objetivos.replace(/Objetivo General:?/gi, 'El propósito principal de este proyecto es:').replace(/Objetivos Específicos:?/gi, 'Para alcanzar esta meta, se realizarán las siguientes acciones:') : null,
+                  data?.intro_estructura
+                ].filter(Boolean).join('\n\n') || 'Sin datos'}
+              </p>
+            </div>
+            
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">2. Resultados</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {[
+                  data?.resultados_mercado,
+                  data?.resultados_tecnico,
+                  data?.resultados_financiero
+                ].filter(Boolean).join('\n\n') || 'Sin datos'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">3. Conclusiones</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {[
+                  ...(data?.conclusiones_especificas || []),
+                  data?.conclusion_general
+                ].filter(Boolean).join('\n\n') || 'Sin datos'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">4. Recomendaciones</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {data?.recomendaciones || 'Sin datos'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">5. Agradecimientos</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {data?.agradecimientos || 'Sin datos'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200 text-center italic">
+              <h3 className="text-lg font-bold text-slate-800 mb-4 not-italic">6. Dedicatoria</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {data?.dedicatoria || 'Sin datos'}
+              </p>
             </div>
           </div>
         </div>
@@ -544,7 +764,7 @@ const Fase11_DocumentoFinal = () => {
     <PasoLayout 
       faseTitle="Fase 11: Consolidación del Documento"
       pasoActual={step}
-      totalPasos={10}
+      totalPasos={11}
       tabs={[
         { id: 1, icon: <Play size={16} />, label: 'V. Intro' },
         { id: 2, icon: <BookOpen size={16} />, label: 'Intro' },
@@ -555,50 +775,27 @@ const Fase11_DocumentoFinal = () => {
         { id: 7, icon: <Play size={16} />, label: 'V. Agradecimientos' },
         { id: 8, icon: <Gift size={16} />, label: 'Agradecimientos' },
         { id: 9, icon: <Play size={16} />, label: 'V. Dedicatoria' },
-        { id: 10, icon: <Heart size={16} />, label: 'Dedicatoria' }
+        { id: 10, icon: <Heart size={16} />, label: 'Dedicatoria' },
+        { id: 11, icon: <BookOpen size={16} />, label: 'Resumen IA' }
       ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
-      onSiguiente={() => step < 10 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 11 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={
         step === 1 || step === 2 ? "La introducción es la puerta de entrada a tu proyecto. Debe explicar el qué y el para qué." : 
         step === 3 || step === 4 ? "Los resultados son la evidencia de tu trabajo. Sé objetivo, solo muestra los datos sin opinar." : 
         step === 5 || step === 6 ? "Las conclusiones responden a tus objetivos. Las recomendaciones guían el camino a futuro." : 
         step === 7 || step === 8 ? "Un buen líder reconoce a quienes lo ayudaron a llegar a la meta. Agradece a tu equipo, familia e instituciones." :
-        "La dedicatoria es algo muy personal y emotivo. ¿A quién le ofreces el esfuerzo de todos estos meses?"
+        step === 9 || step === 10 ? "La dedicatoria es algo muy personal y emotivo. ¿A quién le ofreces el esfuerzo de todos estos meses?" :
+        "Revisa cómo ha quedado el documento, la IA ha sintetizado todo."
       }
       guardando={guardando}
     >
       <div onBlur={() => { if(typeof setPendingSave === 'function') setPendingSave(true); }} className="relative">
         
-        {/* Botón flotante IA */}
-        {[2, 4, 6, 8, 10].includes(step) && (
-          <div className="absolute top-0 right-0 -mt-2 -mr-2 z-10 flex items-center gap-2">
-            <select
-              value={nivelIA}
-              onChange={(e) => setNivelIA(e.target.value)}
-              disabled={generandoIA}
-              className="bg-white border-2 border-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-xl shadow-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-colors"
-              title="Selecciona el nivel de redacción de la IA"
-            >
-              <option value="basico">Nivel Básico</option>
-              <option value="medio">Nivel Medio</option>
-              <option value="avanzado">Nivel Académico</option>
-            </select>
-            <button 
-              onClick={handleCompletarSeccionIA}
-              disabled={generandoIA}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow-lg flex items-center gap-2 transition-transform hover:scale-105 disabled:opacity-50"
-              title="Generar la redacción para los campos vacíos de esta sección"
-            >
-              {generandoIA ? <span className="animate-spin text-xl">⏳</span> : '✨'}
-              {generandoIA ? 'Redactando con IA...' : 'Llenar Vacíos'}
-            </button>
-          </div>
-        )}
 
         {getPasoContent()}
       </div>

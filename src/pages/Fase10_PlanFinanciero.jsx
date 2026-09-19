@@ -5,8 +5,8 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import StepNavigation from '../components/ui/StepNavigation';
 import { useFase10Controller } from '../controllers/useFase10Controller';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DollarSign, Wallet, TrendingUp, Plus, Trash2, Calculator, Info, Package, Play, Bot, Sparkles } from 'lucide-react';
-import { generarPlanFinancieroIA } from '../services/api';
+import { DollarSign, Wallet, TrendingUp, Plus, Trash2, Calculator, Info, Package, Play, Bot, Sparkles, AlertTriangle, Lightbulb, Target, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { generarPlanFinancieroIA, generarConsejosDemandaIA } from '../services/api';
 
 const cajaHerramientas = {
   activoFijo: {
@@ -57,6 +57,7 @@ const Fase10_PlanFinanciero = () => {
     toolboxCategory, setToolboxCategory,
     toolboxSubcategory, setToolboxSubcategory,
     rolesOrganigrama, fase8Cargada,
+    demandaPotencialFase4,
     handleFinalizar,
     setPendingSave
   } = useFase10Controller();
@@ -80,6 +81,32 @@ const Fase10_PlanFinanciero = () => {
   };
 
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
+  const [consejosIA, setConsejosIA] = useState(null);
+  const [cargandoConsejosIA, setCargandoConsejosIA] = useState(false);
+
+  const handleObtenerConsejosIA = async (datosFin) => {
+    setCargandoConsejosIA(true);
+    try {
+      const dbDataStr = localStorage.getItem('datosFases');
+      let ctx = "Proyecto de emprendimiento.";
+      if (dbDataStr) {
+        try {
+          const dbFases = JSON.parse(dbDataStr);
+          const fbProblem = dbFases[2]?.problema || "";
+          const fbIdea = dbFases[1]?.idea_ganadora || dbFases[4]?.nombreProducto || "";
+          const fbSeg = dbFases[3]?.segmento || dbFases[3]?.publico_objetivo || "";
+          ctx = `Problema: ${fbProblem}. Idea: ${fbIdea}. Público: ${fbSeg}.`;
+        } catch (e) {}
+      }
+      const res = await generarConsejosDemandaIA(ctx, datosFin);
+      setConsejosIA(res);
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo obtener las recomendaciones de la IA: " + e.message);
+    } finally {
+      setCargandoConsejosIA(false);
+    }
+  };
 
   const handleLimpiarTablas = () => {
     if (window.confirm("⚠️ ADVERTENCIA: Esta acción borrará TODO el plan financiero actual (inversiones, precios, proyecciones, etc.). Perderás todos tus datos. ¿Estás completamente seguro de continuar?")) {
@@ -134,8 +161,9 @@ const Fase10_PlanFinanciero = () => {
           precios: res.precios || {},
           proyecciones: res.proyecciones || [],
           puntoEquilibrio: res.puntoEquilibrio || 0,
-          produccionMensual: res.produccionMensual || data.produccionMensual || 1,
-          porcentajeGanancia: res.porcentajeGanancia || data.porcentajeGanancia || 30
+          produccionMensual: res.produccionMensual || demandaPotencialFase4 || data.produccionMensual || 1,
+          porcentajeGanancia: res.porcentajeGanancia || data.porcentajeGanancia || 30,
+          tasaDescuento: 13
         });
         if (typeof setPendingSave === 'function') setPendingSave(true);
       }
@@ -166,9 +194,15 @@ const Fase10_PlanFinanciero = () => {
     const precioSinFactura = margen < 100 ? costoUnitario / (1 - (margen / 100)) : costoUnitario;
     const precioFacturado = precioSinFactura / 0.84;
 
-    const margenContribucion = precioFacturado - costoVariableUnitario;
+    const precioVentaEfectivo = (data?.precios?.precioFacturado && parseFloat(data.precios.precioFacturado) > 0)
+      ? parseFloat(data.precios.precioFacturado)
+      : (data?.precioVenta && parseFloat(data.precioVenta) > 0)
+        ? parseFloat(data.precioVenta)
+        : precioFacturado;
+
+    const margenContribucion = precioVentaEfectivo - costoVariableUnitario;
     const puntoEquilibrio = margenContribucion > 0 ? Math.ceil(totalFijos / margenContribucion) : 0;
-    const ingresos = numProd * precioFacturado;
+    const ingresos = numProd * precioVentaEfectivo;
     const egresos = totalFijos + (numProd * costoVariableUnitario);
     const utilidadMensual = ingresos - egresos;
 
@@ -850,18 +884,30 @@ const Fase10_PlanFinanciero = () => {
                   <span className="font-bold text-slate-800">Bs. {costoTotalOp.toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-600 font-medium">Productos por mes</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="1"
-                      className="w-20 bg-slate-50 p-1.5 rounded-lg border border-slate-200 font-bold text-md focus:border-indigo-400 outline-none text-center text-indigo-700"
-                      value={data.produccionMensual || ''}
-                      onChange={e => updateGlobalData({ produccionMensual: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) })}
-                    />
-                    <span className="font-bold text-slate-500">u.</span>
+                <div className="flex flex-col gap-2 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 font-medium">Productos por mes</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        className="w-20 bg-slate-50 p-1.5 rounded-lg border border-slate-200 font-bold text-md focus:border-indigo-400 outline-none text-center text-indigo-700"
+                        value={data.produccionMensual || ''}
+                        onChange={e => updateGlobalData({ produccionMensual: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) })}
+                      />
+                      <span className="font-bold text-slate-500">u.</span>
+                    </div>
                   </div>
+                  {demandaPotencialFase4 > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => updateGlobalData({ produccionMensual: demandaPotencialFase4 })}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-bold text-right flex items-center justify-end gap-1 cursor-pointer transition-colors"
+                      title="Usar la Demanda Potencial calculada en Fase 4"
+                    >
+                      ✨ Demanda Potencial Fase 4: {demandaPotencialFase4} u. (Usar)
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100 shadow-sm mt-2">
@@ -928,72 +974,88 @@ const Fase10_PlanFinanciero = () => {
           </div>
         </div>
       );
-      case 10: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
-              <TrendingUp size={24} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-800">Cálculo de Proyección de ganancias</h2>
-              <p className="text-slate-500 font-medium">Así se verán tus ingresos estimados en los primeros 6 meses.</p>
-            </div>
-          </div>
+      case 10: {
+        const valActual = parseInt(data.produccionMensual);
+        const prodBase = (!isNaN(valActual) && valActual !== 100 && valActual > 0)
+          ? valActual
+          : (demandaPotencialFase4 || 50);
 
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-lg text-center mb-8">
-            <h3 className="text-2xl font-bold text-blue-100 mb-6">Proyección de Unidades</h3>
-            <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-4">
-              <div>
-                <label className="text-sm font-bold text-blue-200 uppercase tracking-wider mb-2 block">Ventas Estimadas por Mes (Unidades)</label>
-                <input type="number" min="0" className="w-48 mx-auto bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center" value={data.produccionMensual || ''} onChange={e => updateGlobalData({ produccionMensual: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) })} />
+        return (
+          <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                <TrendingUp size={24} />
               </div>
               <div>
-                <label className="text-sm font-bold text-blue-200 uppercase tracking-wider mb-2 block">Meses a Proyectar</label>
-                <input type="number" min="1" max="24" className="w-48 mx-auto bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center" value={data.mesesProyeccion || 6} onChange={e => updateGlobalData({ mesesProyeccion: e.target.value === '' ? '' : (parseInt(e.target.value) || 1) })} />
+                <h2 className="text-2xl font-black text-slate-800">Cálculo de Proyección de ganancias</h2>
+                <p className="text-slate-500 font-medium">Así se verán tus ingresos estimados en los primeros 6 meses.</p>
               </div>
             </div>
-            <p className="text-blue-200 text-sm mt-4">Sé realista, considera tu capacidad de producción y tu mercado.</p>
-          </div>
 
-          <div className="overflow-x-auto pb-4">
-            <table className="w-full text-left bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm min-w-[700px]">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="p-4 text-slate-500 font-bold border-b border-r border-slate-200 bg-slate-100/50 min-w-[250px] sticky left-0 z-10">Meses</th>
-                  {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => (
-                    <th key={mes} className="p-4 text-slate-500 font-bold text-center border-b border-slate-200">Mes {mes}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Nº de productos o servicios</td>
-                  {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
-                    const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-                    return <td key={mes} className="p-4 text-slate-600 text-center">{unidades}</td>;
-                  })}
-                </tr>
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Precio (Bs.)</td>
-                  {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => (
-                    <td key={mes} className="p-4 text-slate-600 text-center">{parseFloat(data.precioVenta || 0).toFixed(2)}</td>
-                  ))}
-                </tr>
-                <tr className="hover:bg-slate-50 transition-colors bg-emerald-50/30">
-                  <td className="p-4 font-bold text-emerald-800 border-r border-slate-200 bg-emerald-100/30 sticky left-0 z-10">Ingresos (Bs.)</td>
-                  {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
-                    const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-                    const ingresos = unidades * (data.precioVenta || 0);
-                    return <td key={mes} className="p-4 font-bold text-emerald-600 text-center whitespace-nowrap">Bs. {ingresos.toFixed(2)}</td>;
-                  })}
-                </tr>
-              </tbody>
-            </table>
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-lg text-center mb-8">
+              <h3 className="text-2xl font-bold text-blue-100 mb-6">Proyección de Unidades</h3>
+              <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-4">
+                <div>
+                  <label className="text-sm font-bold text-blue-200 uppercase tracking-wider mb-2 block">Ventas Estimadas por Mes (Unidades)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-48 mx-auto bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center"
+                    value={data.produccionMensual && data.produccionMensual !== 100 ? data.produccionMensual : prodBase}
+                    onChange={e => updateGlobalData({ produccionMensual: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) })}
+                  />
+                  <div className="mt-2.5 text-xs text-amber-200 font-bold bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 inline-flex items-center gap-1.5">
+                    <span>✨ Demanda Potencial estimada: <strong className="text-amber-300 font-black">{prodBase} u./mes</strong></span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-blue-200 uppercase tracking-wider mb-2 block">Meses a Proyectar</label>
+                  <input type="number" min="1" max="24" className="w-48 mx-auto bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center" value={data.mesesProyeccion || 6} onChange={e => updateGlobalData({ mesesProyeccion: e.target.value === '' ? '' : (parseInt(e.target.value) || 1) })} />
+                </div>
+              </div>
+              <p className="text-blue-200 text-sm mt-4">Sé realista, considera tu capacidad de producción y tu mercado.</p>
+            </div>
+
+            <div className="overflow-x-auto pb-4">
+              <table className="w-full text-left bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm min-w-[700px]">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="p-4 text-slate-500 font-bold border-b border-r border-slate-200 bg-slate-100/50 min-w-[250px] sticky left-0 z-10">Meses</th>
+                    {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => (
+                      <th key={mes} className="p-4 text-slate-500 font-bold text-center border-b border-slate-200">Mes {mes}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Nº de productos o servicios</td>
+                    {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
+                      const multiplicador = 1 + ((mes - 1) * 0.13);
+                      const unidades = Math.round(prodBase * multiplicador);
+                      return <td key={mes} className="p-4 text-slate-600 text-center">{unidades}</td>;
+                    })}
+                  </tr>
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Precio (Bs.)</td>
+                    {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => (
+                      <td key={mes} className="p-4 text-slate-600 text-center">{parseFloat(precioVentaEfectivo || 0).toFixed(2)}</td>
+                    ))}
+                  </tr>
+                  <tr className="hover:bg-slate-50 transition-colors bg-emerald-50/30">
+                    <td className="p-4 font-bold text-emerald-800 border-r border-slate-200 bg-emerald-100/30 sticky left-0 z-10">Ingresos (Bs.)</td>
+                    {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
+                      const multiplicador = 1 + ((mes - 1) * 0.13);
+                      const unidades = Math.round(prodBase * multiplicador);
+                      const ingresos = unidades * (precioVentaEfectivo || 0);
+                      return <td key={mes} className="p-4 font-bold text-emerald-600 text-center whitespace-nowrap">Bs. {ingresos.toFixed(2)}</td>;
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
       case 11: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
@@ -1049,7 +1111,7 @@ const Fase10_PlanFinanciero = () => {
                 <tr className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Costos Variables (Bs.)</td>
                   {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
+                    const multiplicador = 1 + ((mes - 1) * 0.13);
                     const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
                     const vars = unidades * costoVariableUnitario;
                     return <td key={mes} className="p-4 text-slate-600 text-center">{vars.toFixed(2)}</td>;
@@ -1058,7 +1120,7 @@ const Fase10_PlanFinanciero = () => {
                 <tr className="hover:bg-slate-50 transition-colors bg-red-50/30">
                   <td className="p-4 font-bold text-red-800 border-r border-slate-200 bg-red-100/30 sticky left-0 z-10">Gasto Total (Bs.)</td>
                   {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
+                    const multiplicador = 1 + ((mes - 1) * 0.13);
                     const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
                     const vars = unidades * costoVariableUnitario;
                     const total = totalFijos + vars;
@@ -1121,9 +1183,9 @@ const Fase10_PlanFinanciero = () => {
                 <tr className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Utilidad Bruta (Bs.)</td>
                   {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
+                    const multiplicador = 1 + ((mes - 1) * 0.13);
                     const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-                    const ingresos = unidades * (data.precioVenta || 0);
+                    const ingresos = unidades * (precioVentaEfectivo || 0);
                     const vars = unidades * costoVariableUnitario;
                     const gastos = totalFijos + vars;
                     const uBruta = ingresos - gastos;
@@ -1133,9 +1195,9 @@ const Fase10_PlanFinanciero = () => {
                 <tr className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 font-bold text-slate-700 border-r border-slate-200 bg-slate-50/30 sticky left-0 z-10">Impuestos (IVA 13% + IT 3%)</td>
                   {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
+                    const multiplicador = 1 + ((mes - 1) * 0.13);
                     const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-                    const ingresos = unidades * (data.precioVenta || 0);
+                    const ingresos = unidades * (precioVentaEfectivo || 0);
                     const vars = unidades * costoVariableUnitario;
                     const gastos = totalFijos + vars;
                     const uBruta = ingresos - gastos;
@@ -1146,9 +1208,9 @@ const Fase10_PlanFinanciero = () => {
                 <tr className="hover:bg-slate-50 transition-colors bg-amber-50/30">
                   <td className="p-4 font-bold text-amber-800 border-r border-slate-200 bg-amber-100/30 sticky left-0 z-10">Utilidad Neta (Bs.)</td>
                   {Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-                    const multiplicador = 1 + ((mes - 1) * 0.10);
+                    const multiplicador = 1 + ((mes - 1) * 0.13);
                     const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-                    const ingresos = unidades * (data.precioVenta || 0);
+                    const ingresos = unidades * (precioVentaEfectivo || 0);
                     const vars = unidades * costoVariableUnitario;
                     const gastos = totalFijos + vars;
                     const uBruta = ingresos - gastos;
@@ -1259,9 +1321,9 @@ const Fase10_PlanFinanciero = () => {
 
         // Calcular flujos netos proyectados mensuales
         const flujos = Array.from({ length: data.mesesProyeccion || 6 }, (_, i) => i + 1).map(mes => {
-          const multiplicador = 1 + ((mes - 1) * 0.10);
+          const multiplicador = 1 + ((mes - 1) * 0.13);
           const unidades = Math.round((data.produccionMensual || 0) * multiplicador);
-          const ingresos = unidades * (data.precioVenta || 0);
+          const ingresos = unidades * (precioVentaEfectivo || 0);
           const vars = unidades * costoVariableUnitario;
           const gastos = totalFijos + vars;
           const uBruta = ingresos - gastos;
@@ -1269,7 +1331,8 @@ const Fase10_PlanFinanciero = () => {
           return uBruta - impuestos;
         });
 
-        const tasaDescuentoMensual = (data.tasaDescuento || 0) / 100 / 12; // tasa anual llevada a mensual simple
+        const tasaTMAR = (data.tasaDescuento !== undefined && data.tasaDescuento !== '' && data.tasaDescuento !== null) ? parseFloat(data.tasaDescuento) : 13;
+        const tasaDescuentoMensual = tasaTMAR / 100; // 13% mensual (0.13)
 
         // VAN = -Inversion + Sumatoria(Flujo_n / (1+r)^n)
         let van = -inversionInicial;
@@ -1279,7 +1342,7 @@ const Fase10_PlanFinanciero = () => {
 
         // TIR aproximada (bisección simple)
         let tir = 0;
-        let tir_anual = 0;
+        let tir_mensual = 0;
         if (inversionInicial > 0 && flujos.some(f => f > 0)) {
           let low = -0.5; // -50%
           let high = 1.0; // 100%
@@ -1293,7 +1356,24 @@ const Fase10_PlanFinanciero = () => {
             else high = mid;
           }
           tir = low;
-          tir_anual = (Math.pow(1 + tir, 12) - 1) * 100;
+          tir_mensual = tir * 100;
+        }
+
+        let uMinVAN = (data.produccionMensual || prodBase);
+        const r = tasaDescuentoMensual;
+        const mUnitarioNeto = (precioVentaEfectivo * 0.84) - costoVariableUnitario;
+
+        if (mUnitarioNeto > 0) {
+          let sumaMultiplicadores = 0;
+          let sumaFijosDescontados = 0;
+          for (let i = 1; i <= (data.mesesProyeccion || 6); i++) {
+            const mult = 1 + ((i - 1) * 0.13);
+            const df = Math.pow(1 + r, i);
+            sumaMultiplicadores += mult / df;
+            sumaFijosDescontados += totalFijos / df;
+          }
+          const factorInversionYFijos = inversionInicial + sumaFijosDescontados;
+          uMinVAN = Math.ceil(factorInversionYFijos / (mUnitarioNeto * sumaMultiplicadores));
         }
 
         return (
@@ -1336,10 +1416,10 @@ const Fase10_PlanFinanciero = () => {
 
             <div className="bg-gradient-to-r from-purple-700 to-indigo-800 rounded-2xl p-8 text-white shadow-lg text-center mb-8">
               <h3 className="text-2xl font-bold text-purple-100 mb-6">Tasa de Descuento (TMAR)</h3>
-              <p className="text-sm text-purple-200 mb-4 max-w-xl mx-auto">¿Cuánto porcentaje de rentabilidad anual le exiges a este proyecto para que valga la pena el riesgo?</p>
+              <p className="text-sm text-purple-200 mb-4 max-w-xl mx-auto">¿Cuánto porcentaje de rentabilidad mensual le exiges a este proyecto para que valga la pena el riesgo?</p>
               <div className="flex items-center justify-center gap-2">
-                <input type="number" min="0" max="100" className="w-32 bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center" value={data.tasaDescuento === 0 ? 0 : (data.tasaDescuento || '')} onChange={e => updateGlobalData({ tasaDescuento: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) })} />
-                <span className="text-4xl font-bold text-purple-200">% anual</span>
+                <input type="number" min="0" max="100" className="w-32 bg-white/10 p-4 rounded-xl border border-white/20 font-bold text-white focus:border-white focus:bg-white/20 outline-none text-4xl text-center" value={data.tasaDescuento === 0 ? 0 : (data.tasaDescuento || 13)} onChange={e => updateGlobalData({ tasaDescuento: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) })} />
+                <span className="text-4xl font-bold text-purple-200">% mensual</span>
               </div>
             </div>
 
@@ -1360,18 +1440,156 @@ const Fase10_PlanFinanciero = () => {
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden">
                 <div className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Tasa Interna de Retorno (TIR)</div>
-                <div className="text-slate-400 text-sm mb-4">Es la rentabilidad real anual que te da el proyecto. Debe ser mayor a la TMAR.</div>
-                <div className={`text-4xl font-black ${tir_anual >= (data.tasaDescuento || 0) ? 'text-emerald-500' : 'text-red-500'}`}>
-                  {tir_anual.toFixed(2)} %
+                <div className="text-slate-400 text-sm mb-4">Es la rentabilidad real mensual que te da el proyecto. Debe ser mayor a la TMAR.</div>
+                <div className={`text-4xl font-black ${tir_mensual >= tasaTMAR ? 'text-emerald-500' : 'text-red-500'}`}>
+                  {tir_mensual.toFixed(2)} % mensual
                 </div>
                 <div className="mt-4 font-bold text-sm">
-                  {tir_anual >= (data.tasaDescuento || 0)
+                  {tir_mensual >= tasaTMAR
                     ? <span className="text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full">Rinde más de lo exigido 🚀</span>
                     : <span className="text-red-600 bg-red-100 px-3 py-1 rounded-full">No alcanza la tasa exigida 📉</span>
                   }
                 </div>
               </div>
             </div>
+
+            {(van < 0 || tir_mensual < tasaTMAR) && (
+              <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/60 border-2 border-amber-200 rounded-3xl p-6 sm:p-8 shadow-xl mb-8 transition-all animate-fade-in">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-amber-200/80 pb-6 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-amber-500 text-white rounded-2xl shadow-lg shadow-amber-500/30">
+                      <AlertTriangle size={28} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-700 bg-amber-200/70 px-3 py-1 rounded-full">
+                        Diagnóstico Financiero
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black text-amber-950 mt-1">
+                        Recomendaciones para rentabilizar tu proyecto
+                      </h3>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleObtenerConsejosIA({
+                      demandaActual: data.produccionMensual || prodBase,
+                      unidadesNecesarias: uMinVAN,
+                      precioVenta: precioVentaEfectivo.toFixed(2),
+                      van: van.toFixed(2),
+                      tir: tir_mensual.toFixed(2),
+                      tmar: tasaTMAR
+                    })}
+                    disabled={cargandoConsejosIA}
+                    className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {cargandoConsejosIA ? (
+                      <>
+                        <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Generando Estrategia...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={20} /> Generar Ideas con IA
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Tarjetas de Metas de Demanda */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-white/80 backdrop-blur-sm border border-amber-200 rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                      <span>VENTAS ACTUALES</span>
+                      <Target size={16} className="text-amber-600" />
+                    </div>
+                    <div className="text-3xl font-black text-slate-800">
+                      {data.produccionMensual || prodBase} <span className="text-sm font-semibold text-slate-500">u./mes</span>
+                    </div>
+                    <p className="text-xs text-amber-700 font-medium mt-1">Demanda estimada actual</p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-bold text-emerald-100 mb-2">
+                        <span>DEMANDA REQUERIDA (VAN &gt; 0)</span>
+                        <TrendingUp size={16} className="text-emerald-200" />
+                      </div>
+                      <div className="text-3xl font-black text-white">
+                        {uMinVAN} <span className="text-sm font-semibold text-emerald-200">u./mes</span>
+                      </div>
+                      <p className="text-xs text-emerald-100 font-medium mt-1">Ventas necesarias para VAN positivo</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => updateGlobalData({ produccionMensual: uMinVAN })}
+                      className="mt-3 py-2 px-3 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl font-bold text-xs shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <CheckCircle2 size={14} /> Aplicar {uMinVAN} u./mes como meta
+                    </button>
+                  </div>
+
+                  <div className="bg-white/80 backdrop-blur-sm border border-amber-200 rounded-2xl p-5 shadow-sm">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                      <span>INCREMENTO REQUERIDO</span>
+                      <ArrowUpRight size={16} className="text-orange-600" />
+                    </div>
+                    <div className="text-3xl font-black text-orange-600">
+                      +{Math.max(0, uMinVAN - (data.produccionMensual || prodBase))} <span className="text-sm font-semibold text-slate-500">u.</span>
+                    </div>
+                    <p className="text-xs text-amber-700 font-medium mt-1">
+                      {(data.produccionMensual || prodBase) > 0 
+                        ? `+${Math.round(((uMinVAN - (data.produccionMensual || prodBase)) / (data.produccionMensual || prodBase)) * 100)}% de incremento en clientes`
+                        : 'Definir meta de demanda'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Estrategias Sugeridas Generadas por IA */}
+                {consejosIA ? (
+                  <div className="bg-white rounded-2xl p-6 border border-amber-200 shadow-md animate-fade-in">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Lightbulb className="text-amber-500" size={22} />
+                      <h4 className="font-black text-lg text-slate-900">Plan Estratégico sugerido por IA</h4>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-4 bg-amber-50 p-3 rounded-xl border border-amber-100 font-medium">
+                      {consejosIA.diagnostico}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      {consejosIA.estrategiasDemanda?.map((est, idx) => (
+                        <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
+                          <div>
+                            <span className="text-xs font-black text-amber-600 uppercase tracking-wider block mb-1">Estrategia {idx + 1}</span>
+                            <h5 className="font-bold text-slate-800 text-sm mb-2">{est.titulo}</h5>
+                            <p className="text-xs text-slate-600 leading-relaxed">{est.descripcion}</p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-slate-200 text-xs font-bold text-emerald-600">
+                            🚀 {est.impacto}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {consejosIA.consejoEstructuraCostos && (
+                      <div className="text-xs text-slate-700 bg-indigo-50 border border-indigo-100 p-3 rounded-xl font-medium flex items-center gap-2">
+                        <span className="font-bold text-indigo-700">💡 Optimización de Costos:</span> {consejosIA.consejoEstructuraCostos}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-amber-200/80">
+                    <h4 className="font-bold text-amber-950 text-sm mb-2 flex items-center gap-2">
+                      <Lightbulb size={18} className="text-amber-600" /> Estrategias clave para aumentar tu demanda potencial:
+                    </h4>
+                    <ul className="text-xs text-amber-900/90 space-y-2 list-disc list-inside">
+                      <li><strong>Ampliar Canales de Venta</strong>: Implementar venta directa en redes sociales, delivery o alianzas B2B.</li>
+                      <li><strong>Combos y Suscripciones</strong>: Crear paquetes o programas de fidelización para compras recurrentes.</li>
+                      <li><strong>Optimización de Valor y Precio</strong>: Elevar el valor percibido del producto para aumentar la conversión.</li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
           </div>
         );

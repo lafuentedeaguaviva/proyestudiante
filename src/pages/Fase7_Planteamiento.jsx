@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PasoLayout from '../layouts/PasoLayout';
 import { useFase7Controller } from '../controllers/useFase7Controller';
-import { Bot, MapPin, Target, Lightbulb, Compass, Search, CheckCircle, Video, Wand2 } from 'lucide-react';
+import { Bot, MapPin, Target, Lightbulb, Compass, Search, CheckCircle, Video, Wand2, Sparkles, RefreshCw } from 'lucide-react';
 import SelectorVerbo from '../components/ui/SelectorVerbo';
 
 const VideoPlaceholder = ({ id, title }) => (
@@ -75,12 +75,23 @@ const Fase7_Planteamiento = () => {
     cargando, 
     guardando, 
     updateData, 
+    irAPaso,
     siguientePaso, 
     pasoAnterior,
     generateAI,
     isGenerating,
-    activeGeneration
+    activeGeneration,
+    isGeneratingResumen,
+    generarResumenFase7
   , setPendingSave } = useFase7Controller();
+
+  // Auto-generar resumen al entrar al paso 11 si está vacío
+  useEffect(() => {
+    if (step === 11 && !data.resumen_ia && !isGeneratingResumen) {
+      generarResumenFase7();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   if (cargando) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
 
@@ -466,7 +477,188 @@ const Fase7_Planteamiento = () => {
             </div>
           </div>
         );
-      
+
+      case 11: {
+        const seccionesResumen = [
+          {
+            key: 'resumen_diagnostico',
+            fallbackKey: 'diagnostico',
+            titulo: '📋 Diagnóstico del Contexto',
+            descripcion: 'Análisis del problema y entorno del emprendimiento.',
+            color: 'border-blue-400',
+            bg: 'bg-blue-50',
+            textColor: 'text-blue-800',
+            rows: 8,
+            placeholder: 'La IA generará el diagnóstico basado en tu investigación y observaciones...'
+          },
+          {
+            key: 'resumen_objetivo_general',
+            fallbackKey: 'objGeneral',
+            titulo: '🎯 Objetivo General',
+            descripcion: 'El propósito principal del proyecto, en una sola oración.',
+            color: 'border-indigo-400',
+            bg: 'bg-indigo-50',
+            textColor: 'text-indigo-800',
+            rows: 3,
+            placeholder: 'La IA generará el objetivo general mejorado...'
+          },
+          {
+            key: 'resumen_objetivos_especificos',
+            fallbackKey: 'objEspecificos',
+            titulo: '📌 Objetivos Específicos',
+            descripcion: 'Los 4 pasos medibles para alcanzar el objetivo general.',
+            color: 'border-violet-400',
+            bg: 'bg-violet-50',
+            textColor: 'text-violet-800',
+            rows: 6,
+            placeholder: 'La IA generará 4 objetivos específicos mejorados...'
+          },
+          {
+            key: 'resumen_mision',
+            fallbackKey: 'mision_redaccion_final',
+            titulo: '🧭 Misión',
+            descripcion: '¿Quiénes somos? ¿Qué hacemos? ¿Para quién? ¿Por qué?',
+            color: 'border-emerald-400',
+            bg: 'bg-emerald-50',
+            textColor: 'text-emerald-800',
+            rows: 4,
+            placeholder: 'La IA generará la misión mejorada del emprendimiento...'
+          },
+          {
+            key: 'resumen_vision',
+            fallbackKey: 'vision_redaccion_final',
+            titulo: '🔭 Visión',
+            descripcion: '¿Cómo nos vemos en 3 a 5 años?',
+            color: 'border-amber-400',
+            bg: 'bg-amber-50',
+            textColor: 'text-amber-800',
+            rows: 4,
+            placeholder: 'La IA generará la visión mejorada del emprendimiento...'
+          },
+          {
+            key: 'resumen_justificacion_social',
+            fallbackKey: 'justificacion_social',
+            titulo: '🌱 Justificación Social',
+            descripcion: '¿Qué problema resuelve y a quién beneficia en la comunidad?',
+            color: 'border-teal-400',
+            bg: 'bg-teal-50',
+            textColor: 'text-teal-800',
+            rows: 4,
+            placeholder: 'La IA generará la justificación social basada en tu proyecto...'
+          },
+          {
+            key: 'resumen_justificacion_economica',
+            fallbackKey: 'justificacion_economica',
+            titulo: '💰 Justificación Económica',
+            descripcion: 'Rentabilidad, viabilidad financiera y oportunidad de mercado.',
+            color: 'border-sky-400',
+            bg: 'bg-sky-50',
+            textColor: 'text-sky-800',
+            rows: 4,
+            placeholder: 'La IA generará la justificación económica basada en tu proyecto...'
+          },
+          {
+            key: 'resumen_justificacion_personal',
+            fallbackKey: 'justificacion_personal',
+            titulo: '👤 Justificación Personal',
+            descripcion: 'Motivación personal, aprendizaje y desarrollo profesional.',
+            color: 'border-purple-400',
+            bg: 'bg-purple-50',
+            textColor: 'text-purple-800',
+            rows: 4,
+            placeholder: 'La IA generará la justificación personal basada en tu proyecto...'
+          }
+        ];
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 text-white shadow-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+                    <Sparkles size={32} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black">Resumen del Planteamiento con IA</h2>
+                    <p className="text-indigo-200 text-sm mt-1">
+                      La IA mejora y completa cada sección usando toda la información de tu proyecto.
+                      Los campos también se guardan en los pasos anteriores.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={generarResumenFase7}
+                  disabled={isGeneratingResumen}
+                  className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-sm transition-colors disabled:opacity-50 border border-white/30"
+                >
+                  {isGeneratingResumen
+                    ? <><RefreshCw size={16} className="animate-spin" /> Generando...</>
+                    : <><Sparkles size={16} /> Generar / Regenerar Todo</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Loading state */}
+            {isGeneratingResumen ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-14 flex flex-col items-center justify-center gap-4 text-slate-500">
+                <div className="w-14 h-14 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+                <p className="font-bold text-lg text-slate-700">La IA está trabajando...</p>
+                <p className="text-sm text-slate-400 text-center max-w-sm">
+                  Está leyendo todos tus datos de las fases anteriores y redactando cada sección en primera persona.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {seccionesResumen.map((seccion) => (
+                  <div
+                    key={seccion.key}
+                    className={`bg-white rounded-2xl shadow-sm border-2 ${seccion.color} overflow-hidden`}
+                  >
+                    <div className={`${seccion.bg} px-6 py-4 border-b border-slate-100`}>
+                      <h3 className={`font-black text-lg ${seccion.textColor}`}>{seccion.titulo}</h3>
+                      <p className="text-sm text-slate-500 mt-0.5">{seccion.descripcion}</p>
+                    </div>
+                    <div className="p-5">
+                      <textarea
+                        value={data[seccion.key] || (seccion.fallbackKey ? data[seccion.fallbackKey] : '') || ''}
+                        onChange={(e) => updateData({ 
+                          [seccion.key]: e.target.value,
+                          ...(seccion.fallbackKey ? { [seccion.fallbackKey]: e.target.value } : {})
+                        })}
+                        onBlur={() => { if (typeof setPendingSave === 'function') setPendingSave(true); }}
+                        rows={seccion.rows}
+                        className="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none resize-none text-slate-800 leading-relaxed transition-all font-normal text-[15px]"
+                        placeholder={seccion.placeholder}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tip */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
+              <Lightbulb size={22} className="text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-amber-800 mb-1">Consejo</p>
+                <p className="text-amber-700 text-sm leading-relaxed">
+                  Puedes editar cada sección directamente. Al hacer clic en <strong>"Generar / Regenerar Todo"</strong>, 
+                  la IA mejorará lo que ya escribiste o creará el contenido si los campos están vacíos.
+                  Todo se guarda automáticamente y también actualiza los pasos anteriores.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        );
+      }
+
+
       default: return <div>Paso no encontrado</div>;
     }
   };
@@ -475,22 +667,27 @@ const Fase7_Planteamiento = () => {
     <PasoLayout
       faseTitle="Fase 7: Planteamiento del Emprendimiento Productivo"
       pasoActual={pasoActual}
-      totalPasos={10}
+      totalPasos={11}
+      tabs={[
+        { id: 1, icon: <Video size={18} />, label: 'Video Diagnóstico' },
+        { id: 2, icon: <MapPin size={18} />, label: 'Diagnóstico' },
+        { id: 3, icon: <Video size={18} />, label: 'Video Objetivos' },
+        { id: 4, icon: <Target size={18} />, label: 'Objetivos' },
+        { id: 5, icon: <Video size={18} />, label: 'Video Misión' },
+        { id: 6, icon: <Compass size={18} />, label: 'Misión' },
+        { id: 7, icon: <Video size={18} />, label: 'Video Visión' },
+        { id: 8, icon: <Lightbulb size={18} />, label: 'Visión' },
+        { id: 9, icon: <Video size={18} />, label: 'Video Justificación' },
+        { id: 10, icon: <CheckCircle size={18} />, label: 'Justificación' },
+        { id: 11, icon: <Sparkles size={18} />, label: 'Resumen IA' }
+      ]}
+      onTabClick={(id) => {
+        if (typeof setPendingSave === 'function') setPendingSave(true);
+        irAPaso(id);
+      }}
       onSiguiente={siguientePaso}
       onAnterior={pasoActual > 1 ? pasoAnterior : null}
       guardando={guardando}
-      customIcons={[
-        <Video size={18} />, 
-        <MapPin size={18} />, 
-        <Video size={18} />, 
-        <Target size={18} />, 
-        <Video size={18} />, 
-        <Compass size={18} />, 
-        <Video size={18} />, 
-        <Lightbulb size={18} />, 
-        <Video size={18} />, 
-        <CheckCircle size={18} />
-      ]}
     >
       <div onBlur={() => { if(typeof setPendingSave === 'function') setPendingSave(true); }}>
 

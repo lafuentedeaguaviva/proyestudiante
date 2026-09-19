@@ -37,14 +37,21 @@ export default function MapaViaje({ isOpen, onClose, faseActiva, maxFaseDesbloqu
       id: 6, 
       title: 'Fase 6: Localización', 
       icon: <Truck />, 
-      pasos: ['Video Localización', 'Identificación', 'Canales', 'Elección Lugar', 'Croquis', 'Pagos', 'Video Plan Dist.', 'Plan Acción', 'Presupuesto', 'Resumen IA'] 
+      pasos: ['Video Localización', 'Identificación', 'Canales', 'Elección Lugar', 'Croquis', 'Pagos', 'Video Plan Dist.', 'Plan Acción', 'Resumen IA'] 
     },
-    { id: 7, title: 'Fase 7: Planteamiento', icon: <CheckCircle2 />, pasos: ['Diagnóstico del contexto', 'Objetivos y Misión/Visión', 'Justificación'] },
+    { id: 7, title: 'Fase 7: Planteamiento', icon: <CheckCircle2 />, pasos: [
+        'Video Diagnóstico', 'Diagnóstico del contexto',
+        'Video Objetivos', 'Objetivos',
+        'Video Misión', 'Misión',
+        'Video Visión', 'Visión',
+        'Video Justificación', 'Justificación',
+        'Resumen IA'
+    ] },
     { id: 8, title: 'Fase 8: La Operación', icon: <Settings />, pasos: ['1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos', '5. Juego: Clasificación de Procesos', '6. Video: Layout del Negocio', '7. Juego: Zonas de Trabajo'] },
     { id: 9, title: 'Fase 9: Estructura Org.', icon: <Network />, pasos: ['Organigrama', 'Roles'] },
     { id: 10, title: 'Fase 10: Viabilidad', icon: <TrendingUp />, pasos: ['Inversión Inicial', 'Costos Fijos y Variables', 'Precios y Equilibrio', 'Video Utilidad', 'Utilidad e Impuestos', 'Video Equilibrio', 'Punto de Equilibrio', 'Video Evaluación', 'VAN y TIR'] },
-    { id: 11, title: 'Fase 11: Consolidación del Documento', icon: <FileText />, pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria'] },
-    { id: 12, title: 'Fase 12: Proyecto de Vida', icon: <Heart />, pasos: ['Alineación', 'Metas', 'Equilibrio', 'Legado'] },
+    { id: 11, title: 'Fase 11: Consolidación del Documento', icon: <FileText />, pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },
+    { id: 12, title: 'Fase 12: Proyecto de Vida', icon: <Heart />, pasos: ['Alineación', 'Metas', 'Equilibrio', 'Legado', 'Resumen IA'] },
     { id: 13, title: 'Fase 13: Documento Final IA', icon: <Bot />, pasos: ['Configuración IA'] }
   ];
 

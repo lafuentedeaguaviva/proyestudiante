@@ -108,22 +108,22 @@ const Paso9_ResumenMarketingIA = ({ setAyudanteText, onComplete, globalData, upd
           
           <div style={cardStyle}>
             <div style={titleStyle}>⚔️ Análisis de Competencia</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_competencia}</p>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', whiteSpace: 'pre-line' }}>{resumenIAData.resumen_competencia}</p>
           </div>
 
           <div style={cardStyle}>
             <div style={titleStyle}>🚀 Ventaja Competitiva</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_ventaja}</p>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', whiteSpace: 'pre-line' }}>{resumenIAData.resumen_ventaja}</p>
           </div>
 
           <div style={cardStyle}>
             <div style={titleStyle}>🌍 Factores del Entorno (PESTEL)</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_entorno}</p>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', whiteSpace: 'pre-line' }}>{resumenIAData.resumen_entorno}</p>
           </div>
 
           <div style={cardStyle}>
             <div style={titleStyle}>📣 Estrategia de Promoción</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_promocion}</p>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', whiteSpace: 'pre-line' }}>{resumenIAData.resumen_promocion}</p>
           </div>
 
           <div style={{ ...cardStyle, gridColumn: '1 / -1', background: 'linear-gradient(135deg, #fefce8 0%, #fef08a 100%)', borderColor: '#fde047' }}>

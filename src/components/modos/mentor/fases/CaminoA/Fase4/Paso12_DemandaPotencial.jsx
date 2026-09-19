@@ -2,23 +2,43 @@ import React, { useEffect } from 'react';
 import { Calculator, Save } from 'lucide-react';
 
 const Paso12_DemandaPotencial = ({ setAyudanteText, globalData, updateGlobalData, onComplete, guardando }) => {
-  useEffect(() => {
-    setAyudanteText("Pensemos en números. ¿Aproximadamente cuántas personas hay en tu zona de alcance que cumplen con el perfil de tu cliente?");
-  }, [setAyudanteText]);
-
-  const handleChange = (e) => {
-    updateGlobalData({ [e.target.name]: e.target.value });
-  };
-
-  const calcularPotencial = () => {
-    const total = parseFloat(globalData.mercadoTotal) || 0;
-    const porcentajeProblema = parseFloat(globalData.porcentajeProblema) || 0;
-    const porcentajeCompra = parseFloat(globalData.porcentajeCompra) || 0;
+  const calcularPotencial = (currData = globalData) => {
+    const total = parseFloat(currData.mercadoTotal) || 0;
+    const porcentajeProblema = parseFloat(currData.porcentajeProblema) || 0;
+    const porcentajeCompra = parseFloat(currData.porcentajeCompra) || 0;
     
     // De los totales, cuántos tienen el problema y de ellos cuántos comprarían
     const conProblema = total * (porcentajeProblema / 100);
     const probablesCompradores = conProblema * (porcentajeCompra / 100);
     return Math.round(probablesCompradores);
+  };
+
+  useEffect(() => {
+    setAyudanteText("Pensemos en números. ¿Aproximadamente cuántas personas hay en tu zona de alcance que cumplen con el perfil de tu cliente?");
+    const pot = calcularPotencial();
+    if (pot > 0) {
+      updateGlobalData({
+        demandaPotencial: pot,
+        clientesPotenciales: pot,
+        demanda_potencial: pot,
+        calculoMensual: pot,
+        produccionMensual: pot
+      });
+    }
+  }, [setAyudanteText]);
+
+  const handleChange = (e) => {
+    const nextData = { ...globalData, [e.target.name]: e.target.value };
+    const pot = calcularPotencial(nextData);
+
+    updateGlobalData({
+      ...nextData,
+      demandaPotencial: pot,
+      clientesPotenciales: pot,
+      demanda_potencial: pot,
+      calculoMensual: pot,
+      produccionMensual: pot
+    });
   };
 
   const inputStyle = {
@@ -31,7 +51,7 @@ const Paso12_DemandaPotencial = ({ setAyudanteText, globalData, updateGlobalData
   return (
     <div style={{ padding: '2rem', color: '#0f172a', maxWidth: '800px', margin: '0 auto' }}>
       <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ca8a04', marginBottom: '1.5rem', textAlign: 'center' }}>
-        Calcula tu Demanda Potencial
+        Demanda potencial por mes
       </h2>
       
       <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', border: '1px solid #e2e8f0' }}>

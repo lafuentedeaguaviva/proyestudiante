@@ -11,6 +11,7 @@ export const useFaseController = ({
   totalPasos,
   clavesDeGuardado = [], // Array de strings, p. ej. ['financiero'] o campos individuales ['opcion_diagnostico', 'diag_p1']
   estructuraJSON = true, // Si es true, guarda todo 'data' en clavesDeGuardado[0]. Si es false, guarda cada key/value.
+  defaultData = {}
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const useFaseController = ({
     }
   }, [searchParams, step]);
   
-  const [data, setData] = useState({});
+  const [data, setData] = useState(defaultData);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [pendingSave, setPendingSave] = useState(false);
@@ -43,9 +44,16 @@ export const useFaseController = ({
         if (estructuraJSON && clavesDeGuardado.length > 0) {
           const mainKey = clavesDeGuardado[0];
           if (guardado && guardado[mainKey]) {
-            loadedData = typeof guardado[mainKey] === 'string' 
-              ? JSON.parse(guardado[mainKey]) 
-              : { ...guardado[mainKey] };
+            if (typeof guardado[mainKey] === 'string') {
+              try {
+                loadedData = JSON.parse(guardado[mainKey]);
+              } catch (e) {
+                console.warn(`[useFaseController] No se pudo parsear JSON para ${mainKey}:`, e);
+                loadedData = {};
+              }
+            } else if (typeof guardado[mainKey] === 'object' && guardado[mainKey] !== null) {
+              loadedData = { ...guardado[mainKey] };
+            }
           }
         } else {
           // Si no es JSON anidado, se asume que las claves se guardan planas
@@ -109,26 +117,49 @@ export const useFaseController = ({
   // 3. Actualización de Datos (UI => Controller)
   const updateData = useCallback((newData) => {
     setData(prev => ({ ...prev, ...newData }));
-    // setPendingSave removed from onChange to prevent focus loss
   }, []);
+
+  const forceSave = useCallback(async () => {
+    setGuardando(true);
+    try {
+      if (estructuraJSON && clavesDeGuardado.length > 0) {
+        await FaseModel.guardarDatos(faseId, clavesDeGuardado[0], data);
+      } else {
+        for (const key of clavesDeGuardado) {
+          if (data[key] !== undefined) {
+            await FaseModel.guardarDatos(faseId, key, data[key]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error en autoguardado:", error);
+    } finally {
+      setGuardando(false);
+      setPendingSave(false);
+    }
+  }, [data, faseId, estructuraJSON, clavesDeGuardado]);
 
   // 4. Navegación
   const irAPaso = useCallback(async (nPaso) => {
     // Si intenta pasar más allá del último paso, significa que completa la fase
     if (nPaso > totalPasos) {
       try {
-        // Forzar guardado sincrónico antes de salir
-        if (pendingSave) {
-          if (estructuraJSON && clavesDeGuardado.length > 0) {
-            await FaseModel.guardarDatos(faseId, clavesDeGuardado[0], data);
+        // Forzar guardado sincrónico de todos los campos antes de salir
+        if (estructuraJSON && clavesDeGuardado.length > 0) {
+          await FaseModel.guardarDatos(faseId, clavesDeGuardado[0], data);
+        } else {
+          for (const key of clavesDeGuardado) {
+            if (data[key] !== undefined) {
+              await FaseModel.guardarDatos(faseId, key, data[key]);
+            }
           }
         }
         
         // Desbloquear siguiente fase
         await FaseModel.actualizarProgreso(faseId + 1, 1);
         
-        // Navegar a la siguiente fase
-        navigate(`/fase/${faseId + 1}`);
+        // Navegar a la carátula de la siguiente fase
+        navigate(`/fase/${faseId + 1}/intro`);
       } catch (err) {
         console.error("Error al avanzar fase:", err);
         alert("Error crítico al avanzar: " + (err.message || err.toString()));
@@ -156,6 +187,7 @@ export const useFaseController = ({
     irAPaso,
     siguientePaso,
     pasoAnterior,
-    setPendingSave
+    setPendingSave,
+    forceSave
   };
 };

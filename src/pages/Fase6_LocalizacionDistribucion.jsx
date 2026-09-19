@@ -10,28 +10,22 @@ import Paso10_ResumenLocDistIA from '../components/modos/mentor/fases/CaminoA/Fa
 const Fase6_LocalizacionDistribucion = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [pendingSave, setPendingSave] = useState(false);
-
   const {
     globalData, setGlobalData,
     cargando, step, guardando, irAPaso, siguientePaso, pasoAnterior,
-    showCompletionModal, setShowCompletionModal, handleFinalizar, isFinalizando
+    showCompletionModal, setShowCompletionModal, handleFinalizar, isFinalizando,
+    setPendingSave
   } = useFase6Controller();
 
-  const updateGlobalData = setGlobalData;
+  const updateGlobalData = (d) => {
+    setGlobalData(d);
+    setPendingSave(true);
+  };
 
   const data = globalData || {};
   if (!data.lugares) data.lugares = [{ id: 1, nombre: '', cercania: 1, flujo: 1, visibilidad: 1, costo: 1, permisos: 1 }];
   if (!data.planDistribucion) data.planDistribucion = [];
   if (!data.presupuesto) data.presupuesto = [];
-  
-  // Efecto para debounce manual (si aún se usa pendingSave para trigger)
-  useEffect(() => {
-    if (pendingSave) {
-      setGlobalData({}); // Trigger update
-      setPendingSave(false);
-    }
-  }, [pendingSave, setGlobalData]);
 
   const renderVideoStep = (titulo, videoKey, botonTexto) => (
     <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 animate-fade-in bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border border-slate-100">
@@ -329,54 +323,6 @@ const Fase6_LocalizacionDistribucion = () => {
         </div>
       );
       case 9: 
-        const total = data.presupuesto.reduce((acc, curr) => acc + ((parseFloat(curr.costoUnitario) || 0) * (parseInt(curr.cantidad) || 0)), 0);
-        return (
-        <div className="animate-fade-in p-6 bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">9. Presupuesto de Promoción y Distribución</h2>
-          <p className="text-slate-500 mb-6">Calcula cuánto te costará promocionar y entregar tu producto.</p>
-          
-          <div className="flex flex-col gap-4 mt-6 mb-4">
-            {globalData.presupuesto.map((p, i) => (
-              <div key={p.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative hover:shadow-md transition-shadow">
-                <button onClick={() => updateGlobalData({ presupuesto: globalData.presupuesto.filter(item => item.id !== p.id) })} className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors" title="Eliminar gasto">
-                  <Trash2 size={20} />
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2 pr-10">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Concepto</label>
-                    <input className="w-full p-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50 focus:bg-white" value={p.concepto} placeholder="Nombre del gasto" onChange={(e) => { const n = [...globalData.presupuesto]; n[i].concepto = e.target.value; updateGlobalData({ presupuesto: n }); }} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Costo Unitario (Bs.)</label>
-                    <input type="number" min="0" step="0.01" className="w-full p-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50 focus:bg-white" value={p.costoUnitario} placeholder="0" onChange={(e) => { const n = [...globalData.presupuesto]; n[i].costoUnitario = e.target.value === '' ? '' : parseFloat(e.target.value); updateGlobalData({ presupuesto: n }); }} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Cantidad</label>
-                    <input type="number" min="1" className="w-full p-3 border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50 focus:bg-white" value={p.cantidad} placeholder="1" onChange={(e) => { const n = [...globalData.presupuesto]; n[i].cantidad = e.target.value === '' ? '' : parseInt(e.target.value); updateGlobalData({ presupuesto: n }); }} />
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
-                  <div className="text-right">
-                    <span className="text-slate-500 text-sm">Subtotal:</span>
-                    <span className="ml-2 font-bold text-blue-700 text-lg">Bs. {((parseFloat(p.costoUnitario) || 0) * (parseInt(p.cantidad) || 0)).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <button onClick={() => updateGlobalData({ presupuesto: [...globalData.presupuesto, { id: Date.now(), concepto: '', costoUnitario: 0, cantidad: 1 }] })} className="text-blue-600 font-bold hover:underline mb-8">+ Añadir Gasto</button>
-          
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-2xl shadow-lg flex justify-between items-center text-white">
-            <div>
-              <p className="text-blue-100 mb-1">Presupuesto Total Estimado</p>
-              <p className="text-sm text-blue-200">Suma de todos los conceptos</p>
-            </div>
-            <div className="text-4xl font-black">Bs. {total.toFixed(2)}</div>
-          </div>
-        </div>
-      );
-      case 10: 
         return <Paso10_ResumenLocDistIA setAyudanteText={()=>{}} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando || isFinalizando} />;
       default: return <div>Paso no definido</div>;
     }
@@ -385,7 +331,7 @@ const Fase6_LocalizacionDistribucion = () => {
     <PasoLayout 
       faseTitle="Fase 6: Localización y Distribución"
       pasoActual={step}
-      totalPasos={9}
+      totalPasos={8}
       tabs={[
         { id: 1, icon: <Video size={18} />, label: 'Video Distribución' },
         { id: 2, icon: <MapPin size={18} />, label: 'Identificación Loc.' },
@@ -395,22 +341,21 @@ const Fase6_LocalizacionDistribucion = () => {
         { id: 6, icon: <CreditCard size={18} />, label: 'Pagos' },
         { id: 7, icon: <Video size={18} />, label: 'Video Plan Dist.' },
         { id: 8, icon: <ClipboardList size={18} />, label: 'Plan Acción' },
-        { id: 9, icon: <DollarSign size={18} />, label: 'Presupuesto' },
-        { id: 10, icon: <Bot size={18} />, label: 'Resumen IA' }
+        { id: 9, icon: <Bot size={18} />, label: 'Resumen IA' }
       ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
       onSiguiente={() => {
-        if (step < 10) {
+        if (step < 9) {
           siguientePaso();
         } else {
           handleFinalizar();
         }
       }}
       onAnterior={step > 1 ? () => pasoAnterior() : null}
-      mentorText={`Estás en el paso ${step} de 10. Revisa que los datos estén correctos antes de continuar.`}
+      mentorText={`Estás en el paso ${step} de 9. Revisa que los datos estén correctos antes de continuar.`}
       guardando={guardando}
     >
       <div>

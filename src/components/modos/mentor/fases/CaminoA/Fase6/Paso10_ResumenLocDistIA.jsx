@@ -104,14 +104,30 @@ const Paso10_ResumenLocDistIA = ({ setAyudanteText, onComplete, globalData, upda
       {resumenIAData && !generando && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
           
-          <div style={cardStyle}>
-            <div style={titleStyle}>📍 Evaluación de Ubicación</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_ubicacion}</p>
+          <div style={{ ...cardStyle, gridColumn: '1 / -1' }}>
+            <div style={titleStyle}>📍 Localización</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
+              <div>
+                <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_ubicacion}</p>
+              </div>
+              <div>
+                <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_canales}</p>
+              </div>
+            </div>
           </div>
 
           <div style={cardStyle}>
-            <div style={titleStyle}>🚚 Canales de Venta</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_canales}</p>
+            <div style={titleStyle}>🗺️ Dirección de Ubicación (Croquis)</div>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>
+              {resumenIAData.resumen_direccion}
+            </p>
+          </div>
+
+          <div style={cardStyle}>
+            <div style={titleStyle}>💳 Métodos de Pago</div>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>
+              {resumenIAData.resumen_pagos}
+            </p>
           </div>
 
           <div style={cardStyle}>
@@ -119,12 +135,7 @@ const Paso10_ResumenLocDistIA = ({ setAyudanteText, onComplete, globalData, upda
             <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_plan}</p>
           </div>
 
-          <div style={cardStyle}>
-            <div style={titleStyle}>💰 Análisis de Presupuesto</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_presupuesto}</p>
-          </div>
-
-          <div style={{ ...cardStyle, gridColumn: '1 / -1', background: 'linear-gradient(135deg, #fefce8 0%, #fef08a 100%)', borderColor: '#fde047' }}>
+          <div style={{ ...cardStyle, gridColumn: '1 / -1', background: 'linear-gradient(to right, #eff6ff, #e0e7ff)', borderLeft: '4px solid #3b82f6' }}>
             <div style={{ ...titleStyle, color: '#854d0e', fontSize: '1.25rem' }}><CheckCircle size={24} /> Recomendación Logística</div>
             <p style={{ color: '#713f12', margin: 0, lineHeight: '1.6', fontSize: '1.1rem', fontWeight: '500' }}>{resumenIAData.recomendacion_logistica}</p>
           </div>

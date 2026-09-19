@@ -4,8 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import SplashScreen from '../components/ui/SplashScreen';
 import PasoLayout from '../layouts/PasoLayout';
 import { useFase12Controller } from '../controllers/useFase12Controller';
-import { Heart, Target, Clock, Globe2 } from 'lucide-react';
+import { Heart, Target, Clock, Globe2, BookOpen } from 'lucide-react';
 import { NexusContext } from '../context/NexusContext';
+import { obtenerTodoElContenidoProyecto, generarRedaccionMediaIA } from '../services/api';
 
 const Fase12_ProyectoVida = () => {
   const {  increaseNexus } = React.useContext(NexusContext) || { increaseNexus: () => {} };
@@ -21,6 +22,64 @@ const Fase12_ProyectoVida = () => {
   const updateGlobalData = (newData) => {
     setGlobalData(newData);
     if (typeof setPendingSave === 'function') setPendingSave(true);
+  };
+
+  const [generandoIA, setGenerandoIA] = useState(false);
+
+  const handleCompletarTodoIA = async () => {
+    setGenerandoIA(true);
+    try {
+      const contexto = JSON.stringify(await obtenerTodoElContenidoProyecto());
+      let updates = {};
+      
+      const checkAndGen = async (field, promptName, extraInst = "Redacta un párrafo corto y conciso.") => {
+        if (!data[field] || String(data[field]).trim() === '') {
+          const res = await generarRedaccionMediaIA(contexto, promptName, extraInst, 'medio');
+          updates[field] = res;
+        }
+      };
+
+      // Paso 1
+      await checkAndGen('proposito_experiencia', 'Experiencia de vida que inspiró el emprendimiento', 'Responde de forma personal y en primera persona, brevemente.');
+      await checkAndGen('proposito_valor', 'Valor personal principal que refleja el proyecto', 'Menciona un valor (ej. innovación, servicio) y explícalo brevemente.');
+      await checkAndGen('proposito_seguir', 'Motivación más allá del dinero', 'Responde brevemente si seguirías haciendo esto sin cobrar y por qué.');
+
+      // Paso 2
+      await checkAndGen('metaCorto', 'Meta personal a corto plazo (1-2 años) que se quiere lograr con el emprendimiento');
+      await checkAndGen('financioCorto', 'Forma de financiar la meta a corto plazo con los ingresos del proyecto');
+      await checkAndGen('metaMediano', 'Meta personal a mediano plazo (3-5 años)');
+      await checkAndGen('financioMediano', 'Forma de financiar la meta a mediano plazo con el proyecto');
+      await checkAndGen('metaLargo', 'Meta personal a largo plazo (5-10 años)');
+      await checkAndGen('financioLargo', 'Forma de financiar la meta a largo plazo con el proyecto');
+
+      // Paso 3
+      await checkAndGen('equilibrio_horas', 'Horas reales de trabajo a la semana/día en el negocio', 'Especifica un horario realista y saludable.');
+      await checkAndGen('equilibrio_separacion', 'Estrategia para separar el tiempo de trabajo del personal', 'Ej. No usar el celular de trabajo los fines de semana.');
+      await checkAndGen('equilibrio_salud', 'Acciones para cuidar la salud física y mental', 'Ej. Hacer ejercicio, meditar.');
+      await checkAndGen('equilibrio_delegar', 'Plan de delegación de tareas operativas', 'Indica qué tareas se delegarán y cuándo.');
+
+      // Paso 4
+      await checkAndGen('legado_beneficiarios', 'Beneficiarios indirectos del proyecto');
+      await checkAndGen('legado_problema', 'Problema social o ambiental que el negocio ayuda a mitigar');
+      await checkAndGen('legado_futuro', 'Visión futura de cómo se quiere que la empresa sea recordada');
+
+      // Resumen narrativo consolidado
+      if (!data.resumen_ia_proyecto_vida || String(data.resumen_ia_proyecto_vida).trim() === '') {
+        const promptResumen = "Redacta el Proyecto de Vida del emprendedor en un solo texto continuo, emotivo y profesional de 3 a 4 párrafos que integre su propósito, metas financieras, plan de equilibrio de vida y el legado que desea dejar.";
+        updates.resumen_ia_proyecto_vida = await generarRedaccionMediaIA(contexto, promptResumen, "No dividas el texto con subtítulos, redáctalo como una sola narración fluida y en primera persona.", 'medio');
+      }
+
+      if (Object.keys(updates).length > 0) {
+        updateGlobalData(updates);
+      } else {
+        alert("¡Todos los campos del Proyecto de Vida ya están llenos!");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al generar con IA");
+    } finally {
+      setGenerandoIA(false);
+    }
   };
 
   if (cargando) return (
@@ -230,6 +289,38 @@ const Fase12_ProyectoVida = () => {
           </div>
         </div>
       );
+      case 5: return (
+        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-indigo-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
+              <BookOpen size={24} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-black text-slate-800">Resumen del Proyecto de Vida</h2>
+              <p className="text-slate-500 font-medium">Revisa cómo se integra tu vida personal con el emprendimiento.</p>
+            </div>
+            <button 
+              onClick={handleCompletarTodoIA}
+              disabled={generandoIA}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl shadow-lg flex items-center gap-2 transition-transform hover:scale-105 disabled:opacity-50"
+            >
+              {generandoIA ? <span className="animate-spin text-xl">⏳</span> : '✨'}
+              {generandoIA ? 'Generando...' : 'Completar Todo con IA'}
+            </button>
+          </div>
+
+          <div className="bg-slate-50 p-6 rounded-xl border-2 border-slate-200">
+             <label className="block text-lg font-bold text-slate-800 mb-4">Proyecto de Vida (Narrativa Continua)</label>
+             <p className="text-sm text-slate-500 mb-4">Este texto consolida tu propósito, metas, equilibrio y legado en una sola narrativa.</p>
+             <textarea 
+                value={data?.resumen_ia_proyecto_vida || ''}
+                onChange={(e) => updateGlobalData({ resumen_ia_proyecto_vida: e.target.value })}
+                className="w-full h-[400px] p-6 bg-white border-2 border-slate-200 rounded-xl text-slate-800 text-lg leading-relaxed focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all resize-y"
+                placeholder="Presiona 'Completar Todo con IA' para generar una narrativa fluida que consolide tu proyecto de vida, o escríbela tú mismo..."
+             />
+          </div>
+        </div>
+      );
       default: return <div>Paso no definido</div>;
     }
   };
@@ -238,30 +329,32 @@ const Fase12_ProyectoVida = () => {
     <PasoLayout 
       faseTitle="Fase 12: Proyecto de Vida"
       pasoActual={step}
-      totalPasos={4}
+      totalPasos={5}
       tabs={[
         { id: 1, icon: <Heart size={16} />, label: 'Alineación' },
         { id: 2, icon: <Target size={16} />, label: 'Metas' },
         { id: 3, icon: <Clock size={16} />, label: 'Equilibrio' },
-        { id: 4, icon: <Globe2 size={16} />, label: 'Legado' }
+        { id: 4, icon: <Globe2 size={16} />, label: 'Legado' },
+        { id: 5, icon: <BookOpen size={16} />, label: 'Resumen IA' }
       ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
-      onSiguiente={() => step < 4 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={siguientePaso}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={
         step === 1 ? "Conectar el negocio con tu historia personal le dará sentido incluso en los días difíciles." : 
         step === 2 ? "Aterriza los números financieros en beneficios reales para tu vida. ¿Qué vas a lograr con ese dinero?" : 
         step === 3 ? "Si te agotas, el negocio muere. Establece límites saludables desde ahora." : 
-        "Las empresas que perduran son aquellas que aportan algo más al mundo además de dinero."
+        step === 4 ? "Las empresas que perduran son aquellas que aportan algo más al mundo además de dinero." :
+        "Este es tu Proyecto de Vida. Asegúrate de que tu negocio trabaje para ti y no al revés."
       }
       guardando={guardando}
     >
       <div onBlur={() => { if(typeof setPendingSave === 'function') setPendingSave(true); }}>
           {getPasoContent()}
-        </div>
+      </div>
     </PasoLayout>
   );
 };

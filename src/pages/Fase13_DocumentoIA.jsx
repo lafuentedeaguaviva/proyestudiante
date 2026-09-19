@@ -17,6 +17,7 @@ const Fase13_DocumentoIA = () => {
   const [estadoIA, setEstadoIA] = useState('');
   const [datosListos, setDatosListos] = useState(null);
   const [mejoradosListos, setMejoradosListos] = useState({});
+  const [imagenesListas, setImagenesListas] = useState({});
   const [perfilListo, setPerfilListo] = useState(null);
   const [errorStr, setErrorStr] = useState(null);
 
@@ -34,11 +35,90 @@ const Fase13_DocumentoIA = () => {
       const perfilResponse = await obtenerPerfilActivo();
       const perfilUsuario = perfilResponse?.perfil || {};
       
+      // Procesar encuestas para Anexos
+      if (datosTotales[2]) {
+        const cols = [
+          { key: 'edad', label: '1. Edad' },
+          { key: 'genero', label: '2. Género' },
+          { key: 'zona', label: '3. Zona' },
+          { key: 'est', label: '4. Nivel de estudios' },
+          { key: 'ing', label: '5. Recibes dinero' },
+          { key: 'cant', label: '6. Cantidad semanal' },
+          { key: 'gasto', label: '7. Gastos' },
+          { key: 'frec', label: '8. Frecuencia' },
+          { key: 'import', label: '9. Lo más importante' },
+          { key: 'lugar', label: '10. Dónde adquieres' },
+          { key: 'redes', label: '11. Redes sociales' },
+          { key: 'dif', label: '12. Dificultad (1-5)' },
+          { key: 'intent', label: '13. Intentos previos' },
+          { key: 'act', label: '14. Acción actual' },
+          { key: 'uso', label: '15. ¿Usarías el producto?' },
+          { key: 'pago', label: '16. ¿Cuánto pagarías?' },
+          { key: 'carac', label: '17. Característica clave' }
+        ];
+        const rawEncuestas = datosTotales[2].encuestas || [];
+        const validEncuestas = rawEncuestas.length > 0 ? rawEncuestas : [
+          { edad: '14-17', genero: 'Femenino', uso: 'Sí', pago: '5-10', frec: '2-3 veces/sem', dif: '4' }, 
+          { edad: '18-21', genero: 'Masculino', uso: 'Sí', pago: '11-20', dif: '5', act: 'Internet' }
+        ];
+        
+        datosTotales[2].encuestasProcesadas = cols.map(col => {
+          const stats = {};
+          let total = 0;
+          validEncuestas.forEach(d => {
+            const val = d[col.key];
+            if (val) {
+              stats[val] = (stats[val] || 0) + 1;
+              total++;
+            }
+          });
+          const chartData = Object.keys(stats)
+            .map(k => ({ 
+              name: k, 
+              value: stats[k], 
+              percentage: Math.round((stats[k] / total) * 100) 
+            }))
+            .sort((a, b) => b.value - a.value);
+
+          let comment = '';
+          if (chartData.length > 0) {
+            comment = `💡 Análisis rápido: La opción predominante es "${chartData[0].name}" con un ${chartData[0].percentage}% de respuestas.`;
+          }
+          return {
+            label: col.label,
+            data: chartData,
+            comment: comment
+          };
+        }).filter(c => c.data.length > 0);
+      }
+      
+      const parseJsonFallback = (faseObj) => {
+        if (!faseObj) return {};
+        let merged = { ...faseObj };
+        Object.keys(faseObj).forEach(k => {
+          if (typeof faseObj[k] === 'string') {
+            try {
+              const parsed = JSON.parse(faseObj[k]);
+              if (parsed && typeof parsed === 'object') {
+                merged = { ...merged, ...parsed };
+              }
+            } catch (e) {}
+          }
+        });
+        return merged;
+      };
+
+      const pDT = {};
+      for (const f in datosTotales) {
+        pDT[f] = parseJsonFallback(datosTotales[f]);
+      }
+
       setEstadoIA('Generando capturas visuales (Organigrama y Layout)...');
       
       let organigramaBase64 = null;
       let layoutBase64 = null;
-      let croquisBase64 = datosTotales[6]?.croquisImagen || null;
+      let croquisBase64 = pDT[6]?.croquisImagen || null;
+      let encuestasBase64 = [];
 
       const captureContainer = document.createElement('div');
       captureContainer.style.position = 'absolute';
@@ -49,7 +129,7 @@ const Fase13_DocumentoIA = () => {
       document.body.appendChild(captureContainer);
 
       try {
-        const layoutData = datosTotales[8]?.cuadriculaLayout;
+        const layoutData = pDT[8]?.cuadriculaLayout;
         if (Array.isArray(layoutData)) {
           const layoutDiv = document.createElement('div');
           layoutDiv.style.padding = '20px';
@@ -95,7 +175,7 @@ const Fase13_DocumentoIA = () => {
           captureContainer.removeChild(layoutDiv);
         }
 
-        const orgData = datosTotales[9]?.estructura?.organigrama;
+        const orgData = pDT[9]?.estructura?.organigrama;
         if (Array.isArray(orgData) && orgData.length > 0) {
           const orgDiv = document.createElement('div');
           orgDiv.style.padding = '40px';
@@ -192,6 +272,144 @@ const Fase13_DocumentoIA = () => {
           const canvas = await html2canvas(orgDiv);
           organigramaBase64 = canvas.toDataURL('image/png');
         }
+
+        // Generar gráficos de encuestas (barras css)
+        const encuestasProc = pDT[2]?.encuestasProcesadas;
+        if (Array.isArray(encuestasProc) && encuestasProc.length > 0) {
+          for (let i = 0; i < encuestasProc.length; i++) {
+            const enc = encuestasProc[i];
+            const encDiv = document.createElement('div');
+            encDiv.style.padding = '30px';
+            encDiv.style.border = '1px solid #e2e8f0';
+            encDiv.style.borderRadius = '16px';
+            encDiv.style.marginBottom = '20px';
+            encDiv.style.width = '600px';
+            encDiv.style.backgroundColor = '#fff';
+            encDiv.style.fontFamily = "'Inter', Arial, sans-serif";
+            encDiv.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
+
+            const title = document.createElement('h3');
+            title.innerText = `${i + 1}. ${enc.label}`;
+            title.style.fontSize = '20px';
+            title.style.fontWeight = 'bold';
+            title.style.marginBottom = '40px';
+            title.style.color = '#1e293b';
+            title.style.textAlign = 'center';
+            encDiv.appendChild(title);
+
+            const chartWrapper = document.createElement('div');
+            chartWrapper.style.position = 'relative';
+            chartWrapper.style.marginLeft = '120px';
+            chartWrapper.style.marginRight = '40px';
+            chartWrapper.style.marginBottom = '40px';
+            chartWrapper.style.borderLeft = '1px solid #94a3b8';
+            chartWrapper.style.borderBottom = '1px solid #94a3b8';
+
+            // Create 5 vertical grid lines (0, 1, 2, 3, 4) just like the example
+            for (let j = 0; j <= 4; j++) {
+              const gridLine = document.createElement('div');
+              gridLine.style.position = 'absolute';
+              gridLine.style.left = `${j * 25}%`;
+              gridLine.style.top = '-20px';
+              gridLine.style.bottom = '0';
+              gridLine.style.borderLeft = j > 0 ? '1px dashed #cbd5e1' : 'none';
+              gridLine.style.zIndex = '0';
+              
+              const tick = document.createElement('div');
+              tick.innerText = j;
+              tick.style.position = 'absolute';
+              tick.style.bottom = '-25px';
+              tick.style.transform = 'translateX(-50%)';
+              tick.style.color = '#94a3b8';
+              tick.style.fontSize = '14px';
+              
+              gridLine.appendChild(tick);
+              chartWrapper.appendChild(gridLine);
+            }
+
+            const barsContainer = document.createElement('div');
+            barsContainer.style.display = 'flex';
+            barsContainer.style.flexDirection = 'column';
+            barsContainer.style.gap = '30px';
+            barsContainer.style.paddingTop = '20px';
+            barsContainer.style.paddingBottom = '20px';
+            barsContainer.style.position = 'relative';
+            barsContainer.style.zIndex = '1';
+
+            enc.data.forEach(d => {
+              const row = document.createElement('div');
+              row.style.display = 'flex';
+              row.style.alignItems = 'center';
+              row.style.position = 'relative';
+
+              const label = document.createElement('div');
+              label.innerText = d.name;
+              label.style.position = 'absolute';
+              label.style.right = '100%';
+              label.style.paddingRight = '10px';
+              label.style.width = '120px';
+              label.style.fontSize = '14px';
+              label.style.textAlign = 'right';
+              label.style.color = '#64748b';
+              row.appendChild(label);
+
+              const barWrapper = document.createElement('div');
+              barWrapper.style.width = '100%';
+              barWrapper.style.height = '16px';
+              barWrapper.style.display = 'flex';
+              barWrapper.style.alignItems = 'center';
+
+              const bar = document.createElement('div');
+              bar.style.width = `${d.percentage}%`;
+              bar.style.height = '100%';
+              bar.style.backgroundColor = '#F59E0B'; // Orange bar
+              bar.style.borderRadius = '0 8px 8px 0';
+              barWrapper.appendChild(bar);
+
+              const val = document.createElement('div');
+              val.innerText = `${d.percentage}%`;
+              val.style.marginLeft = '10px';
+              val.style.fontSize = '14px';
+              val.style.fontWeight = 'bold';
+              val.style.color = '#cbd5e1'; // Light grey text for %
+              barWrapper.appendChild(val);
+
+              row.appendChild(barWrapper);
+              barsContainer.appendChild(row);
+            });
+
+            chartWrapper.appendChild(barsContainer);
+            encDiv.appendChild(chartWrapper);
+
+            if (enc.comment) {
+              const analysisBox = document.createElement('div');
+              analysisBox.style.backgroundColor = '#f0f4ff';
+              analysisBox.style.borderLeft = '4px solid #3b82f6';
+              analysisBox.style.borderRadius = '8px';
+              analysisBox.style.padding = '16px 20px';
+              analysisBox.style.marginTop = '20px';
+              analysisBox.style.color = '#475569';
+              analysisBox.style.fontSize = '15px';
+              analysisBox.style.lineHeight = '1.5';
+              
+              const analysisText = document.createElement('span');
+              analysisText.innerHTML = `💡 <strong style="color: #1e293b;">Análisis rápido:</strong> ${enc.comment}`;
+              analysisBox.appendChild(analysisText);
+              
+              encDiv.appendChild(analysisBox);
+            }
+
+            captureContainer.appendChild(encDiv);
+
+            const canvas = await html2canvas(encDiv, { scale: 2 });
+            encuestasBase64.push({
+              label: enc.label,
+              base64: canvas.toDataURL('image/png'),
+              comment: enc.comment
+            });
+            captureContainer.removeChild(encDiv);
+          }
+        }
       } catch (e) {
         console.error("Error capturando graficos:", e);
       } finally {
@@ -203,7 +421,8 @@ const Fase13_DocumentoIA = () => {
       const imagenesBase64 = {
         croquis: croquisBase64,
         layout: layoutBase64,
-        organigrama: organigramaBase64
+        organigrama: organigramaBase64,
+        encuestas: encuestasBase64
       };
 
       setEstadoIA('Estructurando tu documento final...');
@@ -231,150 +450,235 @@ const Fase13_DocumentoIA = () => {
           }
           return String(val);
         };
-        const ds = (fase, key) => s(datosTotales[fase]?.[key]);
-
-        const pushIA = (key, promptText) => {
-          if (promptText && promptText.trim().length > 5) {
-            textosBrutos[key] = promptText;
+        const ds = (fase, key) => {
+          const merged = pDT[fase] || {};
+          return s(merged[key]);
+        };
+        const addOrPushIA = (key, value, promptName) => {
+          if (value && value.trim().length > 5) {
+            // Ya existe texto generado por el usuario o por la IA en fases previas, lo usamos tal cual
+            mejorados[key] = value.trim();
+          } else {
+            // Está vacío, pedimos a la IA que lo genere desde cero
+            textosBrutos[key] = `[SECCIÓN VACÍA] Redacta la sección '${promptName}' desde cero, creando contenido coherente basado estrictamente en el contexto global del proyecto. Escribe en párrafos, no dejes instrucciones.`;
           }
         };
 
-        const reqGen = (nombre) => `[SECCIÓN VACÍA] Redacta la sección '${nombre}' desde cero, creando contenido coherente basado estrictamente en el contexto global del proyecto. Escribe en párrafos, no dejes instrucciones.`;
-
-        // Fase 11
-        pushIA('agradecimientos', ds(11, 'agradecimientos') ? `Agradecimientos: ${ds(11, 'agradecimientos')}.` : reqGen('Agradecimientos'));
-        pushIA('dedicatoria', ds(11, 'dedicatoria') ? `Dedicatoria: ${ds(11, 'dedicatoria')}.` : reqGen('Dedicatoria'));
-        const instructionResumen = ds(11, 'resumen') 
-            ? `Mejora este Resumen Ejecutivo del proyecto: ${ds(11, 'resumen')}.` 
-            : `Genera un Resumen Ejecutivo automático y muy profesional del proyecto estructurando toda la información que te he pasado en este JSON (el título, problema, mercado, producto y viabilidad financiera). Redáctalo en 2 o 3 párrafos de forma que enganche a un inversor.`;
-        pushIA('resumen', instructionResumen);
-        pushIA('intro_contexto', ds(11, 'intro_contexto') ? `Contexto: ${ds(11, 'intro_contexto')}.` : reqGen('Contexto General'));
-        pushIA('intro_problema', ds(11, 'intro_problema') ? `Problema: ${ds(11, 'intro_problema')}.` : reqGen('Problema a Resolver'));
-        pushIA('intro_objetivos', ds(11, 'intro_objetivos') ? `Objetivos en la introducción: ${ds(11, 'intro_objetivos')}.` : reqGen('Objetivos (General y Específicos)'));
-        pushIA('intro_estructura', ds(11, 'intro_estructura') ? `Estructura en la introducción: ${ds(11, 'intro_estructura')}.` : reqGen('Estructura del Documento'));
-        pushIA('conclusiones', ds(11, 'conclusiones') ? `Conclusiones: ${ds(11, 'conclusiones')}.` : reqGen('Conclusiones Generales'));
-        pushIA('resultados', datosTotales[11] && (ds(11, 'resultados_mercado') || ds(11, 'resultados_tecnico') || ds(11, 'resultados_financiero')) ? `Resultados. Mercado: ${ds(11, 'resultados_mercado')}. Técnico: ${ds(11, 'resultados_tecnico')}. Financiero: ${ds(11, 'resultados_financiero')}.` : reqGen('Resultados del Proyecto'));
-
-        // Fase 7
-        pushIA('diagnostico', ds(7, 'diagnostico') ? `Diagnóstico del contexto productivo: ${ds(7, 'diagnostico')}.` : reqGen('Diagnóstico del Contexto Productivo'));
-        const objG = ds(7, 'obj_producto') ? `Producto: ${ds(7, 'obj_producto')}. Público: ${ds(7, 'obj_publico')}. Plazo: ${ds(7, 'obj_plazo')}` : null;
-        pushIA('objGeneral', objG ? `Objetivo General: ${objG}. Empezar con verbo en infinitivo.` : reqGen('Objetivo General'));
-        const objEsp = datosTotales[7] ? [ds(7, 'obj_especifico_1'), ds(7, 'obj_especifico_2'), ds(7, 'obj_especifico_3'), ds(7, 'obj_especifico_4')].filter(Boolean).join('\n') : null;
-        pushIA('objEspecificos', objEsp ? `Objetivos Específicos:\n${objEsp}` : reqGen('Objetivos Específicos'));
-        pushIA('mision', ds(7, 'mision_redaccion_final') ? `Misión: ${ds(7, 'mision_redaccion_final')}.` : reqGen('Misión de la Empresa'));
-        pushIA('vision', ds(7, 'vision_redaccion_final') ? `Visión: ${ds(7, 'vision_redaccion_final')}.` : reqGen('Visión de la Empresa'));
-        const justif = ds(7, 'justificacion_social') ? `Social: ${ds(7, 'justificacion_social')}. Económica: ${ds(7, 'justificacion_economica')}. Personal: ${ds(7, 'justificacion_personal')}.` : null;
-        pushIA('justificacion', justif ? `Justificación:\n${justif}` : reqGen('Justificación Social, Económica y Personal'));
-
-        // Fase 6
-        pushIA('localizacion', ds(6, 'dondeProducir') ? `Localización Macro: ${ds(6, 'dondeProducir')}. Localización Micro: ${ds(6, 'dondeVender')}.` : reqGen('Localización y Distribución'));
-        pushIA('logistica_entrega', ds(6, 'comoEntregar') ? `Logística de entrega actual: ${ds(6, 'comoEntregar')}.` : reqGen('Logística de Entrega'));
-        pushIA('metodos_pago', ds(6, 'comoRecibirPago') ? `Métodos de pago aceptados: ${ds(6, 'comoRecibirPago')}.` : reqGen('Métodos de Pago'));
-        pushIA('necesidades_distribucion', ds(6, 'necesidadesDistribucion') ? `Necesidades de distribución (recursos): ${ds(6, 'necesidadesDistribucion')}.` : reqGen('Necesidades de Distribución'));
-        const planDist = datosTotales[6]?.planDistribucion;
-        if (Array.isArray(planDist) && planDist.length > 0) {
-          const textoPlan = planDist.map(p => `- Acción: ${s(p.accion)} | Cuándo: ${s(p.cuando)} | Responsable: ${s(p.quien)} | Recursos: ${s(p.necesito)}`).join('\n');
-          pushIA('plan_distribucion', `Plan de Acción de Distribución:\n${textoPlan}`);
+        // Fase 11 (Copiado directo sin pasar por la IA)
+        mejorados['agradecimientos'] = ds(11, 'agradecimientos') || '';
+        mejorados['dedicatoria'] = ds(11, 'dedicatoria') || '';
+        
+        // El resumen SIEMPRE se mejora o genera con IA usando todos los datos
+        const resumenPrevio = ds(11, 'resumen');
+        if (resumenPrevio && resumenPrevio.trim().length > 5) {
+            textosBrutos['resumen'] = `Mejora, consolida y amplía el siguiente resumen del proyecto: "${resumenPrevio}". Asegúrate de que tenga un tono formal, profesional y esté redactado exclusivamente en español. Basa tu mejora en todo el contexto del proyecto.`;
         } else {
-          pushIA('plan_distribucion', reqGen('Plan de Acción de Distribución'));
+            textosBrutos['resumen'] = `Redacta un Resumen Ejecutivo completo y formal para el proyecto, basándote en todo el contexto proporcionado. El resumen debe estar redactado exclusivamente en español.`;
         }
-        const presupuesto = datosTotales[6]?.presupuesto;
-        if (Array.isArray(presupuesto) && presupuesto.length > 0) {
-          const textoPres = presupuesto.map(p => `- ${s(p.concepto)}: Costo $${s(p.costoUnitario)} x Cantidad ${s(p.cantidad)}`).join('\n');
-          pushIA('presupuesto', `Presupuesto estimado:\n${textoPres}`);
-        } else {
-          pushIA('presupuesto', reqGen('Presupuesto de Distribución'));
-        }
+        // Consolidación de la Introducción (Copiado directo de Fase 11, igual que en el Resumen IA)
+        const objText = ds(11, 'intro_objetivos') ? String(ds(11, 'intro_objetivos')).replace(/Objetivo General:?/gi, 'El propósito principal de este proyecto es:').replace(/Objetivos Específicos:?/gi, 'Para alcanzar esta meta, se realizarán las siguientes acciones:') : '';
+        const introConsolidada = [
+            ds(11, 'intro_contexto'),
+            ds(11, 'intro_problema'),
+            objText,
+            ds(11, 'intro_estructura')
+        ].filter(Boolean).join('\n\n');
+        
+        mejorados['introduccion_consolidada'] = introConsolidada || '';
+        
+        // Extract conclusions correctly since datosTotales[11] is nested in documento_final
+        const ds11Parsed = pDT[11] || {};
+        const concEspec = ds11Parsed.conclusiones_especificas;
+        const concGen = ds11Parsed.conclusiones_general || ds11Parsed.conclusion_general;
+        const textoConclusiones = [
+            ...(Array.isArray(concEspec) ? concEspec : []),
+            concGen
+        ].filter(Boolean).join('\n\n');
+        mejorados['conclusiones'] = textoConclusiones || ds(11, 'conclusiones') || '';
+        mejorados['recomendaciones'] = ds(11, 'recomendaciones') || '';
+
+        const resultadosText = (ds(11, 'resultados_mercado') || ds(11, 'resultados_tecnico') || ds(11, 'resultados_financiero')) 
+          ? `Mercado: ${ds(11, 'resultados_mercado')}\nTécnico: ${ds(11, 'resultados_tecnico')}\nFinanciero: ${ds(11, 'resultados_financiero')}` : '';
+        mejorados['resultados'] = resultadosText;
+
+
+        // Fase 7 - Copiado directo sin pasar por IA
+        mejorados['diagnostico'] = ds(7, 'diagnostico') || '';
+        const objG = ds(7, 'obj_producto') ? `Desarrollar ${ds(7, 'obj_producto')} para ${ds(7, 'obj_publico')} en un plazo de ${ds(7, 'obj_plazo')}` : '';
+        mejorados['objGeneral'] = ds(7, 'objGeneral') || objG || '';
+        const objEsp = [ds(7, 'obj_especifico_1'), ds(7, 'obj_especifico_2'), ds(7, 'obj_especifico_3'), ds(7, 'obj_especifico_4')].filter(Boolean).join('\n');
+        mejorados['objEspecificos'] = objEsp || '';
+        mejorados['mision'] = ds(7, 'mision_redaccion_final') || '';
+        mejorados['vision'] = ds(7, 'vision_redaccion_final') || '';
+        const justif = ds(7, 'justificacion_social') ? `Social: ${ds(7, 'justificacion_social')}\nEconómica: ${ds(7, 'justificacion_economica')}\nPersonal: ${ds(7, 'justificacion_personal')}` : '';
+        mejorados['justificacion'] = justif || '';
+
+        // Fase 6 - Copiado directo de Resumen IA
+        const parsedFase6 = pDT[6] || {};
+        const r6 = parsedFase6.resumen_ia || parsedFase6.resumen_fase6 || {};
+        mejorados['localizacion'] = r6.resumen_ubicacion ? `${r6.resumen_ubicacion}\n\n${r6.resumen_canales}` : ds(6, 'dondeProducir') ? `Localización Macro: ${ds(6, 'dondeProducir')}\nLocalización Micro: ${ds(6, 'dondeVender')}` : '';
+        mejorados['direccion_ubicacion'] = r6.resumen_direccion || '';
+        mejorados['metodos_pago'] = r6.resumen_pagos || ds(6, 'comoRecibirPago') || '';
+        mejorados['plan_distribucion'] = r6.resumen_plan || '';
 
         // Fase 5
-        let textoOferta = "Análisis de Oferta (Competidores y Soluciones actuales):\n";
-        let tieneOferta = false;
-        if (Array.isArray(datosTotales[5]?.competencia)) { textoOferta += datosTotales[5].competencia.map(c => `- Competidor: ${s(c.nombre)} | Vende: ${s(c.vende)} | Fortalezas: ${s(c.fortalezas)} | Debilidades: ${s(c.debilidades)}`).join('\n'); tieneOferta = true; }
-        if (Array.isArray(datosTotales[5]?.soluciones)) { textoOferta += "\n" + datosTotales[5].soluciones.map(sItem => `- Solución actual usada: Porque ${s(sItem.porque)} | Problema o frustración: ${s(sItem.frustracion)}`).join('\n'); tieneOferta = true; }
-        pushIA('oferta', tieneOferta ? textoOferta : reqGen('Análisis de Oferta y Competencia'));
+        const parsedFase5 = pDT[5] || {};
+        const r5 = parsedFase5.resumen_ia || parsedFase5.resumen_fase5 || parsedFase5 || {};
+        let textoOferta = r5.resumen_competencia || "";
+        if (!textoOferta) {
+            if (Array.isArray(parsedFase5.competencia) && parsedFase5.competencia.length > 0) { textoOferta += "Análisis de Competidores:\n" + parsedFase5.competencia.map(c => `- ${s(c.nombre)} | Vende: ${s(c.vende)} | Fortalezas: ${s(c.fortalezas)}`).join('\n'); }
+            if (Array.isArray(parsedFase5.soluciones) && parsedFase5.soluciones.length > 0) { textoOferta += "\nSoluciones Actuales:\n" + parsedFase5.soluciones.map(sItem => `- ${s(sItem.porque)} | Problema: ${s(sItem.frustracion)}`).join('\n'); }
+        }
+        addOrPushIA('oferta', textoOferta, 'Análisis de Oferta y Competencia');
         
-        let textoPestel = "Análisis PESTEL:\n";
-        let tienePestel = false;
-        ['pestelPolitico', 'pestelEconomico', 'pestelSocial', 'pestelTecnologico', 'pestelAmbiental'].forEach(p => { if (datosTotales[5]?.[p]) { textoPestel += `- ${p}: ${ds(5, p)}\n`; tienePestel = true; } });
-        pushIA('entorno', tienePestel ? textoPestel : reqGen('Análisis del Entorno PESTEL'));
+        let textoPestel = r5.resumen_entorno || "";
+        if (!textoPestel) {
+            ['pestelPolitico', 'pestelEconomico', 'pestelSocial', 'pestelTecnologico', 'pestelAmbiental'].forEach(p => { if (parsedFase5[p]) { textoPestel += `- ${p}: ${ds(5, p)}\n`; } });
+        }
+        addOrPushIA('entorno', textoPestel, 'Análisis del Entorno PESTEL');
+        
+        const textoVentaja = r5.resumen_ventaja || ds(5, 'ventajaFrase');
+        addOrPushIA('ventaja_competitiva', textoVentaja, 'Ventaja Competitiva');
+        
+        let promo = r5.resumen_promocion || "";
+        if (!promo) {
+            promo = ds(5, 'promoCanales') ? `Canales Promoción: ${ds(5, 'promoCanales')}\nDistribución: ${ds(6, 'distDondeVender')}` : '';
+        }
+        addOrPushIA('promocion', promo, 'Estrategia de Promoción');
 
-        const ventaja = ds(5, 'ventajaFrase');
-        pushIA('ventaja_competitiva', ventaja ? `Ventaja Competitiva: ${ventaja}.` : reqGen('Ventaja Competitiva'));
-        const promo = ds(5, 'promoCanales') ? `Canales Promoción: ${ds(5, 'promoCanales')}. Distribución: ${ds(6, 'distDondeVender')}` : null;
-        pushIA('promocion', promo ? `Estrategia de promoción: ${promo}.` : reqGen('Estrategia de Promoción'));
-
-        // Fase 3
-        pushIA('demanda', ds(3, 'tamano_mercado') ? `Demanda potencial: ${ds(3, 'tamano_mercado')}.` : reqGen('Análisis de Demanda'));
-        pushIA('publico_objetivo', ds(3, 'perfil_cliente') ? `Público objetivo: ${ds(3, 'perfil_cliente')}.` : reqGen('Público Objetivo'));
+        // Fase 3 y 4 (Demanda)
+        const r4 = datosTotales[4]?.resumen_fase4 || datosTotales[4] || {};
+        const textoDemanda = r4.resumen_demanda || ds(3, 'tamano_mercado');
+        addOrPushIA('demanda', textoDemanda, 'Análisis de Demanda');
+        addOrPushIA('publico_objetivo', ds(3, 'perfil_cliente'), 'Público Objetivo');
 
         // Fase 4
-        const caracteristicasProd = datosTotales[4]?.caracteristicasProducto || datosTotales[4]?.caracteristicasServicio;
-        if (Array.isArray(caracteristicasProd) && caracteristicasProd.length > 0) {
-          const textoCarac = caracteristicasProd.map(c => `- Característica: ${s(c.caracteristica)} | Beneficio: ${s(c.beneficio)}`).join('\n');
-          pushIA('caracteristicas_producto', `Características y beneficios:\n${textoCarac}`);
+        let textoCarac = "";
+        if (r4.resumen_concepto) {
+             textoCarac = r4.resumen_concepto + (r4.resumen_ventaja ? `\n\nVentaja (Beneficios):\n${r4.resumen_ventaja}` : "");
         } else {
-          pushIA('caracteristicas_producto', reqGen('Características del Producto o Servicio'));
+             const caracteristicasProd = datosTotales[4]?.caracteristicasProducto || datosTotales[4]?.caracteristicasServicio;
+             textoCarac = (Array.isArray(caracteristicasProd) && caracteristicasProd.length > 0) ? caracteristicasProd.map(c => `- ${s(c.caracteristica)} (Beneficio: ${s(c.beneficio)})`).join('\n') : '';
         }
-        pushIA('empaque', ds(4, 'empaqueProducto') ? `Empaque del producto: ${ds(4, 'empaqueProducto')}.` : reqGen('Empaque y Etiquetado'));
+        addOrPushIA('caracteristicas_producto', textoCarac, 'Características del Producto o Servicio');
+        
+        const textoEmpaque = r4.resumen_empaque || ds(4, 'empaqueProducto');
+        addOrPushIA('empaque', textoEmpaque, 'Empaque y Etiquetado');
 
         // Fase 8
-        const procesos = datosTotales[8]?.pasosProduccion;
-        if (Array.isArray(procesos) && procesos.length > 0) {
-          const textoProc = procesos.map(p => `- ${s(p.texto)} (${s(p.categoria) || 'General'})`).join('\n');
-          pushIA('procesos', `Procesos de producción:\n${textoProc}`);
-        } else {
-          pushIA('procesos', reqGen('Ciclo de Producción o Servicio'));
-        }
-        pushIA('layout', datosTotales[8]?.cuadriculaLayout ? `Layout elementos: ${datosTotales[8].cuadriculaLayout.filter(x => x).map(x => s(x)).join(', ')}.` : reqGen('Layout y Distribución de Planta'));
+        addOrPushIA('procesos_intro', '', 'Redacta un solo párrafo introductorio sobre el ciclo de producción, indicando que a continuación se detalla el diagrama de procesos.');
+        addOrPushIA('layout_intro', '', 'Redacta un solo párrafo introductorio sobre la distribución de la planta, indicando que a continuación se muestra el layout.');
 
         // Fase 9
-        const roles = datosTotales[9]?.estructura?.roles;
-        if (Array.isArray(roles) && roles.length > 0) {
-          const textRoles = roles.map(r => `- ${s(r.nombreRol)}: ${s(r.objetivo)}. Tareas: ${(r.tareas || []).map(t=>s(t.tarea)).join(', ')}`).join('\n');
-          pushIA('estructura_org', `Estructura organizacional:\n${textRoles}`);
-        } else {
-          pushIA('estructura_org', reqGen('Estructura Organizacional y Roles'));
+        const r9 = datosTotales[9] || {};
+        
+        let textoEstructura = r9.resumen_estructura || "";
+        addOrPushIA('resumen_estructura', textoEstructura, 'Estructura Organizacional (Resumen)');
+
+        let textoRoles = r9.resumen_roles || "";
+        if (!textoRoles) {
+            const roles = r9.estructura?.roles;
+            textoRoles = (Array.isArray(roles) && roles.length > 0) ? roles.map(r => `- ${s(r.nombreRol)}: ${s(r.objetivo)}. Tareas: ${(r.tareas || []).map(t=>s(t.tarea)).join(', ')}`).join('\n') : '';
         }
+        addOrPushIA('resumen_roles', textoRoles, 'Desglose Detallado de Roles y Funciones');
+
+        let textoClima = r9.resumen_clima_cultura || "";
+        addOrPushIA('resumen_clima_cultura', textoClima, 'Clima Organizacional');
 
         // Fase 10 (Viabilidad - Tablas)
-        const van = datosTotales[10]?.van;
-        const tir = datosTotales[10]?.tir;
-        if (van !== undefined && tir !== undefined) {
-           pushIA('viabilidad', `Indicadores Financieros: VAN = ${van}, TIR = ${tir}%.`);
-        } else {
-           pushIA('viabilidad', reqGen('Viabilidad Financiera y Sostenibilidad'));
+        const pDT10 = datosTotales[10] || {};
+        let invArray = null;
+        if (pDT10.inversiones_array) {
+          if (Array.isArray(pDT10.inversiones_array)) invArray = pDT10.inversiones_array;
+          else if (typeof pDT10.inversiones_array === 'string') {
+            try { invArray = JSON.parse(pDT10.inversiones_array); } catch(e){}
+          }
+        }
+        const inversionesLoc = (invArray && invArray.length > 0) ? invArray : (pDT10.inversiones || []);
+        
+        const capitalInversion = inversionesLoc.filter(i => ['fijo', 'diferido'].includes(i.tipo));
+        const capitalOperacion = inversionesLoc.filter(i => ['materiales', 'infraestructura', 'personal'].includes(i.tipo));
+        
+        const cfTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) !== 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        const cvTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        const numProd = parseInt(pDT10.produccionMensual) || 1;
+        const costoTotalOp = capitalOperacion.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        const costoUnitario = costoTotalOp / numProd;
+        const costoVariableUnitario = cvTotal / numProd;
+        const margen = parseFloat(pDT10.porcentajeGanancia || 30);
+        const precioSinFacturaCalc = margen < 100 ? costoUnitario / (1 - (margen / 100)) : costoUnitario;
+        const precioFacturadoCalc = precioSinFacturaCalc / 0.84;
+        
+        const numMeses = parseInt(pDT10.mesesProyeccion) || 6;
+        const flujos = [];
+        for (let m = 1; m <= numMeses; m++) {
+          const multiplicador = 1 + ((m - 1) * 0.13);
+          const unidades = Math.round(numProd * multiplicador);
+          const ingresos = unidades * precioFacturadoCalc;
+          const vars = unidades * costoVariableUnitario;
+          const gastosTotales = cfTotal + vars;
+          const uBruta = ingresos - gastosTotales;
+          const impuestos = ingresos * 0.16;
+          const uNeta = uBruta - impuestos;
+          flujos.push(uNeta);
         }
         
-        // Ya no pedimos a la IA que invente las tablas en Fase 13,
-        // porque ahora se generan explícitamente en la propia Fase 10.
-
-        // Fase 12 (Proyecto de Vida)
-        const proposito = ds(12, 'proposito_valor');
-        if (proposito) {
-           pushIA('proyecto_vida', `Propósito de vida y visión: ${proposito}.`);
-        } else {
-           pushIA('proyecto_vida', reqGen('Proyecto de Vida (Impacto Personal)'));
+        const totalInversion = capitalInversion.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        const tasaTMAR = parseFloat(pDT10.tasaDescuento) || 13;
+        const tasaDescuentoMensual = tasaTMAR / 100;
+        
+        let vanCalc = -totalInversion;
+        flujos.forEach((flujo, index) => {
+          vanCalc += flujo / Math.pow(1 + tasaDescuentoMensual, index + 1);
+        });
+        
+        let tirCalc = 0;
+        if (totalInversion > 0 && flujos.some(f => f > 0)) {
+          let low = -0.5;
+          let high = 1.0;
+          for (let i = 0; i < 100; i++) {
+            let mid = (low + high) / 2;
+            let npv = -totalInversion;
+            flujos.forEach((flujo, index) => {
+              npv += flujo / Math.pow(1 + mid, index + 1);
+            });
+            if (npv > 0) low = mid;
+            else high = mid;
+          }
+          tirCalc = low * 100;
         }
+
+        const formattedVan = vanCalc.toFixed(2);
+        const formattedTir = tirCalc.toFixed(2);
+        
+        addOrPushIA('viabilidad_interpretacion', '', `Redacta una interpretación ejecutiva y positiva (máximo 2 párrafos) sobre la viabilidad del proyecto, sabiendo que el Valor Actual Neto (VAN) es ${formattedVan} y la Tasa Interna de Retorno (TIR) es ${formattedTir}%. Explica qué significan estos números para el negocio y si es rentable basándose en esos resultados.`);
+
+        // Fase 12 (Proyecto de Vida) - Copiado directo sin pasar por IA
+        mejorados['proyecto_vida'] = ds(12, 'resumen_ia_proyecto_vida') || ds(12, 'proposito_valor') || '';
 
         // Obtener contexto global
         const titulo = ds(1, 'titulo_proyecto') || ds(2, 'nombreIdea') || "Proyecto Emprendedor";
         const problema = ds(2, 'problema') || "";
         const contextoGlobal = `Título: ${titulo}\nProblema que resuelve: ${problema}`;
 
-        // Ejecución en Lotes (Batching) para evitar colapsos
+        // Ejecución en Lotes (Batching) de la IA SÓLO para las secciones vacías
         try {
           const keys = Object.keys(textosBrutos);
-          const chunkSize = 6; // Procesar de 6 en 6
-          mejorados = {};
-          
-          for (let i = 0; i < keys.length; i += chunkSize) {
-            const chunkKeys = keys.slice(i, i + chunkSize);
-            const chunkObj = {};
-            chunkKeys.forEach(k => chunkObj[k] = textosBrutos[k]);
-            
-            setEstadoIA(`Redactando secciones ${i + 1} a ${Math.min(i + chunkSize, keys.length)} de ${keys.length}...`);
-            const chunkResult = await generarDocumentoConsolidadoIA(chunkObj, contextoGlobal, configIA);
-            mejorados = { ...mejorados, ...chunkResult };
+          if (keys.length > 0) {
+            const chunkSize = 6; 
+            for (let i = 0; i < keys.length; i += chunkSize) {
+              const chunkKeys = keys.slice(i, i + chunkSize);
+              const chunkObj = {};
+              chunkKeys.forEach(k => chunkObj[k] = textosBrutos[k]);
+              
+              setEstadoIA(`Redactando ${chunkKeys.length} secciones vacías mediante IA (Lote ${Math.floor(i/chunkSize) + 1})...`);
+              const chunkResult = await generarDocumentoConsolidadoIA(chunkObj, contextoGlobal, configIA);
+              mejorados = { ...mejorados, ...chunkResult };
+            }
+          } else {
+            setEstadoIA(`Todas las secciones tienen contenido previo. Saltando generación por IA...`);
+            // Simular un pequeño tiempo para que el usuario lea el mensaje
+            await new Promise(r => setTimeout(r, 1000));
           }
         } catch (megaError) {
           console.error("Fallo la generación por lotes", megaError);
@@ -393,6 +697,7 @@ const Fase13_DocumentoIA = () => {
       
       setDatosListos(datosTotales);
       setMejoradosListos(mejorados);
+      setImagenesListas(imagenesBase64);
       setPerfilListo(perfilUsuario);
       setStep(2);
       
@@ -507,7 +812,7 @@ const Fase13_DocumentoIA = () => {
 
             <div className="space-y-4">
               <button 
-                onClick={() => generarYDescargarWord(datosListos, mejoradosListos, {}, perfilListo)}
+                onClick={() => generarYDescargarWord(datosListos, mejoradosListos, imagenesListas, perfilListo)}
                 className="w-full bg-white text-emerald-600 border-2 border-emerald-200 hover:bg-emerald-50 font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 transition-all"
               >
                 <Download size={24} /> Volver a Descargar

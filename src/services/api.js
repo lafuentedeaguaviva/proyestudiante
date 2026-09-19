@@ -898,7 +898,9 @@ export const generarDocumentoMejoradoIA = async (textoBruto, configIA) => {
     const tono = configIA.tono || "académico y profesional";
     const instrucciones = configIA.instrucciones || "Mejora la redacción y ortografía";
     
-    const systemPrompt = `Eres un asistente experto en redacción académica para tesis de emprendimiento. Tu tarea es tomar un texto bruto (borrador) y reescribirlo usando un tono ${tono}. Debes respetar la idea original, pero hacer que suene más profesional, fluido y claro. Instrucciones extra: ${instrucciones}. NO agregues comentarios ni explicaciones adicionales, devuelve SOLO el texto mejorado.`;
+    const systemPrompt = `Eres un asistente experto en redacción académica para tesis de emprendimiento. Tu tarea es tomar un texto bruto (borrador) y reescribirlo usando un tono ${tono}. Debes respetar la idea original, pero hacer que suene más profesional, fluido y claro.
+REGLA DE ORO: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto") Y EN UN TONO ESTRICTAMENTE POSITIVO Y OPTIMISTA. Nunca uses lenguaje pesimista.
+Instrucciones extra: ${instrucciones}. NO agregues comentarios ni explicaciones adicionales, devuelve SOLO el texto mejorado.`;
     
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
@@ -938,6 +940,7 @@ export const generarRedaccionMediaIA = async (contextoProyecto, campoFaltante, i
   try {
     const systemPrompt = `Eres un asistente experto en redacción de planes de emprendimiento. Tu tarea es generar la redacción de una sección específica que está vacía, basándote en la información general del proyecto. 
 El nivel de redacción debe ser "${nivelIA}": ${descNivel}.
+REGLA DE ORO: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto") Y EN UN TONO ESTRICTAMENTE POSITIVO Y OPTIMISTA. Nunca uses lenguaje pesimista o limitante.
 NO agregues introducciones, saludos ni comentarios. Genera directamente el contenido para la sección: "${campoFaltante}".
 Instrucciones específicas: ${instrucciones || 'Genera 1 o 2 párrafos concisos y bien estructurados.'}`;
     
@@ -990,6 +993,8 @@ Respeta la idea original de cada sección, pero haz que suene más profesional, 
 
 IMPORTANTE:
 Si el valor de alguna llave incluye la directiva "[SECCIÓN VACÍA]", debes INVENTAR y redactar esa sección desde cero de la mejor manera posible, basándote lógicamente en el "Contexto Global del Proyecto" y en el resto de los datos proporcionados. No dejes notas de que faltan datos, asume el rol y genera un texto convincente y bien estructurado que encaje perfectamente con el proyecto.
+
+REGLA DE ORO: REDACTA ABSOLUTAMENTE TODO EL JSON EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto") Y EN UN TONO ESTRICTAMENTE POSITIVO Y OPTIMISTA. Transforma cualquier debilidad o bajo presupuesto en una fortaleza (eficiencia, agilidad).
 
 Instrucciones extra: ${instrucciones}.
 
@@ -1062,15 +1067,16 @@ DEBES devolver EXACTAMENTE un objeto JSON con las siguientes llaves (y sin texto
    - "precioSinFactura": número
    - "precioFacturado": número
    - "porcentajeGanancia": número
-3. "proyecciones": Un array de exactamente 6 objetos (para 6 meses), donde cada uno tiene:
-   - "ingresos": número
-   - "gastos": número
-   - "utilidad": número (ingresos - gastos)
-4. "puntoEquilibrio": número entero (unidades estimadas para no perder ni ganar).
-5. "produccionMensual": número entero (cantidad de unidades/servicios al mes).
+3. "proyecciones": Un array vacío (ya no es necesario, el sistema las calcula dinámicamente).
+4. "puntoEquilibrio": 0 (el sistema lo calcula).
+5. "produccionMensual": número entero (cantidad inicial de unidades/servicios al mes).
 6. "porcentajeGanancia": número (ej: 30).
 
-Usa estimaciones lógicas y realistas para el tipo de negocio. RESPONDE SOLO CON EL JSON VÁLIDO.`;
+Usa estimaciones lógicas y realistas para el tipo de negocio.
+REGLA DE ORO: Asegura que el plan financiero sea siempre viable y muy rentable.
+Ten en cuenta que el sistema calculará las proyecciones automáticamente aplicando un crecimiento mensual del 13% en ventas y un 16% de descuento por impuestos sobre los ingresos.
+Ajusta la 'produccionMensual', los 'precios' (altos) y las 'inversiones' (bajas/moderadas) para garantizar que, con esos descuentos, el VAN sea positivo y la TIR supere el 13% mensual.
+RESPONDE SOLO CON EL JSON VÁLIDO.`;
   }
 
   const response = await fetch("https://api.deepseek.com/chat/completions", {
@@ -1110,6 +1116,91 @@ Usa estimaciones lógicas y realistas para el tipo de negocio. RESPONDE SOLO CON
   } catch (parseError) {
     console.error("Error parseando respuesta de IA Financiera:", content);
     throw new Error("La IA no devolvió un formato válido (JSON). Intenta de nuevo.");
+  }
+};
+
+/**
+ * Genera estrategias IA para incrementar la demanda potencial cuando los indicadores financieros son negativos
+ */
+export const generarConsejosDemandaIA = async (contextoProyecto, datosFinancieros) => {
+  const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("No hay API Key configurada para DeepSeek.");
+
+  const systemPrompt = `Eres un consultor de negocios y estrategia de crecimiento (Growth Hacker) experto en emprendimientos.
+El usuario tiene un proyecto donde la evaluación financiera (VAN y TIR) actualmente da RESULTADOS NEGATIVOS o insuficientes.
+
+Contexto del Proyecto:
+${contextoProyecto || "Proyecto de emprendimiento general."}
+
+Datos Financieros Actuales:
+- Ventas estimadas actuales: ${datosFinancieros.demandaActual} unidades/mes
+- Ventas requeridas para breakeven/VAN positivo: ${datosFinancieros.unidadesNecesarias} unidades/mes
+- Precio Facturado actual: Bs. ${datosFinancieros.precioVenta}
+- VAN Actual: Bs. ${datosFinancieros.van}
+- TIR Actual: ${datosFinancieros.tir}% mensual (vs TMAR ${datosFinancieros.tmar}%)
+
+Debes devolver EXACTAMENTE un objeto JSON (sin texto adicional ni bloques de markdown) con la siguiente estructura:
+{
+  "diagnostico": "Resumen claro y motivador de 2 oraciones sobre por qué los indicadores actuales están en rojo y qué palanca principal mover.",
+  "estrategiasDemanda": [
+    {
+      "titulo": "Nombre corto de la estrategia 1",
+      "descripcion": "Explicación práctica de cómo aumentar la demanda de clientes potenciales en 2 oraciones.",
+      "impacto": "Impacto estimado (ej: '+30% en ventas en 2 meses')"
+    },
+    {
+      "titulo": "Nombre corto de la estrategia 2",
+      "descripcion": "Explicación práctica de un nuevo canal o alianzas comerciales.",
+      "impacto": "Impacto estimado"
+    },
+    {
+      "titulo": "Nombre corto de la estrategia 3",
+      "descripcion": "Estrategia de posicionamiento o empaquetado premium para subir precio/demanda.",
+      "impacto": "Impacto estimado"
+    }
+  ],
+  "consejoEstructuraCostos": "Consejo breve de 1 oración sobre si se debe optimizar algún costo fijo o reducir la inversión inicial."
+}
+
+Usa un tono positivo, alentador, profesional y muy práctico. RESPONDE SOLO CON EL JSON VÁLIDO.`;
+
+  const response = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "Genera el plan de acción para aumentar la demanda potencial y rentabilizar el proyecto ahora." }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `Error en la API de DeepSeek (Estado: ${response.status})`);
+  }
+
+  const data = await response.json();
+  const content = data.choices[0].message.content.trim();
+
+  try {
+    let cleanContent = content;
+    const firstBrace = content.indexOf('{');
+    const lastBrace = content.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleanContent = content.substring(firstBrace, lastBrace + 1);
+    }
+    return JSON.parse(cleanContent);
+  } catch (parseError) {
+    console.error("Error parseando consejos de demanda IA:", content);
+    throw new Error("La IA no devolvió un formato JSON válido.");
   }
 };
 
@@ -1192,31 +1283,45 @@ export const generarResumenMarketingIA = async (dataFase5) => {
   try {
     let systemPrompt = await obtenerPromptIA(5, 'generar_resumen_marketing');
     
-    const compNombres = dataFase5.competencia?.map(c => c.nombre).join(', ') || '';
+    const compDetalles = dataFase5.competencia?.map(c => `- ${c.nombre} (Vende: ${c.vende || 'No especificado'}, Fortalezas: ${c.fortalezas || 'No especificado'})`).join('\n') || '';
     const ventaja = dataFase5.ventajaFrase || '';
-    const entornoPol = dataFase5.pestelPolitico || '';
-    const entornoEco = dataFase5.pestelEconomico || '';
+    const entornoPESTEL = [
+      dataFase5.pestelPolitico ? `Político: ${dataFase5.pestelPolitico}` : '',
+      dataFase5.pestelEconomico ? `Económico: ${dataFase5.pestelEconomico}` : '',
+      dataFase5.pestelSocial ? `Social: ${dataFase5.pestelSocial}` : '',
+      dataFase5.pestelTecnologico ? `Tecnológico: ${dataFase5.pestelTecnologico}` : '',
+      dataFase5.pestelAmbiental ? `Ambiental: ${dataFase5.pestelAmbiental}` : ''
+    ].filter(Boolean).join('\n');
     const promoCan = dataFase5.promoCanales?.join(', ') || '';
     const promoMensaje = dataFase5.promoMensaje || '';
 
     if (systemPrompt) {
       systemPrompt = systemPrompt
-        .replace('{compNombres}', compNombres)
+        .replace('{compNombres}', compDetalles)
         .replace('{ventaja}', ventaja)
-        .replace('{entornoPol}', entornoPol)
-        .replace('{entornoEco}', entornoEco)
+        .replace('{entornoPol}', entornoPESTEL)
+        .replace('{entornoEco}', '')
         .replace('{promoCan}', promoCan)
         .replace('{promoMensaje}', promoMensaje);
     } else {
       systemPrompt = `Eres un estratega de marketing experto (Director de Marketing). A partir de los datos crudos proporcionados por un emprendedor, redacta un resumen directivo y estratégico de su plan de marketing.
 Datos de la Estrategia de Marketing:
-Competidores identificados: ${compNombres}.
+Competidores identificados:\n${compDetalles}
 Ventaja competitiva (Frase poderosa): ${ventaja}.
-Entorno clave - Político: ${entornoPol}. Económico: ${entornoEco}.
+Factores del Entorno PESTEL:\n${entornoPESTEL}
 Promoción - Canales: ${promoCan}. Mensaje: ${promoMensaje}.
 
-REGLA DE ORO: REDACTA TODO EN PRIMERA PERSONA (plural o singular, ej: "Nuestro proyecto", "Ofrecemos", "Mi estrategia"). El texto debe sonar como si el propio emprendedor estuviera presentando y defendiendo su plan ante inversores.
-Responde ÚNICAMENTE con un objeto JSON con las claves 'resumen_competencia', 'resumen_ventaja', 'resumen_entorno', 'resumen_promocion' y 'recomendacion_estrategica'. Cada valor debe ser un texto conciso, profesional y persuasivo de no más de 3 oraciones. No uses markdown de bloques de código, solo el JSON puro.`;
+REGLA DE ORO 1: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto", "Mi estrategia", "Ofreceré"). 
+REGLA DE ORO 2: NUNCA USES TONO NEGATIVO NI PESIMISTA. El texto debe sonar como un emprendedor muy seguro y positivo presentando su plan de marketing. ¡Prohibido criticar o señalar debilidades!
+
+INSTRUCCIONES ESPECÍFICAS PARA CADA CAMPO DEL JSON:
+- 'resumen_competencia': Dedica un párrafo bien redactado para cada competidor evaluando sus fortalezas y qué vende (usa doble salto de línea \\n\\n entre párrafos).
+- 'resumen_ventaja': Mejora y amplía la ventaja competitiva para que suene contundente y persuasiva.
+- 'resumen_entorno': Redacta los factores PESTEL incluyendo subtítulos en negrita (ej: **Político:** ...) separados por saltos de línea (\\n).
+- 'resumen_promocion': Redacta la estrategia mejorada e incluye viñetas (usa el símbolo - o •) para listar claramente las acciones de promoción.
+- 'recomendacion_estrategica': Un consejo de marketing directo.
+
+Responde ÚNICAMENTE con el objeto JSON puro.`;
     }
 
     const response = await fetch("https://api.deepseek.com/chat/completions", {
@@ -1287,8 +1392,8 @@ export const generarResumenFase4IA = async (dataFase4) => {
       - Empaque/Presentación: ${dataFase4.disenoEmpaque || dataFase4.descripcionServicio || 'No especificado'}
       - Demanda (Clientes mensuales estimados): ${dataFase4.calculoMensual || 'No calculado'}
 
-      REGLA DE ORO: SIEMPRE DEBES REDACTAR EN POSITIVO, MEJORANDO TODO LO QUE EL EMPRENDEDOR ESCRIBIÓ. 
-      REGLA DE ORO 2: REDACTA TODO EN PRIMERA PERSONA (plural o singular, ej: "Nuestro proyecto", "Ofrecemos", "Mi producto"). El texto debe sonar como si el propio emprendedor lo estuviera presentando.
+      REGLA DE ORO 1: SIEMPRE DEBES REDACTAR EN POSITIVO, MEJORANDO TODO LO QUE EL EMPRENDEDOR ESCRIBIÓ. NUNCA USES TONO NEGATIVO NI PESIMISTA.
+      REGLA DE ORO 2: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto", "Ofrezco", "Mi producto"). El texto debe sonar como si el propio emprendedor lo estuviera presentando con extrema seguridad.
       NUNCA debes decir "no está definido", "falta detallar" o "no se especificó". Si falta información, DEBES INVENTARLA o ASUMIRLA de forma lógica basándote en el nombre del producto o el contexto del proyecto. Actúa como si el proyecto ya fuera un éxito y redacta de manera asertiva y convincente.
 
       IMPORTANTE: DEBES responder EXCLUSIVAMENTE con un objeto JSON (sin formato Markdown adicional, ni \`\`\`json) que contenga exactamente estas 5 propiedades (tipo string, de 2 a 3 líneas cada una):
@@ -1338,7 +1443,6 @@ export const generarResumenFase6IA = async (dataFase6) => {
       resumen_ubicacion: "Falta API Key",
       resumen_canales: "Falta API Key",
       resumen_plan: "Falta API Key",
-      resumen_presupuesto: "Falta API Key",
       recomendacion_logistica: "Por favor configura VITE_DEEPSEEK_API_KEY"
     };
   }
@@ -1353,8 +1457,7 @@ export const generarResumenFase6IA = async (dataFase6) => {
         .replace('{distComoVender}', dataFase6.distComoVender || 'No especificado')
         .replace('{lugares}', JSON.stringify(dataFase6.lugares || []))
         .replace('{comoRecibirPago}', dataFase6.comoRecibirPago || 'No especificados')
-        .replace('{planDistribucion}', JSON.stringify(dataFase6.planDistribucion || []))
-        .replace('{presupuestoTotal}', dataFase6.presupuesto ? dataFase6.presupuesto.reduce((a,b)=>a+(b.costoUnitario*b.cantidad),0).toString() : '0');
+        .replace('{planDistribucion}', JSON.stringify(dataFase6.planDistribucion || []));
     } else {
       systemPrompt = `
       Eres un Mentor de Emprendimiento experto en Logística. El emprendedor acaba de terminar la Fase 6 (Localización y Distribución).
@@ -1362,22 +1465,24 @@ export const generarResumenFase6IA = async (dataFase6) => {
       Información ingresada:
       - Producción: ${dataFase6.dondeProducir || 'No especificado'}
       - Almacenamiento: ${dataFase6.dondeAlmacenar || 'No especificado'}
+      - Dirección de Venta (Croquis): ${dataFase6.croquisDescripcion || 'No especificado'}
       - Modalidad de Venta: ${dataFase6.distComoVender || 'No especificado'}
       - Lugares Evaluados: ${JSON.stringify(dataFase6.lugares || [])}
       - Métodos de Pago: ${dataFase6.comoRecibirPago || 'No especificados'}
       - Plan de Acción: ${JSON.stringify(dataFase6.planDistribucion || [])}
-      - Presupuesto Total: Bs. ${dataFase6.presupuesto ? dataFase6.presupuesto.reduce((a,b)=>a+(b.costoUnitario*b.cantidad),0) : 0}
 
       Genera un resumen profesional, alentador y ejecutivo evaluando su estrategia.
       
-      REGLA DE ORO: REDACTA TODO EN PRIMERA PERSONA (plural o singular, ej: "Nuestro proyecto", "Distribuiremos", "Mi plan"). El texto debe sonar como si el propio emprendedor estuviera presentando su logística a inversores.
+      REGLA DE ORO 1: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto", "Mi plan", "Distribuiré", "Cuento con un presupuesto"). 
+      REGLA DE ORO 2: NUNCA USES TONO NEGATIVO NI PESIMISTA. Si un presupuesto es bajo o un plan es simple, resáltalo como una fortaleza (ej: "optimizando recursos al máximo", "operación ágil", "enfoque lean"). El texto debe sonar como un emprendedor muy seguro y positivo presentando su modelo. ¡Prohibido criticar o señalar debilidades! Todo debe ser justificado de manera optimista.
 
-      IMPORTANTE: DEBES responder EXCLUSIVAMENTE con un objeto JSON (sin formato Markdown adicional, ni \`\`\`json) que contenga exactamente estas 5 propiedades (tipo string, de 2 a 3 líneas cada una):
+      IMPORTANTE: DEBES responder EXCLUSIVAMENTE con un objeto JSON (sin formato Markdown adicional, ni \`\`\`json) que contenga exactamente estas 6 propiedades (tipo string, de 2 a 3 líneas cada una):
       {
         "resumen_ubicacion": "Análisis de las ventajas/desventajas del lugar físico elegido.",
-        "resumen_canales": "Eficiencia de los canales de venta y métodos de pago.",
+        "resumen_canales": "Eficiencia de los canales de venta elegidos.",
+        "resumen_direccion": "Redacción fluida indicando el lugar de producción, el lugar de almacenamiento, y la dirección de venta (según el croquis o si es delivery). Analízalo lógicamente.",
+        "resumen_pagos": "Redacción sobre los métodos de pago elegidos y una lista de los mismos.",
         "resumen_plan": "Revisión sobre la factibilidad del plan de acción logístico.",
-        "resumen_presupuesto": "Evaluación de los costos asociados a la distribución.",
         "recomendacion_logistica": "Un consejo experto para optimizar la cadena de entrega o distribución."
       }
       `;
@@ -1406,7 +1511,6 @@ export const generarResumenFase6IA = async (dataFase6) => {
       resumen_ubicacion: "Error al conectar.",
       resumen_canales: "Error al conectar.",
       resumen_plan: "Error al conectar.",
-      resumen_presupuesto: "Error al conectar.",
       recomendacion_logistica: "Error al conectar."
     };
   }

@@ -63,6 +63,11 @@ const FASES_INFO = {
     titulo: 'Proyecto de Vida',
     descripcion: 'Diseña el equilibrio perfecto entre tu emprendimiento y tu bienestar personal.',
     path: '/fase/12?paso=1'
+  },
+  '13': {
+    titulo: 'Proyecto Final',
+    descripcion: 'Genera el documento definitivo de tu proyecto integrando toda la información y descargándolo para su presentación.',
+    path: '/fase/13'
   }
 };
 

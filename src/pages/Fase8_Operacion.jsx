@@ -6,6 +6,7 @@ import SplashScreenMentor from '../components/ui/SplashScreenMentor';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import StepNavigation from '../components/ui/StepNavigation';
 import { useFase8Controller } from '../controllers/useFase8Controller';
+import { generarPasosPersonalizadoIA } from '../services/api';
 import { Play, CheckCircle, GripVertical, Settings, Sparkles, Box, Truck, Search, Eye, X, HelpCircle, Activity, Download, ArrowDownSquare, ArrowUpSquare, ArrowRight, Briefcase, Eraser, Video, List, CheckSquare, Network, Map, CreditCard } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as htmlToImage from 'html-to-image';
@@ -622,12 +623,23 @@ const Fase8_Operacion = () => {
     setCargandoIA(true);
     setShowIAPrompt(true);
     try {
-      const f1 = await obtenerContenidoFaseCompleto(1);
-      const f4 = await obtenerContenidoFaseCompleto(4);
-      
-      const idea = f1?.contexto?.ideaGanadora || "Mi emprendimiento";
-      const publico = f1?.contexto?.protagonista || "mis clientes";
-      const detalles = f4?.diseno_producto?.notas || "sin diseño previo";
+      const tryParse = (raw) => {
+        if (!raw) return {};
+        if (typeof raw === 'object') return raw;
+        try { return JSON.parse(raw); } catch { return {}; }
+      };
+
+      const [f1Raw, f4Raw] = await Promise.all([
+        FaseModel.obtenerDatosFase(1),
+        FaseModel.obtenerDatosFase(4)
+      ]);
+
+      const f1 = tryParse(f1Raw?.idea_ganadora);
+      const f4 = tryParse(f4Raw?.diseno_producto);
+
+      const idea = f1?.idea || f4?.nombreProducto || 'Mi emprendimiento';
+      const publico = f1?.protagonista || 'mis clientes';
+      const detalles = f4?.descripcion || f4?.paraQueSirve || 'sin diseño previo';
 
       const defaultPrompt = `Tengo un negocio enfocado en: "${idea}". 
 Ayudo a: "${publico}". 

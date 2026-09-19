@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useFaseController } from './useFaseController';
 import { FaseModel } from '../models/FaseModel';
 import { obtenerPromptIA } from '../services/api';
@@ -42,26 +42,30 @@ const opcionesDiagnostico = [
 export const useFase7Controller = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeGeneration, setActiveGeneration] = useState(null);
+  const [isGeneratingResumen, setIsGeneratingResumen] = useState(false);
 
   const claves = [
-    'opcion_diagnostico', 'diag_p1', 'diag_p2', 'diag_p3', 'diag_p4', 'diag_p5', 'diagnostico',
+    'opcion_diagnostico', 'desc_producto', 'diag_p1', 'diag_p2', 'diag_p3', 'diag_p4', 'diag_p5', 'diagnostico',
     'ubicacion', 'descripcionLugar', 'problemaIdentificado', 'datosRespaldo', 'solucionPropuesta', 'preguntaInvestigacion',
     'obj_verbo', 'obj_producto', 'obj_publico', 'obj_ubicacion', 'obj_plazo',
     'obj_especifico_1', 'obj_especifico_2', 'obj_especifico_3', 'obj_especifico_4',
     'mision_quienes_somos', 'mision_que_hacemos', 'mision_para_quien', 'mision_por_que', 'mision_redaccion_final',
     'vision_como_vemos', 'vision_meta_grande', 'vision_impacto', 'vision_redaccion_final',
     'justificacion_social', 'justificacion_economica', 'justificacion_personal',
-    'objGeneral', 'objEspecificos'
+    'objGeneral', 'objEspecificos', 'resumen_ia',
+    'resumen_diagnostico', 'resumen_objetivo_general', 'resumen_objetivos_especificos',
+    'resumen_mision', 'resumen_vision',
+    'resumen_justificacion_social', 'resumen_justificacion_economica', 'resumen_justificacion_personal'
   ];
 
   const baseController = useFaseController({
     faseId: 7,
-    totalPasos: 10,
+    totalPasos: 11,
     clavesDeGuardado: claves,
     estructuraJSON: false, // Fase 7 guarda claves planas
   });
 
-  const { data, updateData, step, cargando, guardando, irAPaso, siguientePaso, pasoAnterior } = baseController;
+  const { data, updateData, step, cargando, guardando, irAPaso, siguientePaso, pasoAnterior, setPendingSave } = baseController;
 
   // Agresivo limpiador de datos corruptos para evitar que se queden atascados
   useEffect(() => {
@@ -283,6 +287,7 @@ export const useFase7Controller = () => {
       const parsedData = match ? JSON.parse(match[0]) : JSON.parse(content);
       
       updateData(parsedData);
+      setPendingSave(true);
       
     } catch (error) {
       console.error("Error AI:", error);
@@ -292,11 +297,235 @@ export const useFase7Controller = () => {
     setActiveGeneration(null);
   };
 
+  const generarResumenFase7 = async () => {
+    setIsGeneratingResumen(true);
+    try {
+      const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+      if (!apiKey) { alert('API Key de IA no configurada.'); return; }
+
+      // Recopilar datos de fases anteriores
+      const [f1, f2, f3, f4] = await Promise.all([
+        FaseModel.obtenerDatosFase(1),
+        FaseModel.obtenerDatosFase(2),
+        FaseModel.obtenerDatosFase(3),
+        FaseModel.obtenerDatosFase(4)
+      ]);
+
+      const tryParse = (raw) => {
+        if (!raw) return {};
+        if (typeof raw === 'object') return raw;
+        try { return JSON.parse(raw); } catch { return {}; }
+      };
+
+      const f1p = tryParse(f1?.idea_ganadora);
+      const f2p = tryParse(f2?.validacion_idea);
+      const f3p = tryParse(f3?.publico_objetivo);
+      const f4p = tryParse(f4?.diseno_producto);
+
+      // Extraer contexto enriquecido de todas las fases
+      const ideaNegocio = data.obj_producto || f1p?.idea || f4p?.nombreProducto || 'el emprendimiento';
+      const problema = f1p?.observaciones?.[0]?.dolor || f2p?.encontrar_idea?.observaciones?.[0]?.dolor || 'una necesidad identificada en la comunidad';
+      const solucion = f4p?.descripcion || data.desc_producto || ideaNegocio;
+      const publicoObj = data.obj_publico || tryParse(f2?.resumen_ia)?.publico_objetivo_resumido || f3p?.publicoObjetivoIA || 'el público objetivo';
+      const ubicacion = data.obj_ubicacion || f3p?.publicoUbicacion || '';
+      const plazo = data.obj_plazo || '';
+      const verbo = data.obj_verbo || 'Desarrollar';
+
+      // Diagnóstico actual (puede estar parcial o vacío)
+      const diagActual = [data.diag_p1, data.diag_p2, data.diag_p3, data.diag_p4, data.diag_p5].filter(Boolean).join(' ');
+
+      // Objetivos actuales (pueden estar parciales o vacíos)
+      const objGeneralActual = data.objGeneral || `${verbo} ${ideaNegocio} para ${publicoObj} ${ubicacion} ${plazo}`.trim();
+      const objEspActual = data.objEspecificos || [data.obj_especifico_1, data.obj_especifico_2, data.obj_especifico_3, data.obj_especifico_4].filter(Boolean).join('\n');
+
+      // Misión y visión actuales (pueden estar parciales o vacías)
+      const misionActual = data.mision_redaccion_final || `${data.mision_quienes_somos || ''} ${data.mision_que_hacemos || ''} para ${data.mision_para_quien || ''}`.trim();
+      const visionActual = data.vision_redaccion_final || `${data.vision_como_vemos || ''} ${data.vision_meta_grande || ''}`.trim();
+
+      // Justificaciones
+      const justSocial = data.justificacion_social || '';
+      const justEcon = data.justificacion_economica || '';
+      const justPersonal = data.justificacion_personal || '';
+
+      // Prompt: primero intenta el de Supabase (editable desde el Admin), luego usa el hardcoded
+      const promptAdmin = await obtenerPromptIA(7, 'generar_resumen_fase');
+
+      // Si el admin personalizó el prompt, reemplazar sus variables; si no, usar el prompt directo (ya tiene los datos interpolados)
+      let systemPrompt;
+      if (promptAdmin) {
+        systemPrompt = promptAdmin
+          .replace('{idea}', ideaNegocio)
+          .replace('{problema}', problema)
+          .replace('{solucion}', solucion)
+          .replace('{publico}', publicoObj)
+          .replace('{ubicacion}', ubicacion)
+          .replace('{just_social}', justSocial || 'No definida')
+          .replace('{just_economica}', justEcon || 'No definida')
+          .replace('{just_personal}', justPersonal || 'No definida')
+          .replace('{diagnostico_actual}', diagActual || 'VACÍO')
+          .replace('{objetivo_general_actual}', objGeneralActual || 'VACÍO')
+          .replace('{objetivos_especificos_actuales}', objEspActual || 'VACÍO')
+          .replace('{mision_actual}', misionActual || 'VACÍO')
+          .replace('{vision_actual}', visionActual || 'VACÍO');
+      } else {
+        // Prompt por defecto con datos directamente interpolados
+        systemPrompt = `Eres un experto en formulación de proyectos de emprendimiento educativo. Tu tarea es MEJORAR y COMPLETAR los 5 componentes del planteamiento de un proyecto emprendedor, siempre redactados en PRIMERA PERSONA (usando "nosotros" o "yo"), con tono formal y académico.
+
+DATOS DEL PROYECTO:
+- Producto/Servicio: ${ideaNegocio}
+- Problema que resuelve: ${problema}
+- Solución propuesta: ${solucion}
+- Público objetivo: ${publicoObj}
+- Ubicación: ${ubicacion}
+- Justificación Social: ${justSocial || 'No definida'}
+- Justificación Económica: ${justEcon || 'No definida'}
+- Justificación Personal: ${justPersonal || 'No definida'}
+
+CONTENIDO ACTUAL (puede estar incompleto o vacío, debes completarlo o mejorarlo):
+- Diagnóstico actual: ${diagActual || 'VACÍO'}
+- Objetivo General actual: ${objGeneralActual || 'VACÍO'}
+- Objetivos Específicos actuales: ${objEspActual || 'VACÍO'}
+- Misión actual: ${misionActual || 'VACÍO'}
+- Visión actual: ${visionActual || 'VACÍO'}
+
+INSTRUCCIONES VITALES:
+1. Si un campo está VACÍO, créalo desde cero usando los datos del proyecto.
+2. Si un campo tiene contenido, MEJÓRALO, hazlo más fluido, formal y completo.
+3. El "diagnostico_final" debe ser un texto en prosa de 3-4 párrafos en primera persona.
+4. El "objetivo_general" debe iniciar con un verbo en infinitivo y ser una sola oración completa.
+5. Los "objetivos_especificos" deben ser 4 objetivos numerados, cada uno empezando con un verbo en infinitivo.
+6. La "mision" debe ser 1-2 oraciones que respondan: ¿Quiénes somos? ¿Qué hacemos? ¿Para quién? ¿Por qué?
+7. La "vision" debe ser 1-2 oraciones proyectadas al futuro (3-5 años).
+8. Genera "justificacion_social", "justificacion_economica" y "justificacion_personal" redactando un párrafo conciso para cada una.
+9. NUNCA uses "no definido", "no completado" ni frases genéricas.
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
+{
+  "diagnostico_final": "texto mejorado en prosa...",
+  "objetivo_general": "texto mejorado...",
+  "objetivos_especificos": "1. texto...\n2. texto...\n3. texto...\n4. texto...",
+  "mision": "texto mejorado...",
+  "vision": "texto mejorado...",
+  "justificacion_social": "El presente emprendimiento se justifica socialmente porque...",
+  "justificacion_economica": "Económicamente, el proyecto resulta altamente viable debido a...",
+  "justificacion_personal": "En el ámbito personal, este proyecto nos motiva porque..."
+}`;
+      }
+
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Genera el JSON ahora. Solo el JSON, nada más.' }
+          ],
+          temperature: 0.7
+        })
+      });
+
+      const resData = await response.json();
+      const rawContent = resData.choices?.[0]?.message?.content?.trim();
+      
+      // Extraer el JSON de la respuesta
+      const match = rawContent?.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('La IA no devolvió un JSON válido.');
+      const parsed = JSON.parse(match[0]);
+
+      // Guardar en campos de resumen Y en los campos originales de la fase
+      const updates = {};
+
+      if (parsed.diagnostico_final) {
+        updates.resumen_diagnostico = parsed.diagnostico_final;
+        updates.diagnostico = parsed.diagnostico_final; // Rellenar campo original de diagnóstico unificado
+        
+        // Separa eficazmente por saltos de línea (dobles o simples)
+        const parrafos = parsed.diagnostico_final
+          .split(/\n\s*\n/)
+          .map(p => p.trim())
+          .filter(Boolean);
+        const parrafosFinales = parrafos.length >= 3 
+          ? parrafos 
+          : parsed.diagnostico_final.split('\n').map(p => p.trim()).filter(Boolean);
+
+        if (parrafosFinales[0]) updates.diag_p1 = parrafosFinales[0];
+        if (parrafosFinales[1]) updates.diag_p2 = parrafosFinales[1];
+        if (parrafosFinales[2]) updates.diag_p3 = parrafosFinales[2];
+        if (parrafosFinales[3]) updates.diag_p4 = parrafosFinales[3];
+        if (parrafosFinales[4]) updates.diag_p5 = parrafosFinales[4];
+      }
+
+      if (parsed.objetivo_general) {
+        updates.resumen_objetivo_general = parsed.objetivo_general;
+        updates.objGeneral = parsed.objetivo_general; // Rellenar campo original
+      }
+
+      if (parsed.objetivos_especificos) {
+        updates.resumen_objetivos_especificos = parsed.objetivos_especificos;
+        updates.objEspecificos = parsed.objetivos_especificos; // Rellenar campo original
+        
+        // También los campos individuales para los inputs del paso 4
+        const lineas = parsed.objetivos_especificos.split('\n').filter(l => l.trim());
+        const cleanObj = (l) => l.replace(/^\d+[\.\)]\s*/, '').trim();
+        if (lineas[0]) updates.obj_especifico_1 = cleanObj(lineas[0]);
+        if (lineas[1]) updates.obj_especifico_2 = cleanObj(lineas[1]);
+        if (lineas[2]) updates.obj_especifico_3 = cleanObj(lineas[2]);
+        if (lineas[3]) updates.obj_especifico_4 = cleanObj(lineas[3]);
+      }
+
+      if (parsed.mision) {
+        updates.resumen_mision = parsed.mision;
+        updates.mision_redaccion_final = parsed.mision; // Rellenar campo original del paso 6
+      }
+
+      if (parsed.vision) {
+        updates.resumen_vision = parsed.vision;
+        updates.vision_redaccion_final = parsed.vision; // Rellenar campo original del paso 8
+      }
+
+      if (parsed.justificacion_social) {
+        updates.resumen_justificacion_social = parsed.justificacion_social;
+        updates.justificacion_social = parsed.justificacion_social; // Rellenar campo original del paso 10
+      }
+
+      if (parsed.justificacion_economica) {
+        updates.resumen_justificacion_economica = parsed.justificacion_economica;
+        updates.justificacion_economica = parsed.justificacion_economica; // Rellenar campo original del paso 10
+      }
+
+      if (parsed.justificacion_personal) {
+        updates.resumen_justificacion_personal = parsed.justificacion_personal;
+        updates.justificacion_personal = parsed.justificacion_personal; // Rellenar campo original del paso 10
+      }
+
+      // 1. Actualizar estado en React UI
+      updateData(updates);
+      setPendingSave(true);
+
+      // 2. Persistir inmediatamente a Supabase todos los campos actualizados
+      const promises = Object.entries(updates).map(([key, val]) =>
+        FaseModel.guardarDatos(7, key, val)
+      );
+      await Promise.all(promises);
+
+    } catch (error) {
+      console.error('Error generando resumen Fase 7:', error);
+      alert('Hubo un error al generar el resumen. Revisa la consola.');
+    } finally {
+      setIsGeneratingResumen(false);
+    }
+  };
+
   return {
     ...baseController,
     siguientePaso: handleSiguientePasoCustom,
     generateAI,
     isGenerating,
-    activeGeneration
+    activeGeneration,
+    isGeneratingResumen,
+    generarResumenFase7
   };
 };
+
+

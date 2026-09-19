@@ -4,7 +4,7 @@ import PasoLayout from '../layouts/PasoLayout';
 import SplashScreenMentor from '../components/ui/SplashScreenMentor';
 import { useFase9Controller } from '../controllers/useFase9Controller';
 import { AnimatePresence, motion, Reorder } from 'framer-motion';
-import { Plus, Trash2, Users, FileText, ChevronRight, TrendingUp, Settings, Megaphone, Monitor, X, Network, Briefcase, Download } from 'lucide-react';
+import { Plus, Trash2, Users, FileText, ChevronRight, TrendingUp, Settings, Megaphone, Monitor, X, Network, Briefcase, Download, Sparkles, RefreshCw } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 
 const InlineInput = ({ value, onChange, className, placeholder }) => {
@@ -36,16 +36,23 @@ const InlineTextarea = ({ value, onChange, className, placeholder }) => {
 };
 
 const Fase9_Estructura = () => {
-  
-    
   const { 
     cargando, guardando, step, irAPaso, siguientePaso, pasoAnterior,
     showSplash, setShowSplash,
     showExpandModal, setShowExpandModal,
     modoVista, setModoVista,
     data, updateData, organigrama, roles,
-    handleFinalizar
-  , setPendingSave } = useFase9Controller();
+    handleFinalizar,
+    isGeneratingResumen,
+    generarResumenFase9,
+    setPendingSave 
+  } = useFase9Controller();
+
+  useEffect(() => {
+    if (step === 3 && !data.resumen_estructura && !isGeneratingResumen) {
+      generarResumenFase9();
+    }
+  }, [step]);
 
   const getDefaultFunciones = (areaNombre) => {
     const l = areaNombre.toLowerCase();
@@ -476,75 +483,73 @@ const Fase9_Estructura = () => {
           </div>
           
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="animate-presence-removed">
-              {safeOrganigrama.map((nodo) => {
-                const rol = safeRoles.find(r => r.id === nodo.id || r.areaId === nodo.id) || { id: nodo.id, cargo: nodo.nombre, responsabilidades: '' };
-                const respText = Array.isArray(rol.responsabilidades) ? rol.responsabilidades.join(', ') : (rol.responsabilidades || '');
+            {safeOrganigrama.map((nodo) => {
+              const rol = safeRoles.find(r => r.id === nodo.id || r.areaId === nodo.id) || { id: nodo.id, cargo: nodo.nombre, responsabilidades: '' };
+              const respText = Array.isArray(rol.responsabilidades) ? rol.responsabilidades.join(', ') : (rol.responsabilidades || '');
 
-                return (
-                  <div key={nodo.id} className="relative flex flex-col gap-4 p-6 bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-md transition-all">
-                    {/* Botón Eliminar solo para los que no son líder principal */}
-                    {nodo.tipo !== 'lider' && (
-                      <button 
-                        onClick={() => {
-                          updateData(prev => ({ 
-                            roles: (prev.roles || safeRoles).filter(r => r.id !== nodo.id && r.areaId !== nodo.id),
-                            organigrama: (prev.organigrama || safeOrganigrama).filter(org => org.id !== nodo.id && org.parentId !== nodo.id)
-                          }));
-                        }} 
-                        className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
-                        title="Eliminar rol"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    )}
+              return (
+                <div key={nodo.id} className="relative flex flex-col gap-4 p-6 bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-md transition-all">
+                  {/* Botón Eliminar solo para los que no son líder principal */}
+                  {nodo.tipo !== 'lider' && (
+                    <button 
+                      onClick={() => {
+                        updateData(prev => ({ 
+                          roles: (prev.roles || safeRoles).filter(r => r.id !== nodo.id && r.areaId !== nodo.id),
+                          organigrama: (prev.organigrama || safeOrganigrama).filter(org => org.id !== nodo.id && org.parentId !== nodo.id)
+                        }));
+                      }} 
+                      className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full"
+                      title="Eliminar rol"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
 
-                    <div className="flex flex-col">
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Cargo / Puesto</label>
-                      <input 
-                        className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all placeholder-slate-300" 
-                        value={nodo.nombre || ''} 
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateData(prev => {
-                            const prevOrg = prev.organigrama || safeOrganigrama;
-                            const prevRoles = prev.roles || safeRoles;
+                  <div className="flex flex-col">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Cargo / Puesto</label>
+                    <input 
+                      className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all placeholder-slate-300" 
+                      value={nodo.nombre || ''} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateData(prev => {
+                          const prevOrg = prev.organigrama || safeOrganigrama;
+                          const prevRoles = prev.roles || safeRoles;
+                          
+                          const newOrg = prevOrg.map(org => org.id === nodo.id ? { ...org, nombre: val } : org);
+                          const exists = prevRoles.find(r => r.id === nodo.id || r.areaId === nodo.id);
+                          const newRoles = exists 
+                            ? prevRoles.map(r => (r.id === nodo.id || r.areaId === nodo.id) ? { ...r, cargo: val } : r)
+                            : [...prevRoles, { id: nodo.id, cargo: val, responsabilidades: respText }];
                             
-                            const newOrg = prevOrg.map(org => org.id === nodo.id ? { ...org, nombre: val } : org);
-                            const exists = prevRoles.find(r => r.id === nodo.id || r.areaId === nodo.id);
-                            const newRoles = exists 
-                              ? prevRoles.map(r => (r.id === nodo.id || r.areaId === nodo.id) ? { ...r, cargo: val } : r)
-                              : [...prevRoles, { id: nodo.id, cargo: val, responsabilidades: respText }];
-                              
-                            return { organigrama: newOrg, roles: newRoles };
-                          });
-                        }} 
-                        placeholder="Ej: Encargado de Ventas" 
-                      />
-                    </div>
-                    
-                    <div className="flex flex-col flex-grow">
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Responsabilidades Principales</label>
-                      <InlineTextarea 
-                        className="w-full flex-grow bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all resize-none placeholder-slate-300 min-h-[100px]" 
-                        value={respText} 
-                        onChange={(val) => {
-                          updateData(prev => {
-                            const prevRoles = prev.roles || safeRoles;
-                            const exists = prevRoles.find(r => r.id === nodo.id || r.areaId === nodo.id);
-                            const newRoles = exists 
-                              ? prevRoles.map(r => (r.id === nodo.id || r.areaId === nodo.id) ? { ...r, responsabilidades: val } : r)
-                              : [...prevRoles, { id: nodo.id, cargo: nodo.nombre, responsabilidades: val }];
-                            return { roles: newRoles };
-                          });
-                        }} 
-                        placeholder={getDefaultFunciones(nodo.nombre || '')} 
-                      />
-                    </div>
+                          return { organigrama: newOrg, roles: newRoles };
+                        });
+                      }} 
+                      placeholder="Ej: Encargado de Ventas" 
+                    />
                   </div>
-                );
-              })}
-            </div>
+                  
+                  <div className="flex flex-col flex-grow">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Responsabilidades Principales</label>
+                    <InlineTextarea 
+                      className="w-full flex-grow bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all resize-none placeholder-slate-300 min-h-[100px]" 
+                      value={respText} 
+                      onChange={(val) => {
+                        updateData(prev => {
+                          const prevRoles = prev.roles || safeRoles;
+                          const exists = prevRoles.find(r => r.id === nodo.id || r.areaId === nodo.id);
+                          const newRoles = exists 
+                            ? prevRoles.map(r => (r.id === nodo.id || r.areaId === nodo.id) ? { ...r, responsabilidades: val } : r)
+                            : [...prevRoles, { id: nodo.id, cargo: nodo.nombre, responsabilidades: val }];
+                          return { roles: newRoles };
+                        });
+                      }} 
+                      placeholder={getDefaultFunciones(nodo.nombre || '')} 
+                    />
+                  </div>
+                </div>
+              );
+            })}
             
             <div onClick={() => {
                 const newId = Date.now().toString();
@@ -554,13 +559,99 @@ const Fase9_Estructura = () => {
                   roles: [...safeRoles, { id: newId, cargo: '', responsabilidades: '' }] 
                 });
               }}
-              className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 hover:bg-indigo-50 hover:border-indigo-400 hover:text-indigo-600 transition-all cursor-pointer min-h-[250px] opacity-70 hover:opacity-100"
+              className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 hover:bg-indigo-50 hover:border-indigo-400 hover:text-indigo-600 transition-all cursor-pointer min-h-[160px] opacity-70 hover:opacity-100"
             >
-              <div className="bg-white p-4 rounded-full shadow-sm mb-3">
-                <Plus size={32} />
+              <div className="bg-white p-3 rounded-full shadow-sm mb-2">
+                <Plus size={24} />
               </div>
-              <span className="font-bold text-lg">Añadir Nuevo Rol</span>
-              <span className="text-sm opacity-70 mt-1">Define un nuevo cargo para tu empresa</span>
+              <span className="font-bold text-base">Añadir Nuevo Rol</span>
+              <span className="text-xs opacity-70 mt-1">Define un nuevo cargo para tu empresa</span>
+            </div>
+          </div>
+        </div>
+      );
+      case 3: return (
+        <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 border-b border-slate-100 pb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg shadow-indigo-500/20">
+                <Sparkles size={26} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">Resumen y Diagnóstico IA</h2>
+                <p className="text-slate-500 font-medium">Síntesis inteligente de la estructura de tu empresa, roles detallados y clima organizacional.</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <button
+                onClick={() => generarResumenFase9(true)}
+                disabled={isGeneratingResumen}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-bold rounded-2xl shadow-md transition-all text-sm active:scale-95"
+                title="Generar un organigrama completo de 7 puestos e importar todos sus roles"
+              >
+                <Network size={18} />
+                Reconstruir Organigrama Completo con IA
+              </button>
+              <button
+                onClick={() => generarResumenFase9(false)}
+                disabled={isGeneratingResumen}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white font-bold rounded-2xl shadow-md transition-all text-sm active:scale-95"
+              >
+                <RefreshCw size={18} className={isGeneratingResumen ? "animate-spin" : ""} />
+                {isGeneratingResumen ? "Generando con IA..." : "Regenerar Diagnóstico con IA"}
+              </button>
+            </div>
+          </div>
+
+          {isGeneratingResumen && (
+            <div className="flex flex-col items-center justify-center p-12 bg-indigo-50/50 rounded-3xl border border-indigo-100 mb-6">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="font-bold text-indigo-900 text-lg">Analizando las necesidades de tu empresa...</p>
+              <p className="text-indigo-600 text-sm mt-1">Diseñando un organigrama completo y el desglose detallado de roles y funciones.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-6">
+            {/* Card 1: Estructura Organizacional */}
+            <div className="p-6 bg-slate-50 border border-slate-200/80 rounded-3xl shadow-sm hover:border-indigo-200 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl font-bold">🏢</div>
+                <h3 className="font-black text-slate-800 text-lg">Resumen de Estructura Organizacional</h3>
+              </div>
+              <InlineTextarea
+                className="w-full bg-white p-4 rounded-2xl border border-slate-200 text-slate-700 font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 min-h-[160px]"
+                value={data.resumen_estructura || ''}
+                onChange={(val) => updateData({ resumen_estructura: val })}
+                placeholder="Diagnóstico de la estructura de la empresa..."
+              />
+            </div>
+
+            {/* Card 2: Roles y Responsabilidades */}
+            <div className="p-6 bg-slate-50 border border-slate-200/80 rounded-3xl shadow-sm hover:border-indigo-200 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-purple-100 text-purple-700 rounded-xl font-bold">👥</div>
+                <h3 className="font-black text-slate-800 text-lg">Desglose Detallado de Roles y Funciones</h3>
+              </div>
+              <InlineTextarea
+                className="w-full bg-white p-4 rounded-2xl border border-slate-200 text-slate-700 font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 min-h-[260px] whitespace-pre-line font-sans"
+                value={data.resumen_roles || ''}
+                onChange={(val) => updateData({ resumen_roles: val })}
+                placeholder="Evaluación de cargos y distribución de tareas detallada..."
+              />
+            </div>
+
+            {/* Card 3: Clima Organizacional y Cultura */}
+            <div className="p-6 bg-slate-50 border border-slate-200/80 rounded-3xl shadow-sm hover:border-indigo-200 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl font-bold">🌟</div>
+                <h3 className="font-black text-slate-800 text-lg">Clima Organizacional y Propuesta de Valor al Colaborador</h3>
+              </div>
+              <InlineTextarea
+                className="w-full bg-white p-4 rounded-2xl border border-slate-200 text-slate-700 font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 min-h-[140px]"
+                value={data.resumen_clima_cultura || ''}
+                onChange={(val) => updateData({ resumen_clima_cultura: val })}
+                placeholder="Estrategias de clima laboral y motivación de equipo..."
+              />
             </div>
           </div>
         </div>
@@ -573,17 +664,24 @@ const Fase9_Estructura = () => {
     <PasoLayout 
       faseTitle="Fase 9: Estructura Organizacional"
       pasoActual={step}
-      totalPasos={2}
+      totalPasos={3}
       tabs={[
         { id: 1, icon: <Network size={18} />, label: 'Organigrama' },
-        { id: 2, icon: <Briefcase size={18} />, label: 'Roles y Funciones' }
+        { id: 2, icon: <Briefcase size={18} />, label: 'Roles y Funciones' },
+        { id: 3, icon: <Sparkles size={18} />, label: 'Resumen IA' }
       ]}
       onTabClick={(id) => {
         irAPaso(id);
       }}
-      onSiguiente={() => step < 2 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 3 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
-      mentorText={step === 1 ? "La organización es la base del éxito. Empieza definiendo los pilares y áreas principales de tu empresa." : "Ahora, dale claridad a cada área definiendo las responsabilidades. ¡Un equipo que sabe qué hacer es imparable!"}
+      mentorText={
+        step === 1 
+          ? "La organización es la base del éxito. Empieza definiendo los pilares y áreas principales de tu empresa." 
+          : step === 2 
+            ? "Ahora, dale claridad a cada área definiendo las responsabilidades. ¡Un equipo que sabe qué hacer es imparable!" 
+            : "¡Excelente! Aquí tienes la síntesis IA de la estructura y roles de tu negocio. Revisa los detalles antes de continuar."
+      }
       guardando={guardando}
     >
       <div onBlur={() => { if(typeof setPendingSave === 'function') setPendingSave(true); }}>
