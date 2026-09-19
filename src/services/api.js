@@ -22,6 +22,21 @@ export const autenticarUsuario = async (email, password, isLogin) => {
 };
 
 /**
+ * Inicia el flujo de autenticación con Google OAuth.
+ * Supabase redirige al usuario a Google y luego de vuelta a la app.
+ */
+export const iniciarSesionConGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/dashboard`
+    }
+  });
+  if (error) throw error;
+};
+
+
+/**
  * Obtiene el perfil actual del usuario logueado.
  */
 export const cerrarSesion = async () => {
