@@ -8,6 +8,7 @@ import CaratulaFase from '../components/ui/CaratulaFase';
 import SubMenuFases from '../components/ui/SubMenuFases';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import StepNavigation from '../components/ui/StepNavigation';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 import { useFase1Logic } from '../hooks/useFase1Logic';
 
 const DavidStar = ({ size = 24, color = "currentColor", fill = "none", onClick, style }) => (
@@ -229,16 +230,12 @@ const Fase1_EmprendimientoMentor = () => {
             {step === 2 && (
               <motion.div key="s2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.observacion?.titulo || "El arte de observar"}</h3>
-                <div style={{ background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', marginBottom: '2rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }}>
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={mentorData.teoria_caminos?.recursos?.observacion?.url || "https://www.youtube.com/embed/T6mvaB7tZ9U"} 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  ></iframe>
+                <div style={{ marginBottom: '2rem' }}>
+                  <YoutubePlayer 
+                    videoKey="video_f1_observacion"
+                    fallbackUrl={mentorData.teoria_caminos?.recursos?.observacion?.url || "https://www.youtube.com/embed/T6mvaB7tZ9U"}
+                    title="Observación del Entorno"
+                  />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
                   {step > 1 && (
@@ -329,16 +326,12 @@ const Fase1_EmprendimientoMentor = () => {
             {step === 4 && (
               <motion.div key="s4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.fricciones?.titulo || "¿Por qué fallan las soluciones?"}</h3>
-                <div style={{ background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', marginBottom: '2rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }}>
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={mentorData.teoria_caminos?.recursos?.fricciones?.url || "https://www.youtube.com/embed/z4vG_y-J15o"} 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  ></iframe>
+                <div style={{ marginBottom: '2rem' }}>
+                  <YoutubePlayer 
+                    videoKey="video_f1_fricciones"
+                    fallbackUrl={mentorData.teoria_caminos?.recursos?.fricciones?.url || "https://www.youtube.com/embed/z4vG_y-J15o"}
+                    title="Fricciones del Entorno"
+                  />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
                   {step > 1 && (
@@ -407,16 +400,12 @@ const Fase1_EmprendimientoMentor = () => {
             {step === 6 && (
               <motion.div key="s6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.ideacion?.titulo || "Video: Brainstorming Efectivo"}</h3>
-                <div style={{ background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', marginBottom: '2rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }}>
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('youtube') || mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('vimeo') ? mentorData.teoria_caminos.recursos.ideacion.url : "https://www.youtube.com/embed/pWp1-WvU7K8"} 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  ></iframe>
+                <div style={{ marginBottom: '2rem' }}>
+                  <YoutubePlayer 
+                    videoKey="video_f1_ideacion"
+                    fallbackUrl={mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('youtube') || mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('vimeo') ? mentorData.teoria_caminos.recursos.ideacion.url : "https://www.youtube.com/embed/pWp1-WvU7K8"}
+                    title="Ideación"
+                  />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
                   {step > 1 && (
@@ -547,16 +536,12 @@ const Fase1_EmprendimientoMentor = () => {
             {step === 8 && (
               <motion.div key="s8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.evaluacion?.titulo || "Evaluación objetiva de negocios"}</h3>
-                <div style={{ background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', marginBottom: '2rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }}>
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={mentorData.teoria_caminos?.recursos?.evaluacion?.url || "https://www.youtube.com/embed/fAymKnd8b44"} 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  ></iframe>
+                <div style={{ marginBottom: '2rem' }}>
+                  <YoutubePlayer 
+                    videoKey="video_f1_evaluacion"
+                    fallbackUrl={mentorData.teoria_caminos?.recursos?.evaluacion?.url || "https://www.youtube.com/embed/fAymKnd8b44"}
+                    title="Evaluación Objetiva"
+                  />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
                   {step > 1 && (

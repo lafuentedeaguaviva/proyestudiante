@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, X, Video, Image as ImageIcon, Headphones, FileText } from 'lucide-react';
+import YoutubePlayer from './YoutubePlayer';
 
 export default function PanelRecursos({ recursos }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -127,13 +128,11 @@ export default function PanelRecursos({ recursos }) {
 
                   {activeRecurso.type === 'video' && (
                     <div style={{ width: '100%', aspectRatio: '16/9', background: 'black', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-                      <iframe 
-                        width="100%" height="100%" 
-                        src={activeRecurso.url} 
-                        title={activeRecurso.title} 
-                        frameBorder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
+                      <YoutubePlayer 
+                        videoKey={activeRecurso.videoKey}
+                        fallbackUrl={activeRecurso.url}
+                        title={activeRecurso.title}
+                        style={{ width: '100%', height: '100%' }}
                       />
                     </div>
                   )}

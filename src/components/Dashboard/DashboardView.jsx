@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, Shield, Rocket, BookOpen, Plus, Folder, User, Settings, Lightbulb } from 'lucide-react';
+import { Target, Shield, Rocket, BookOpen, Plus, Folder, User, Settings, Lightbulb, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { cerrarSesion } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 import MundoCard from './MundoCard';
 import ProyectoItem from './ProyectoItem';
 import ModalPagoQR from './ModalPagoQR';
@@ -10,6 +13,17 @@ const mundos = [
 ];
 
 const DashboardView = ({ state, actions }) => {
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await cerrarSesion();
+      navigate('/login');
+    } catch (error) {
+      console.error("Error al cerrar sesión", error);
+    }
+  };
   if (state.loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--color-primary)', fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)' }}>
@@ -54,14 +68,16 @@ const DashboardView = ({ state, actions }) => {
                 <Plus size={20} /> Nueva Misión
               </motion.button>
             )}
-            <motion.div 
-              whileHover={{ scale: 1.05 }} 
-              onClick={actions.goToAdmin}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: 'var(--radius-full)', background: 'var(--color-surface-solid)', color: 'var(--color-text-primary)', cursor: 'pointer', border: '1px solid var(--color-border-active)', boxShadow: 'var(--shadow-sm)', marginLeft: 'var(--spacing-md)' }}
-              title="Configurar IA"
-            >
-              <Settings size={24} />
-            </motion.div>
+            {isAdmin && (
+              <motion.div 
+                whileHover={{ scale: 1.05 }} 
+                onClick={actions.goToAdmin}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: 'var(--radius-full)', background: 'var(--color-surface-solid)', color: 'var(--color-text-primary)', cursor: 'pointer', border: '1px solid var(--color-border-active)', boxShadow: 'var(--shadow-sm)', marginLeft: 'var(--spacing-md)' }}
+                title="Panel de Administración"
+              >
+                <Settings size={24} />
+              </motion.div>
+            )}
             <motion.div 
               whileHover={{ scale: 1.05 }} 
               onClick={actions.goToProfile}
@@ -69,6 +85,14 @@ const DashboardView = ({ state, actions }) => {
               title="Mi Perfil"
             >
               <User size={24} />
+            </motion.div>
+            <motion.div 
+              whileHover={{ scale: 1.05 }} 
+              onClick={handleLogout}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: 'var(--radius-full)', background: 'var(--color-surface-solid)', color: 'var(--color-danger)', cursor: 'pointer', border: '1px solid var(--color-border-active)', boxShadow: 'var(--shadow-sm)', marginLeft: 'var(--spacing-md)' }}
+              title="Cerrar Sesión"
+            >
+              <LogOut size={24} />
             </motion.div>
           </div>
         </header>

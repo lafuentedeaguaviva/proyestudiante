@@ -40,8 +40,16 @@ export const iniciarSesionConGoogle = async () => {
  * Obtiene el perfil actual del usuario logueado.
  */
 export const cerrarSesion = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Supabase signOut error:", error);
+  } catch (err) {
+    console.error("Excepción en signOut:", err);
+  } finally {
+    // Forzar la limpieza de cualquier token residual
+    localStorage.clear();
+    sessionStorage.clear();
+  }
 };
 
 /**
@@ -503,6 +511,75 @@ export const guardarPromptIA = async (fase_id, proposito, prompt_texto) => {
   } catch (err) {
     console.error("Error guardando prompt:", err);
     throw err;
+  }
+};
+
+// =============================================
+// GESTIÓN DE ROLES (Admin)
+// =============================================
+
+/**
+ * Obtiene todos los usuarios con su email, nombre y rol.
+ * Solo debe ser llamada por administradores.
+ */
+export const obtenerTodosLosUsuarios = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('perfiles_usuario')
+      .select('id, email, nombre_completo, rol')
+      .order('rol', { ascending: false }); // admins primero
+
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('Error obteniendo usuarios:', err);
+    throw err;
+  }
+};
+
+/**
+ * Cambia el rol de un usuario (usuario ↔ admin).
+ * Valida que el admin no se degrade a sí mismo.
+ */
+export const cambiarRolUsuario = async (targetUserId, nuevoRol) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No hay usuario autenticado.');
+
+    // Protección: no degradarse a sí mismo
+    if (targetUserId === user.id && nuevoRol === 'usuario') {
+      throw new Error('No puedes quitarte el rol de administrador a ti mismo.');
+    }
+
+    const { data, error } = await supabase
+      .from('perfiles_usuario')
+      .update({ rol: nuevoRol })
+      .eq('id', targetUserId)
+      .select();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Error cambiando rol:', err);
+    throw err;
+  }
+};
+
+/**
+ * Obtiene el conteo actual de administradores.
+ */
+export const contarAdmins = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('perfiles_usuario')
+      .select('id')
+      .eq('rol', 'admin');
+
+    if (error) throw error;
+    return data ? data.length : 0;
+  } catch (err) {
+    console.error('Error contando admins:', err);
+    return 0;
   }
 };
 
@@ -1531,3 +1608,94 @@ export const generarResumenFase6IA = async (dataFase6) => {
   }
 };
 
+// =============================================
+// GESTIÓN DE CONFIGURACIÓN DE VIDEOS (YouTube)
+// =============================================
+
+/**
+ * Obtiene todas las configuraciones de videos (guardadas en prompts_ia con proposito video_*)
+ */
+export const obtenerVideosConfig = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('prompts_ia')
+      .select('*')
+      .eq('fase_id', 0)
+      .like('proposito', 'video_%');
+
+    if (error) throw error;
+    
+    // Convertir de array a objeto indexado por key
+    const configs = {};
+    if (data) {
+      data.forEach(item => {
+        try {
+          configs[item.proposito] = JSON.parse(item.prompt_texto);
+        } catch (e) {
+          console.warn(`Error parseando config de video ${item.proposito}`, e);
+        }
+      });
+    }
+    return configs;
+  } catch (err) {
+    console.error("Error obteniendo configs de videos:", err);
+    return {};
+  }
+};
+
+/**
+ * Guarda o actualiza la configuración de un video
+ */
+export const guardarVideoConfig = async (videoKey, url, startStr, endStr) => {
+  // Convertimos 'MM:SS' a segundos
+  const timeToSeconds = (timeStr) => {
+    if (!timeStr) return null;
+    const parts = timeStr.split(':');
+    if (parts.length === 2) {
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+    return parseInt(timeStr, 10) || null;
+  };
+
+  const configJson = JSON.stringify({
+    url,
+    start: timeToSeconds(startStr),
+    end: timeToSeconds(endStr),
+    startStr: startStr || '',
+    endStr: endStr || ''
+  });
+
+  return await guardarPromptIA(0, videoKey, configJson);
+};
+
+/**
+ * Helper para construir URL final de YouTube embed con parámetros
+ */
+export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
+  let finalUrl = config?.url || fallbackUrl;
+  
+  if (!finalUrl) return '';
+
+  // Asegurarnos de que usa formato embed
+  if (finalUrl.includes('watch?v=')) {
+    finalUrl = finalUrl.replace('watch?v=', 'embed/');
+  } else if (finalUrl.includes('youtu.be/')) {
+    finalUrl = finalUrl.replace('youtu.be/', 'www.youtube.com/embed/');
+  }
+
+  // Quitar parámetros existentes para no duplicar
+  finalUrl = finalUrl.split('?')[0];
+
+  const params = [];
+  if (config?.start) params.push(`start=${config.start}`);
+  if (config?.end) params.push(`end=${config.end}`);
+  
+  // Siempre agregar rel=0 y showinfo=0 para mejor UX
+  params.push('rel=0');
+
+  if (params.length > 0) {
+    finalUrl += `?${params.join('&')}`;
+  }
+
+  return finalUrl;
+};

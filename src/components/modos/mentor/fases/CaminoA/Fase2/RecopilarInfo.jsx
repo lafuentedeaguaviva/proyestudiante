@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileSearch, Bot, CheckSquare, Send, HelpCircle } from 'lucide-react';
+import YoutubePlayer from '../../../../../ui/YoutubePlayer';
 
 export default function RecopilarInfo({ projectName, perfilIA, setAyudanteText, onComplete }) {
   const [fase, setFase] = useState('intro'); // 'intro' | 'loading_ai' | 'survey'
@@ -51,7 +52,12 @@ export default function RecopilarInfo({ projectName, perfilIA, setAyudanteText, 
             <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(59, 130, 246, 0.3)', textAlign: 'left' }}>
               <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', fontSize: '1.2rem', textAlign: 'center' }}>🎥 Aprende a hacer Encuestas de Mercado:</h3>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '2px solid rgba(255,255,255,0.1)' }}>
-                <iframe style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} src="https://www.youtube.com/embed/zM2a1B8Wb20" title="Cómo hacer encuestas" frameBorder="0" allowFullScreen></iframe>
+                <YoutubePlayer 
+                  videoKey="video_f2_encuesta"
+                  fallbackUrl="https://www.youtube.com/embed/zM2a1B8Wb20"
+                  title="Cómo hacer encuestas"
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                />
               </div>
             </div>
 

@@ -5,29 +5,9 @@ import PasoLayout from '../layouts/PasoLayout';
 import { useFase7Controller } from '../controllers/useFase7Controller';
 import { Bot, MapPin, Target, Lightbulb, Compass, Search, CheckCircle, Video, Wand2, Sparkles, RefreshCw } from 'lucide-react';
 import SelectorVerbo from '../components/ui/SelectorVerbo';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 
-const VideoPlaceholder = ({ id, title }) => (
-  <div className="w-full bg-slate-900 rounded-xl overflow-hidden aspect-video relative border-4 border-slate-800 shadow-lg">
-    {id ? (
-      <iframe
-        className="absolute top-0 left-0 w-full h-full"
-        src={`https://www.youtube.com/embed/${id}`}
-        title={title}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      ></iframe>
-    ) : (
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </div>
-        <p className="font-bold text-lg">Espacio para Video Instructivo</p>
-        <p className="text-sm">Configura el ID de YouTube en el código</p>
-      </div>
-    )}
-  </div>
-);
+
 
 const opcionesDiagnostico = [
   {
@@ -107,7 +87,9 @@ const Fase7_Planteamiento = () => {
               <h2 className="text-2xl font-bold">Introducción al Diagnóstico</h2>
             </div>
             <p className="text-center text-slate-600 mb-6">Antes de comenzar, observa este video para entender cómo diagnosticar un problema.</p>
-            <VideoPlaceholder id="" title="Video sobre Diagnóstico del Problema" />
+            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
+              <YoutubePlayer videoKey="video_f7_diagnostico" title="Video sobre Diagnóstico del Problema" fallbackUrl="" />
+            </div>
           </div>
         );
 
@@ -202,7 +184,9 @@ const Fase7_Planteamiento = () => {
               <h2 className="text-2xl font-bold">Introducción a los Objetivos SMART</h2>
             </div>
             <p className="text-center text-slate-600 mb-6">Aprende a redactar objetivos claros y alcanzables para tu emprendimiento.</p>
-            <VideoPlaceholder id="" title="Video sobre Objetivos SMART" />
+            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
+              <YoutubePlayer videoKey="video_f7_objetivos" title="Video sobre Objetivos SMART" fallbackUrl="" />
+            </div>
           </div>
         );
       
@@ -294,7 +278,9 @@ const Fase7_Planteamiento = () => {
               <h2 className="text-2xl font-bold">Introducción a la Misión</h2>
             </div>
             <p className="text-center text-slate-600 mb-6">Descubre cómo definir la razón de ser de tu negocio hoy.</p>
-            <VideoPlaceholder id="" title="Video sobre la Misión" />
+            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
+              <YoutubePlayer videoKey="video_f7_mision" title="Video sobre la Misión" fallbackUrl="" />
+            </div>
           </div>
         );
 
@@ -364,7 +350,9 @@ const Fase7_Planteamiento = () => {
               <h2 className="text-2xl font-bold">Introducción a la Visión</h2>
             </div>
             <p className="text-center text-slate-600 mb-6">Aprende a proyectar tu emprendimiento hacia el futuro.</p>
-            <VideoPlaceholder id="" title="Video sobre la Visión" />
+            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
+              <YoutubePlayer videoKey="video_f7_vision" title="Video sobre la Visión" fallbackUrl="" />
+            </div>
           </div>
         );
 
@@ -429,7 +417,9 @@ const Fase7_Planteamiento = () => {
               <h2 className="text-2xl font-bold">Introducción a la Justificación</h2>
             </div>
             <p className="text-center text-slate-600 mb-6">Entiende por qué y para qué es importante tu proyecto.</p>
-            <VideoPlaceholder id="" title="Video sobre la Justificación" />
+            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
+              <YoutubePlayer videoKey="video_f7_justificacion" title="Video sobre la Justificación" fallbackUrl="" />
+            </div>
           </div>
         );
 

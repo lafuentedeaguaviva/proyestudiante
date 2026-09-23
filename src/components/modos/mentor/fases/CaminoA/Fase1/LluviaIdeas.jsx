@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, Swords, ArrowRight, Bot, CheckSquare, Square } from 'lucide-react';
+import YoutubePlayer from '../../../../../ui/YoutubePlayer';
 
 export default function LluviaIdeas({ camino, setAyudanteText, onComplete, initialIdeas = [] }) {
   const [vista, setVista] = useState('video'); // 'video' | 'inputs' | 'loading_ai' | 'selection'
@@ -103,13 +104,12 @@ export default function LluviaIdeas({ camino, setAyudanteText, onComplete, initi
             <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
               <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', fontSize: '1.2rem' }}>🎥 Antes de empezar, mira cómo hacer una Lluvia de Ideas:</h3>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '2px solid rgba(255,255,255,0.1)' }}>
-                <iframe 
+                <YoutubePlayer 
+                  videoKey="video_f2_lluvia"
+                  fallbackUrl="https://www.youtube.com/embed/yFjK8zFhN0k"
+                  title="Tutorial Brainstorming"
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                  src="https://www.youtube.com/embed/yFjK8zFhN0k" 
-                  title="Tutorial Brainstorming" 
-                  frameBorder="0" 
-                  allowFullScreen
-                ></iframe>
+                />
               </div>
               <p style={{ color: 'var(--text-secondary)', marginTop: '1rem', fontSize: '1.1rem' }}>
                 Anota todas las ideas que se te ocurran basándote en los problemas que observaste. ¡No hay ideas malas en este punto!

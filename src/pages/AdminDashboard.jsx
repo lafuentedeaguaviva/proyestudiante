@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Save, AlertCircle, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, LogOut, Code, Database, RotateCcw } from 'lucide-react';
+import { Settings, AlertCircle, ChevronLeft, ChevronRight, MessageSquare, LayoutDashboard, LogOut, Database, Users, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { guardarPromptIA } from '../services/api';
+import { guardarPromptIA, cerrarSesion } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+
+import PromptsTab from '../components/admin/PromptsTab';
+import UsersTab from '../components/admin/UsersTab';
+import VideosTab from '../components/admin/VideosTab';
+import SettingsTab from '../components/admin/SettingsTab';
 
 const DEFAULT_PROMPTS = [
   {
@@ -63,19 +69,35 @@ const DEFAULT_PROMPTS = [
   }
 ];
 
-const AdminPrompts = () => {
+const AdminDashboard = () => {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('prompts');
+  const [activeTab, setActiveTab] = useState('usuarios'); // Cambiado a 'usuarios' por defecto para que el usuario vea primero lo que pidió
   const [qrUrl, setQrUrl] = useState('');
   const [limiteIA, setLimiteIA] = useState(10);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Estado para gestión de usuarios
+  const [usuarios, setUsuarios] = useState([]);
+  const [loadingUsuarios, setLoadingUsuarios] = useState(false);
+  const [totalAdmins, setTotalAdmins] = useState(0);
+  const [cambiadoRolId, setCambiadoRolId] = useState(null);
 
   useEffect(() => {
     fetchPrompts();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await cerrarSesion();
+      navigate('/login');
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
 
   const fetchPrompts = async () => {
     try {
@@ -86,7 +108,6 @@ const AdminPrompts = () => {
       
       if (error) throw error;
       
-      // Combinar los prompts por defecto con los que ya existan en la BD
       const mergedPrompts = DEFAULT_PROMPTS.map(defaultP => {
         const dbPrompt = data?.find(p => p.fase_id === defaultP.fase_id && p.proposito === defaultP.proposito);
         return dbPrompt ? dbPrompt : defaultP;
@@ -102,7 +123,6 @@ const AdminPrompts = () => {
     } catch (error) {
       console.error("Error fetching prompts:", error);
       setMessage({ text: `Error de BD: ${error.message || error.details || 'Revisa la consola'}`, type: 'error' });
-      // Si falla la BD, al menos mostrar los por defecto
       setPrompts(DEFAULT_PROMPTS);
     } finally {
       setLoading(false);
@@ -127,7 +147,7 @@ const AdminPrompts = () => {
     }
   };
 
-  const handleSave = async (prompt) => {
+  const handleSavePrompt = async (prompt) => {
     try {
       await guardarPromptIA(prompt.fase_id, prompt.proposito, prompt.prompt_texto);
       setMessage({ text: `Prompt para ${prompt.proposito} guardado exitosamente`, type: 'success' });
@@ -148,36 +168,57 @@ const AdminPrompts = () => {
     }
   };
 
+  // Fondos según la pestaña activa
+  const bgStyles = {
+    usuarios: 'radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)',
+    prompts: 'radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)',
+    videos: 'radial-gradient(circle at 20% 30%, rgba(239, 68, 68, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%)',
+    config: 'radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%)'
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#020617', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', overflow: 'hidden' }}>
+    <div style={{ 
+      display: 'flex', minHeight: '100vh', 
+      backgroundColor: '#020617', 
+      backgroundImage: bgStyles[activeTab],
+      color: '#f8fafc', 
+      fontFamily: 'system-ui, -apple-system, sans-serif', 
+      overflow: 'hidden',
+      transition: 'background-image 0.5s ease-in-out'
+    }}>
       
-      {/* Sidebar Colapsable */}
+      {/* Sidebar Glassmorphism */}
       <motion.aside
-        initial={{ width: 260 }}
-        animate={{ width: isSidebarOpen ? 260 : 80 }}
+        initial={{ width: 280 }}
+        animate={{ width: isSidebarOpen ? 280 : 80 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         style={{ 
-          backgroundColor: '#0f172a', 
-          borderRight: '1px solid #1e293b', 
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(255,255,255,0.05)', 
           display: 'flex', 
           flexDirection: 'column', 
           position: 'relative',
-          zIndex: 10
+          zIndex: 10,
+          boxShadow: '4px 0 24px rgba(0,0,0,0.2)'
         }}
       >
-        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #1e293b', minHeight: '80px' }}>
-          <div style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', borderRadius: '0.5rem', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', minHeight: '80px' }}>
+          <motion.div 
+            whileHover={{ rotate: 90 }}
+            style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', borderRadius: '0.75rem', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.5)' }}
+          >
             <Settings size={24} color="white" />
-          </div>
+          </motion.div>
           <AnimatePresence>
             {isSidebarOpen && (
               <motion.span 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                style={{ fontWeight: 800, fontSize: '1.2rem', whiteSpace: 'nowrap', background: 'linear-gradient(to right, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                style={{ fontWeight: 800, fontSize: '1.25rem', whiteSpace: 'nowrap', background: 'linear-gradient(to right, #e2e8f0, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}
               >
-                Admin Panel
+                Centro de Mando
               </motion.span>
             )}
           </AnimatePresence>
@@ -186,50 +227,64 @@ const AdminPrompts = () => {
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           style={{ 
-            position: 'absolute', top: '24px', right: '-12px', width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 0 10px rgba(59,130,246,0.5)', zIndex: 20
+            position: 'absolute', top: '28px', right: '-14px', width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', zIndex: 20, transition: 'all 0.2s'
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.borderColor = '#3b82f6'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
         >
           {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
 
         <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {[
-            { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard', onClick: () => navigate('/dashboard') },
-            { id: 'prompts', icon: <MessageSquare size={20} />, label: 'Prompts IA' },
-            { id: 'config', icon: <Settings size={20} />, label: 'Configuración' },
-            { id: 'database', icon: <Database size={20} />, label: 'Base de Datos' },
-          ].map((item) => (
-            <div 
-              key={item.id}
-              onClick={() => { if(item.onClick) item.onClick(); else setActiveTab(item.id); }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1.5rem', cursor: 'pointer',
-                background: activeTab === item.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                borderRight: activeTab === item.id ? '3px solid #3b82f6' : '3px solid transparent',
-                color: activeTab === item.id ? '#60a5fa' : '#94a3b8',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => { if(activeTab !== item.id) e.currentTarget.style.color = '#f8fafc'; }}
-              onMouseLeave={(e) => { if(activeTab !== item.id) e.currentTarget.style.color = '#94a3b8'; }}
-            >
-              {item.icon}
-              <AnimatePresence>
-                {isSidebarOpen && (
-                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>
-                    {item.label}
-                  </motion.span>
+            { id: 'usuarios', icon: <Users size={20} />, label: 'Usuarios y Roles', color: '#a855f7' },
+            { id: 'prompts', icon: <MessageSquare size={20} />, label: 'Prompts IA', color: '#3b82f6' },
+            { id: 'videos', icon: <Video size={20} />, label: 'Videos y URLs', color: '#ef4444' },
+            { id: 'config', icon: <Settings size={20} />, label: 'Límites y Pagos', color: '#10b981' },
+            { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Volver a Dashboard', onClick: () => navigate('/dashboard'), color: '#94a3b8' },
+          ].map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <motion.div 
+                key={item.id}
+                onClick={() => { if(item.onClick) item.onClick(); else setActiveTab(item.id); }}
+                whileHover={{ x: isActive ? 0 : 5, background: isActive ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)' }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', cursor: 'pointer',
+                  background: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
+                  borderRight: isActive ? `3px solid ${item.color}` : '3px solid transparent',
+                  color: isActive ? '#f8fafc' : '#94a3b8',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {isActive && (
+                  <motion.div 
+                    layoutId="activeTabIndicator"
+                    style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: item.color }}
+                  />
                 )}
-              </AnimatePresence>
-            </div>
-          ))}
+                <div style={{ color: isActive ? item.color : '#94a3b8', transition: 'color 0.2s' }}>
+                  {item.icon}
+                </div>
+                <AnimatePresence>
+                  {isSidebarOpen && (
+                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ fontWeight: isActive ? 600 : 500, whiteSpace: 'nowrap' }}>
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )
+          })}
         </nav>
 
-        <div style={{ padding: '1.5rem', borderTop: '1px solid #1e293b' }}>
+        <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <div 
-            onClick={() => navigate('/login')}
-            style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', color: '#ef4444', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#f87171'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#ef4444'}
+            onClick={handleLogout}
+            style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', color: '#ef4444', transition: 'all 0.2s', padding: '0.5rem' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.transform = 'translateX(5px)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.transform = 'translateX(0)'; }}
           >
             <LogOut size={20} />
             <AnimatePresence>
@@ -244,200 +299,97 @@ const AdminPrompts = () => {
       {/* Contenido Principal */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         
-        {/* Top Header */}
-        <header style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', borderBottom: '1px solid #1e293b', background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(10px)' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc' }}>
-              {activeTab === 'prompts' ? 'Gestión de Prompts' : 'Configuración Global'}
+        {/* Top Header Blur */}
+        <header style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(2, 6, 23, 0.5)', backdropFilter: 'blur(20px)', zIndex: 5 }}>
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.5px' }}>
+              {activeTab === 'prompts' ? 'Gestión de Prompts IA' : 
+               activeTab === 'usuarios' ? 'Gestión de Usuarios' : 
+               activeTab === 'videos' ? 'Biblioteca de Videos' : 
+               'Configuración General'}
             </h1>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#94a3b8' }}>
-              {activeTab === 'prompts' ? 'Ajusta las instrucciones maestras para el motor de IA.' : 'Ajustes generales de la plataforma.'}
+            <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>
+              {activeTab === 'prompts' ? 'Ajusta las instrucciones maestras para el motor de Inteligencia Artificial.' : 
+               activeTab === 'usuarios' ? 'Administra los roles, permisos y accesos de los usuarios registrados.' : 
+               activeTab === 'videos' ? 'Configura las URLs de YouTube y sus marcas de tiempo.' : 
+               'Ajustes globales de pago y límites de uso de la plataforma.'}
             </p>
-          </div>
+          </motion.div>
         </header>
 
         {/* Scrollable Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '3rem' }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
             
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {message.text && (
                 <motion.div 
-                  initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }} 
+                  animate={{ opacity: 1, y: 0, scale: 1 }} 
+                  exit={{ opacity: 0, scale: 0.95 }}
                   style={{ 
-                    padding: '1rem 1.5rem', marginBottom: '2rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 500,
-                    background: message.type === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
+                    padding: '1rem 1.5rem', marginBottom: '2.5rem', borderRadius: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 600,
+                    background: message.type === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', 
                     border: `1px solid ${message.type === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`, 
-                    color: message.type === 'error' ? '#fca5a5' : '#6ee7b7' 
+                    color: message.type === 'error' ? '#fca5a5' : '#6ee7b7',
+                    boxShadow: message.type === 'error' ? '0 10px 25px -5px rgba(239, 68, 68, 0.2)' : '0 10px 25px -5px rgba(16, 185, 129, 0.2)',
+                    backdropFilter: 'blur(10px)'
                   }}
                 >
-                  <AlertCircle size={20} />
+                  <AlertCircle size={24} />
                   {message.text}
                 </motion.div>
               )}
             </AnimatePresence>
 
             {loading ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem', color: '#94a3b8', gap: '1rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid #3b82f6', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
-                <span>Cargando configuración...</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem', color: '#94a3b8', gap: '1.5rem' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: '4px solid #3b82f6', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+                <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Cargando sistema...</span>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
               </div>
-            ) : activeTab === 'prompts' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                {prompts.map((prompt, index) => (
-                  <motion.div 
-                    key={`${prompt.fase_id}-${prompt.proposito}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    style={{ background: '#0f172a', padding: '2rem', borderRadius: '1rem', border: '1px solid #1e293b', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                          <Code size={24} color="#60a5fa" />
-                        </div>
-                        <div>
-                          <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1px' }}>Fase {prompt.fase_id}</span>
-                            <span style={{ color: '#3b82f6' }}>/</span>
-                            {prompt.proposito}
-                          </h2>
-                          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.5rem 0 0 0', fontFamily: 'monospace' }}>
-                            Vars: {prompt.proposito === 'generar_pitch' ? '{protagonista}, {contexto}, {dolor}, {tarea}, {friccion}, {ideaGanadora}, {nombreElegido}' : '{area}, {frase_problema}, {solucionIdeal}...'}
-                          </p>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button 
-                          onClick={() => handleRestoreDefault(index)}
-                          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'transparent', color: '#94a3b8', border: '1px solid #334155', padding: '0.75rem 1rem', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = 'transparent'; }}
-                        >
-                          <RotateCcw size={18} /> Restaurar
-                        </button>
-                        <button 
-                          onClick={() => handleSave(prompt)}
-                          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(37, 99, 235, 0.3)'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(37, 99, 235, 0.2)'; }}
-                        >
-                          <Save size={18} /> Guardar Cambios
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div style={{ position: 'relative' }}>
-                      <textarea
-                        value={prompt.prompt_texto}
-                        onChange={(e) => handlePromptChange(index, e.target.value)}
-                        style={{
-                          width: '100%',
-                          minHeight: '200px',
-                          padding: '1.25rem',
-                          background: '#020617',
-                          border: '1px solid #334155',
-                          borderRadius: '0.75rem',
-                          color: '#cbd5e1',
-                          fontSize: '1rem',
-                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                          lineHeight: '1.6',
-                          resize: 'vertical',
-                          outline: 'none',
-                          transition: 'border-color 0.2s'
-                        }}
-                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                        onBlur={(e) => e.target.style.borderColor = '#334155'}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{ background: '#0f172a', padding: '2rem', borderRadius: '1rem', border: '1px solid #1e293b', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '0.5rem' }}>
-                        <Settings size={24} color="#10b981" />
-                      </div>
-                      <div>
-                        <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          Muro de Pago (QR) y Límites
-                        </h2>
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.5rem 0 0 0' }}>
-                          Configura la URL del código QR y el límite de usos de Inteligencia Artificial por proyecto.
-                        </p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={handleSaveQr}
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(16, 185, 129, 0.3)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(16, 185, 129, 0.2)'; }}
-                    >
-                      <Save size={18} /> Guardar Configuración
-                    </button>
-                  </div>
-                  
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>URL del Código QR</label>
-                    <input
-                      type="text"
-                      placeholder="https://ejemplo.com/mi-qr.png"
-                      value={qrUrl}
-                      onChange={(e) => setQrUrl(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '1rem',
-                        background: '#020617',
-                        border: '1px solid #334155',
-                        borderRadius: '0.5rem',
-                        color: '#f8fafc',
-                        fontSize: '1rem',
-                        outline: 'none',
-                        transition: 'border-color 0.2s'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#10b981'}
-                      onBlur={(e) => e.target.style.borderColor = '#334155'}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>Límite de usos de IA por Proyecto</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={limiteIA}
-                      onChange={(e) => setLimiteIA(parseInt(e.target.value, 10))}
-                      style={{
-                        width: '100%',
-                        padding: '1rem',
-                        background: '#020617',
-                        border: '1px solid #334155',
-                        borderRadius: '0.5rem',
-                        color: '#f8fafc',
-                        fontSize: '1rem',
-                        outline: 'none',
-                        transition: 'border-color 0.2s'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#10b981'}
-                      onBlur={(e) => e.target.style.borderColor = '#334155'}
-                    />
-                  </div>
-                  {qrUrl && (
-                    <div style={{ padding: '1rem', background: '#020617', borderRadius: '0.5rem', border: '1px dashed #334155', display: 'flex', justifyContent: 'center' }}>
-                      <img src={qrUrl} alt="Vista previa QR" style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'contain' }} onError={(e) => e.target.style.display = 'none'} />
-                    </div>
-                  )}
-                </motion.div>
-              </div>
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {activeTab === 'prompts' && (
+                  <PromptsTab 
+                    prompts={prompts} 
+                    handlePromptChange={handlePromptChange} 
+                    handleRestoreDefault={handleRestoreDefault} 
+                    handleSave={handleSavePrompt} 
+                  />
+                )}
+                {activeTab === 'usuarios' && (
+                  <UsersTab 
+                    usuarios={usuarios}
+                    setUsuarios={setUsuarios}
+                    loadingUsuarios={loadingUsuarios}
+                    setLoadingUsuarios={setLoadingUsuarios}
+                    totalAdmins={totalAdmins}
+                    setTotalAdmins={setTotalAdmins}
+                    cambiadoRolId={cambiadoRolId}
+                    setCambiadoRolId={setCambiadoRolId}
+                    currentUserId={user?.id}
+                    setMessage={setMessage}
+                  />
+                )}
+                {activeTab === 'videos' && (
+                  <VideosTab setMessage={setMessage} />
+                )}
+                {activeTab === 'config' && (
+                  <SettingsTab 
+                    qrUrl={qrUrl}
+                    setQrUrl={setQrUrl}
+                    limiteIA={limiteIA}
+                    setLimiteIA={setLimiteIA}
+                    handleSaveQr={handleSaveQr}
+                  />
+                )}
+              </motion.div>
             )}
           </div>
         </div>
@@ -446,5 +398,4 @@ const AdminPrompts = () => {
   );
 };
 
-export default AdminPrompts;
-
+export default AdminDashboard;

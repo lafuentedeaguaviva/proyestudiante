@@ -11,7 +11,7 @@ export default function Encrucijada({ onDecide, initialStep = 1, onStepChange })
 
   // Recursos de la Encrucijada
   const recursosEncrucijada = [
-    { id: 1, type: 'video', title: 'Innovación vs Emprendimiento', url: 'https://www.youtube.com/embed/jZ0y9F6Y9g0' },
+    { id: 1, type: 'video', title: 'Innovación vs Emprendimiento', url: 'https://www.youtube.com/embed/jZ0y9F6Y9g0', videoKey: 'video_encrucijada' },
     { id: 2, type: 'pista', title: 'Pista del Asistente', content: '¿Te gusta crear máquinas y mejorar procesos? Ve por Innovación. ¿Te gusta la idea de generar dinero y encontrar nichos de mercado? Ve por Emprendimiento.' },
     { id: 3, type: 'foto', title: 'Diagrama de Diferencias', url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop' }
   ];
