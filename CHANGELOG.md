@@ -4,6 +4,23 @@ Todas las versiones y cambios notables de este proyecto están documentados aqu�
 
 ---
 
+## [v1.2.0] — 2026-09-23
+
+### ✨ Nuevas Características
+
+#### 👑 Panel de Administrador Premium
+- Creación de un **Centro de Mando Premium** para administradores.
+- Menú lateral moderno con efecto *Glassmorphism* y animaciones usando **Framer Motion**.
+- Sub-pestañas integradas para gestionar **Usuarios**, **Prompts**, **Videos** y **Configuración**.
+- Rutas protegidas (`ProtectedAdminRoute`) asegurando que solo perfiles con rol de `admin` tengan acceso.
+- Ícono de engranaje (⚙️) dinámico en el Dashboard visible únicamente para administradores.
+
+### 🐛 Correcciones (Auth)
+- Refactorización de la función de `Cerrar Sesión` (`signOut`). Ahora incluye una limpieza forzada de `localStorage` y `sessionStorage` para asegurar el borrado total de la caché de sesión y prevenir inicios automáticos fantasma (Race conditions).
+- Ajustes en el flujo de `LoginScreen` para estabilizar el proceso de creación de "Nuevos Usuarios" evitando bloqueos infinitos de validación con Supabase.
+
+---
+
 ## [v1.1.0] — 2026-09-19
 
 ### ✨ Nuevas Características
