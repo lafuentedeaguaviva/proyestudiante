@@ -1676,15 +1676,18 @@ export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
   
   if (!finalUrl) return '';
 
-  // Asegurarnos de que usa formato embed
-  if (finalUrl.includes('watch?v=')) {
-    finalUrl = finalUrl.replace('watch?v=', 'embed/');
-  } else if (finalUrl.includes('youtu.be/')) {
-    finalUrl = finalUrl.replace('youtu.be/', 'www.youtube.com/embed/');
-  }
+  // Extraer el ID del video de forma robusta
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = finalUrl.match(regExp);
+  const videoId = (match && match[2].length === 11) ? match[2] : null;
 
-  // Quitar parámetros existentes para no duplicar
-  finalUrl = finalUrl.split('?')[0];
+  if (videoId) {
+    finalUrl = `https://www.youtube.com/embed/${videoId}`;
+  } else {
+    if (finalUrl.includes('watch?v=')) finalUrl = finalUrl.replace('watch?v=', 'embed/');
+    else if (finalUrl.includes('youtu.be/')) finalUrl = finalUrl.replace('youtu.be/', 'www.youtube.com/embed/');
+    finalUrl = finalUrl.split('?')[0].split('&')[0];
+  }
 
   const params = [];
   if (config?.start) params.push(`start=${config.start}`);

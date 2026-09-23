@@ -30,6 +30,7 @@ import { NexusProvider } from './context/NexusContext';
 import { GlobalStateProvider } from './context/GlobalStateModel';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedAdminRoute from './components/ui/ProtectedAdminRoute';
+import ProtectedRoute from './components/ui/ProtectedRoute';
 
 const AppRouter = () => {
   return (
@@ -40,24 +41,24 @@ const AppRouter = () => {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginScreen />} />
-              <Route path="/completar-perfil" element={<CompletarPerfil />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/fase/0" element={<Fase0_OnboardingMentor />} />
-              <Route path="/fase/:faseId/intro" element={<FaseIntro />} />
-              <Route path="/fase/1" element={<Fase1_EmprendimientoMentor />} />
-              <Route path="/fase/2" element={<Fase2_ValidacionIdea />} />
-              <Route path="/fase/3" element={<Fase3_PublicoObjetivo />} />
-              <Route path="/fase/4" element={<Fase4_DisenoProducto />} />
-              <Route path="/fase/5" element={<Fase5_EstrategiaMarketing />} />
-              <Route path="/fase/6" element={<Fase6_LocalizacionDistribucion />} />
-              <Route path="/fase/7" element={<Fase7_Planteamiento />} />
-              <Route path="/fase/8" element={<Fase8_Operacion />} />
-              <Route path="/fase/9" element={<ErrorBoundary><Fase9_Estructura /></ErrorBoundary>} />
-              <Route path="/fase/10" element={<ErrorBoundary><Fase10_PlanFinanciero /></ErrorBoundary>} />
-              <Route path="/fase/11" element={<ErrorBoundary><Fase11_DocumentoFinal /></ErrorBoundary>} />
-              <Route path="/fase/12" element={<ErrorBoundary><Fase12_ProyectoVida /></ErrorBoundary>} />
-              <Route path="/fase/13" element={<ErrorBoundary><Fase13_DocumentoIA /></ErrorBoundary>} />
-              <Route path="/gameover" element={<GameOverNexus />} />
+              <Route path="/completar-perfil" element={<ProtectedRoute><CompletarPerfil /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/fase/0" element={<ProtectedRoute><Fase0_OnboardingMentor /></ProtectedRoute>} />
+              <Route path="/fase/:faseId/intro" element={<ProtectedRoute><FaseIntro /></ProtectedRoute>} />
+              <Route path="/fase/1" element={<ProtectedRoute><Fase1_EmprendimientoMentor /></ProtectedRoute>} />
+              <Route path="/fase/2" element={<ProtectedRoute><Fase2_ValidacionIdea /></ProtectedRoute>} />
+              <Route path="/fase/3" element={<ProtectedRoute><Fase3_PublicoObjetivo /></ProtectedRoute>} />
+              <Route path="/fase/4" element={<ProtectedRoute><Fase4_DisenoProducto /></ProtectedRoute>} />
+              <Route path="/fase/5" element={<ProtectedRoute><Fase5_EstrategiaMarketing /></ProtectedRoute>} />
+              <Route path="/fase/6" element={<ProtectedRoute><Fase6_LocalizacionDistribucion /></ProtectedRoute>} />
+              <Route path="/fase/7" element={<ProtectedRoute><Fase7_Planteamiento /></ProtectedRoute>} />
+              <Route path="/fase/8" element={<ProtectedRoute><Fase8_Operacion /></ProtectedRoute>} />
+              <Route path="/fase/9" element={<ProtectedRoute><ErrorBoundary><Fase9_Estructura /></ErrorBoundary></ProtectedRoute>} />
+              <Route path="/fase/10" element={<ProtectedRoute><ErrorBoundary><Fase10_PlanFinanciero /></ErrorBoundary></ProtectedRoute>} />
+              <Route path="/fase/11" element={<ProtectedRoute><ErrorBoundary><Fase11_DocumentoFinal /></ErrorBoundary></ProtectedRoute>} />
+              <Route path="/fase/12" element={<ProtectedRoute><ErrorBoundary><Fase12_ProyectoVida /></ErrorBoundary></ProtectedRoute>} />
+              <Route path="/fase/13" element={<ProtectedRoute><ErrorBoundary><Fase13_DocumentoIA /></ErrorBoundary></ProtectedRoute>} />
+              <Route path="/gameover" element={<ProtectedRoute><GameOverNexus /></ProtectedRoute>} />
               <Route path="/encuesta/:projectId" element={<EncuestaPublica />} />
               <Route path="/admin/prompts" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
             </Routes>

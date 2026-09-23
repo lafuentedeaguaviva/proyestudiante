@@ -4,6 +4,16 @@ Todas las versiones y cambios notables de este proyecto están documentados aqu�
 
 ---
 
+## [v1.2.1] — 2026-09-23
+
+### 🐛 Correcciones (Hotfixes)
+- **Persistencia de Sesión (F5):** Implementado `ProtectedRoute` envolviendo todas las rutas en `AppRouter.jsx` para evitar cierres de sesión accidentales al refrescar la página.
+- **Guardado de Videos (Base de Datos):** Creado script SQL para aplicar una restricción `UNIQUE` en la tabla `prompts_ia` permitiendo que Supabase procese los `upsert` correctamente al configurar los videos de la plataforma.
+- **Seguridad RLS (Base de Datos):** Creado script SQL para habilitar Row-Level Security en la tabla `prompts_ia` con los permisos necesarios de lectura y escritura.
+- **Reproductor de YouTube:** Actualizada la lógica de extracción de URLs de YouTube en `api.js` usando expresiones regulares robustas para soportar formatos complejos de URL.
+
+---
+
 ## [v1.2.0] — 2026-09-23
 
 ### ✨ Nuevas Características

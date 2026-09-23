@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, Bot, Zap, Award, Monitor, Leaf, Utensils, HeartPulse, BookOpen, Palette, MoreHorizontal, PlusCircle, Trash2, Video, Eye, AlertCircle, Lightbulb, Compass, Filter, Target } from 'lucide-react';
+import { FileText, CheckCircle, Bot, Zap, Award, Monitor, Leaf, Utensils, HeartPulse, BookOpen, Palette, MoreHorizontal, PlusCircle, Trash2, Video, Eye, AlertCircle, Lightbulb, Compass, Filter, Target, Wrench, Cpu } from 'lucide-react';
 import SidebarFases from '../components/ui/SidebarFases';
 import ConfirmModal from '../components/ui/ConfirmModal';
 import CaratulaFase from '../components/ui/CaratulaFase';
@@ -173,6 +173,8 @@ const Fase1_EmprendimientoMentor = () => {
                     { nombre: 'Salud', icon: <HeartPulse size={32} /> },
                     { nombre: 'Educación', icon: <BookOpen size={32} /> },
                     { nombre: 'Arte y Diseño', icon: <Palette size={32} /> },
+                    { nombre: 'Mecánica', icon: <Wrench size={32} /> },
+                    { nombre: 'Computación', icon: <Cpu size={32} /> },
                     { nombre: 'Otro', icon: <MoreHorizontal size={32} /> }
                   ].map((cat) => (
                     <div 
@@ -188,8 +190,8 @@ const Fase1_EmprendimientoMentor = () => {
                         }
                       }}
                       style={{ 
-                        background: area === cat.nombre || (cat.nombre === 'Otro' && !['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño'].includes(area) && area !== '') ? '#fefce8' : '#f8fafc', 
-                        border: area === cat.nombre || (cat.nombre === 'Otro' && !['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño'].includes(area) && area !== '') ? '2px solid #ca8a04' : '2px solid #e2e8f0', 
+                        background: area === cat.nombre || (cat.nombre === 'Otro' && !['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño', 'Mecánica', 'Computación'].includes(area) && area !== '') ? '#fefce8' : '#f8fafc', 
+                        border: area === cat.nombre || (cat.nombre === 'Otro' && !['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño', 'Mecánica', 'Computación'].includes(area) && area !== '') ? '2px solid #ca8a04' : '2px solid #e2e8f0', 
                         borderRadius: '1rem', padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center', color: area === cat.nombre ? '#ca8a04' : '#64748b'
                       }}
                     >
@@ -199,7 +201,7 @@ const Fase1_EmprendimientoMentor = () => {
                   ))}
                 </div>
 
-                {(!['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño', ''].includes(area) || area === 'Otro') && (
+                {(!['Tecnología', 'Medio Ambiente', 'Gastronomía', 'Salud', 'Educación', 'Arte y Diseño', 'Mecánica', 'Computación', ''].includes(area) || area === 'Otro') && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ marginBottom: '1.5rem' }}>
                     <input 
                       type="text" 
