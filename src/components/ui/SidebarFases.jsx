@@ -10,10 +10,13 @@ const SidebarFases = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [maxFaseDB, setMaxFaseDB] = useState(0); // Para guardar la fase máxima desde la BD
   
-    const [maxPasoFaseActual, setMaxPasoFaseActual] = useState(1);
-    const [proyectoNombre, setProyectoNombre] = useState(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
+  const [maxPasoFaseActual, setMaxPasoFaseActual] = useState(1);
+  const [fasesActivas, setFasesActivas] = useState([]);
+  const [loadingMapa, setLoadingMapa] = useState(true);
+  const [numeroAdmin, setNumeroAdmin] = useState("71541014");
+  const [proyectoNombre, setProyectoNombre] = useState(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
 
-    useEffect(() => {
+  useEffect(() => {
       const handleNombre = () => setProyectoNombre(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
       window.addEventListener('proyectoNombreActualizado', handleNombre);
       return () => window.removeEventListener('proyectoNombreActualizado', handleNombre);
