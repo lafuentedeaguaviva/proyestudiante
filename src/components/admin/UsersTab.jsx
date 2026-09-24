@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, ShieldCheck, ShieldOff } from 'lucide-react';
-import { obtenerTodosLosUsuarios, cambiarRolUsuario } from '../../services/api';
+import { Crown, ShieldCheck, ShieldOff, PlusCircle } from 'lucide-react';
+import { obtenerTodosLosUsuarios, cambiarRolUsuario, recargarEducoins } from '../../services/api';
 
 const UsersTab = ({ usuarios, setUsuarios, loadingUsuarios, setLoadingUsuarios, totalAdmins, setTotalAdmins, cambiadoRolId, setCambiadoRolId, currentUserId, setMessage }) => {
 
@@ -19,6 +19,27 @@ const UsersTab = ({ usuarios, setUsuarios, loadingUsuarios, setLoadingUsuarios, 
       setMessage({ text: `Error cargando usuarios: ${err.message}`, type: 'error' });
     } finally {
       setLoadingUsuarios(false);
+    }
+  };
+
+  const handleRecargar = async (targetUserId, currentName) => {
+    const amountStr = window.prompt(`¿Cuántos EduCoins deseas agregar a ${currentName}?`, '50');
+    if (!amountStr) return;
+    const amount = parseInt(amountStr, 10);
+    if (isNaN(amount) || amount <= 0) {
+      setMessage({ text: 'Cantidad inválida.', type: 'error' });
+      return;
+    }
+    setCambiadoRolId(targetUserId);
+    try {
+      await recargarEducoins(targetUserId, amount);
+      setMessage({ text: `Se recargaron ${amount} EduCoins a ${currentName} exitosamente.`, type: 'success' });
+      await fetchUsuarios();
+      setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+    } catch (err) {
+      setMessage({ text: 'Error al recargar EduCoins: ' + err.message, type: 'error' });
+    } finally {
+      setCambiadoRolId(null);
     }
   };
 
@@ -112,6 +133,7 @@ const UsersTab = ({ usuarios, setUsuarios, loadingUsuarios, setLoadingUsuarios, 
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Usuario</th>
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Email</th>
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Rol Actual</th>
+                <th style={{ padding: '1.25rem 2rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>EduCoins</th>
                 <th style={{ padding: '1.25rem 2rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Acción</th>
               </tr>
             </thead>
@@ -171,6 +193,35 @@ const UsersTab = ({ usuarios, setUsuarios, loadingUsuarios, setLoadingUsuarios, 
                         {isAdmin ? <ShieldCheck size={16} /> : null}
                         {isAdmin ? 'Admin' : 'Usuario'}
                       </span>
+                    </td>
+                    <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                        <span style={{ color: '#fcd34d', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                          🪙 {usr.educoins ?? 50}
+                        </span>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleRecargar(usr.id, usr.nombre_completo || usr.email || 'Usuario')}
+                          disabled={isChanging}
+                          title="Recargar EduCoins"
+                          style={{
+                            background: 'rgba(245, 158, 11, 0.2)',
+                            border: '1px solid rgba(245, 158, 11, 0.4)',
+                            color: '#f59e0b',
+                            borderRadius: '50%',
+                            width: '30px',
+                            height: '30px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: isChanging ? 'not-allowed' : 'pointer',
+                            opacity: isChanging ? 0.5 : 1
+                          }}
+                        >
+                          <PlusCircle size={16} />
+                        </motion.button>
+                      </div>
                     </td>
                     <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>
                       {isAdmin ? (

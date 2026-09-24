@@ -526,7 +526,7 @@ export const obtenerTodosLosUsuarios = async () => {
   try {
     const { data, error } = await supabase
       .from('perfiles_usuario')
-      .select('id, email, nombre_completo, rol')
+      .select('id, email, nombre_completo, rol, educoins')
       .order('rol', { ascending: false }); // admins primero
 
     if (error) throw error;
@@ -606,6 +606,7 @@ export const generarIdeasDeepSeek = async (contextoData) => {
       promptTexto = `Los problemas del usuario son: "${contextoData.frase_problema}". Sus soluciones ideales son: "${contextoData.solucionIdeal}". Basado en esto, genera 10 ideas de negocio variadas (apps, servicios, productos físicos). Las primeras deben ser versiones muy mejoradas de sus soluciones ideales, y el resto ideas nuevas y creativas. Responde solo con un array JSON como ["Idea 1", "Idea 2", "Idea 3", "Idea 4", "Idea 5", "Idea 6", "Idea 7", "Idea 8", "Idea 9", "Idea 10"].`;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -665,6 +666,7 @@ export const generarNombresDeepSeek = async (ideaGanadora) => {
       promptTexto = `Basándote ÚNICAMENTE en esta idea ganadora de negocio: "${ideaGanadora}", genera 3 nombres atractivos y modernos. No uses ninguna otra información externa. Responde solo con el array JSON: [{"nombre": "Nombre1", "representa": "Representa..."}, {"nombre": "Nombre2", "representa": "Representa..."}, {"nombre": "Nombre3", "representa": "Representa..."}].`;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -719,6 +721,7 @@ export const generarPitchDeepSeek = async (contextoData) => {
       promptTexto = `La idea ganadora del proyecto es: "${contextoData.ideaGanadora}". El protagonista al que va dirigida es: "${contextoData.protagonista}". El contexto es: "${contextoData.contexto}". Su dolor principal es: "${contextoData.dolor}". La tarea que intentan realizar es: "${contextoData.tarea}". La fricción de su solución actual es: "${contextoData.friccion}". La solución propuesta se llama: "${contextoData.nombreElegido}". Genera un "Discurso de Presentación (Pitch)" breve, persuasivo y motivacional de no más de 3 oraciones que resuma cómo esta idea ganadora resuelve su problema. No uses explicaciones adicionales, solo devuelve el texto del pitch.`;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -768,6 +771,7 @@ export const generarResumenFase1DeepSeek = async (contextoData) => {
       promptTexto = `La idea ganadora (solución) es: "${contextoData.ideaGanadora}". El protagonista al que va dirigida es: "${contextoData.protagonista}". Su dolor principal (problema) es: "${contextoData.dolor}". Genera un texto muy corto, directo y conciso (máximo 15 palabras por campo) para cada propiedad del JSON.`;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -854,6 +858,7 @@ export const generarPasosPersonalizadoIA = async (promptUsuario) => {
   ];
 
   try {
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -895,6 +900,7 @@ export const evaluarClasificacionProcesosIA = async (pasos) => {
   const promptPasos = pasos.map(p => `ID: ${p.id} | Paso: "${p.texto}" | Categoría Elegida: "${p.categoria}"`).join("\n");
 
   try {
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -994,6 +1000,7 @@ export const generarDocumentoMejoradoIA = async (textoBruto, configIA) => {
 REGLA DE ORO: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto") Y EN UN TONO ESTRICTAMENTE POSITIVO Y OPTIMISTA. Nunca uses lenguaje pesimista.
 Instrucciones extra: ${instrucciones}. NO agregues comentarios ni explicaciones adicionales, devuelve SOLO el texto mejorado.`;
     
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -1036,6 +1043,7 @@ REGLA DE ORO: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "M
 NO agregues introducciones, saludos ni comentarios. Genera directamente el contenido para la sección: "${campoFaltante}".
 Instrucciones específicas: ${instrucciones || 'Genera 1 o 2 párrafos concisos y bien estructurados.'}`;
     
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -1092,6 +1100,7 @@ Instrucciones extra: ${instrucciones}.
 
 RESPONDE ÚNICA Y EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO. NO agregues comillas invertidas de markdown (\`\`\`json), NO agregues explicaciones, SOLO el JSON puro.`;
 
+    await cobrarEducoin();
   const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -1175,6 +1184,7 @@ REGLA DE ORO 2: NO INVENTES NI AGREGUES NUEVOS PRODUCTOS. Limítate a devolver l
 RESPONDE SOLO CON EL JSON VÁLIDO.`;
   }
 
+    await cobrarEducoin();
   const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -1260,6 +1270,7 @@ Debes devolver EXACTAMENTE un objeto JSON (sin texto adicional ni bloques de mar
 
 Usa un tono positivo, alentador, profesional y muy práctico. RESPONDE SOLO CON EL JSON VÁLIDO.`;
 
+    await cobrarEducoin();
   const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -1324,6 +1335,7 @@ export const generarResumenEncuestasIA = async (encuestasData, metricasAvanzadas
 Responde ÚNICAMENTE con el objeto JSON, sin formato markdown, para que sea parseado por JSON.parse().`;
   }
 
+    await cobrarEducoin();
   const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -1420,6 +1432,7 @@ INSTRUCCIONES ESPECÍFICAS PARA CADA CAMPO DEL JSON:
 Responde ÚNICAMENTE con el objeto JSON puro.`;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -1510,6 +1523,7 @@ export const generarResumenFase4IA = async (dataFase4) => {
       `;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -1591,6 +1605,7 @@ export const generarResumenFase6IA = async (dataFase6) => {
       `;
     }
 
+    await cobrarEducoin();
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
@@ -1704,4 +1719,21 @@ export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
   }
 
   return finalUrl;
+};
+export const recargarEducoins = async (targetUserId, amount) => { try { const { data, error } = await supabase.rpc('recargar_educoins', { user_id: targetUserId, amount: amount }); if (error) { const res = await supabase.from('perfiles_usuario').select('educoins').eq('id', targetUserId).single(); const newAmount = (res.data?.educoins || 0) + amount; const { data: updateData, error: updateError } = await supabase.from('perfiles_usuario').update({ educoins: newAmount }).eq('id', targetUserId).select(); if (updateError) throw updateError; return updateData; } return data; } catch (err) { console.error('Error al recargar EduCoins:', err); throw err; } };
+
+
+export const cobrarEducoin = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debes iniciar sesión para usar la IA.");
+  
+  const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 1 });
+  if (error) {
+    console.error("Error consumiendo educoin:", error);
+    if (error.code === '42883') return true; 
+  }
+  if (data === false) {
+    throw new Error("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
+  }
+  return true;
 };

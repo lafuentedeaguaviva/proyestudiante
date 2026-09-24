@@ -4,6 +4,7 @@ import { ArrowLeft, MessageSquare, AlertTriangle, Lightbulb } from 'lucide-react
 import { useNavigate, useLocation } from 'react-router-dom';
 import SidebarFases from '../components/ui/SidebarFases';
 import { NexusContext } from '../context/NexusContext';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Layout "El Caso Zero" / Agencia Kronos
@@ -13,6 +14,7 @@ const DetectiveLayout = ({ children, personajeHablando, canGoBack = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { nexusInfluence, nexusMessage } = useContext(NexusContext) || { nexusInfluence: 0, nexusMessage: null };
+  const { perfil } = useAuth();
 
   useEffect(() => {
     // En Modo Mentor, desactivamos la redirección a gameover y la mecánica de Nexus
@@ -97,23 +99,21 @@ const DetectiveLayout = ({ children, personajeHablando, canGoBack = true }) => {
           </button>
         )}
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-          {/* NEXUS INFLUENCE BAR (Oculto en Modo Mentor) */}
-          {/* <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '300px' }}>
-            <div style={{ fontSize: '0.75rem', color: nexusColor, fontWeight: 'bold', letterSpacing: '2px', marginBottom: '4px' }}>
-              INFLUENCIA NEXUS: {nexusInfluence}%
-            </div>
-            <div style={{ width: '100%', height: '6px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden' }}>
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${nexusInfluence}%` }}
-                style={{ height: '100%', background: nexusColor }}
-              />
-            </div>
-          </div> */}
+          {/* Oculto en Modo Mentor */}
         </div>
         
-        <div style={{ fontWeight: 800, letterSpacing: '4px', color: expedienteTipo === 'PEP' ? '#3b82f6' : (expedienteTipo === 'PI' ? '#10b981' : '#52525b'), fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          EXPEDIENTE: {expedienteTipo}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          {/* Monedero Virtual EduCoins */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.4rem 1rem', borderRadius: '2rem', boxShadow: '0 0 10px rgba(245, 158, 11, 0.2)', backdropFilter: 'blur(5px)' }}>
+            <span style={{ fontSize: '1.2rem' }}>🪙</span>
+            <span style={{ color: '#fcd34d', fontWeight: '900', fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '1px' }}>
+              {perfil?.educoins ?? 50}
+            </span>
+          </div>
+
+          <div style={{ fontWeight: 800, letterSpacing: '4px', color: expedienteTipo === 'PEP' ? '#3b82f6' : (expedienteTipo === 'PI' ? '#10b981' : '#52525b'), fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            EXPEDIENTE: {expedienteTipo}
+          </div>
         </div>
       </header>
 
