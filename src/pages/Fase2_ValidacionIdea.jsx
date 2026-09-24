@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SplashScreenMentor from '../components/ui/SplashScreenMentor';
 import SidebarFases from '../components/ui/SidebarFases';
+import SubMenuFases from '../components/ui/SubMenuFases';
 import { Bot, Video, FileText, Database, Code, CheckCircle, PieChart, Sparkles } from 'lucide-react';
 import { NexusContext } from '../context/NexusContext';
 
@@ -64,13 +65,7 @@ const Fase2_ValidacionIdea = () => {
           </div>
 
           {/* Progress Bar & Tabs */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', background: 'white', padding: '0.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-          {tabs.map(t => (
-            <button key={t.id} onClick={() => irAPaso(t.id)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.75rem', background: step === t.id ? '#3b82f6' : 'transparent', color: step === t.id ? 'white' : '#64748b', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }}>
-              {t.icon} <span style={{ display: step === t.id ? 'inline' : 'none' }}>{t.label}</span>
-            </button>
-          ))}
-        </div>
+          <SubMenuFases tabs={tabs} currentStep={step} onTabClick={(id) => irAPaso(id)} maxStep={7} />
 
           {/* Pasos */}
           <div onBlur={() => setPendingSave(true)} style={{ background: 'white', borderRadius: '1rem', padding: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
