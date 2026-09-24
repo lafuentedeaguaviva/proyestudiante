@@ -154,7 +154,7 @@ const DashboardView = ({ state, actions }) => {
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ef4444', fontWeight: 'bold' }}>Suministros Agotados (0 EduCoins)</h3>
                 <p style={{ margin: '0.5rem 0 0 0', color: 'var(--color-text-secondary)' }}>
-                  Tu saldo actual es insuficiente para iniciar nuevas misiones o continuar operativos vigentes. Por favor, <strong>contacta a tu administrador para solicitar una recarga</strong>.
+                  Tu saldo actual es insuficiente para iniciar nuevas misiones o continuar operativos vigentes. Por favor, <strong>contacta a tu administrador al celular/WhatsApp {state.numeroAdmin} para solicitar una recarga</strong>.
                 </p>
               </div>
             </motion.div>

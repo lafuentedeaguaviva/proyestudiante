@@ -14,6 +14,7 @@ export const useDashboardController = () => {
   // QR Payment Flow
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [qrUrl, setQrUrl] = useState('');
+  const [numeroAdmin, setNumeroAdmin] = useState("71541014");
   const [selectedMundoId, setSelectedMundoId] = useState(null);
   const [versiculoRandom, setVersiculoRandom] = useState(null);
 
@@ -24,14 +25,19 @@ export const useDashboardController = () => {
       setProyectos(misProyectos);
       if (misProyectos.length === 0) setShowMundos(true);
       
-      // Fetch QR URL
-      const { data: qrData } = await supabase
-        .from('prompts_ia')
-        .select('prompt_texto')
+      // Fetch Config (QR y Número)
+      const { data: configs } = await supabase
+        .from('configuracion_prompts_ia')
+        .select('proposito, prompt_texto')
         .eq('fase_id', 0)
-        .eq('proposito', 'qr_pago_url')
-        .single();
-      if (qrData) setQrUrl(qrData.prompt_texto);
+        .in('proposito', ['qr_pago_url', 'numero_contacto_admin']);
+        
+      if (configs) {
+        const qrConf = configs.find(c => c.proposito === 'qr_pago_url');
+        const numConf = configs.find(c => c.proposito === 'numero_contacto_admin');
+        if (qrConf) setQrUrl(qrConf.prompt_texto);
+        if (numConf) setNumeroAdmin(numConf.prompt_texto);
+      }
 
       // Fetch Versículos
       const { data: versesData, error: versesError } = await supabase
@@ -74,7 +80,7 @@ export const useDashboardController = () => {
 
   const handleCrearProyecto = (mundoId) => {
     if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
-      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y crear una misión.");
+      window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y crear una misión.`);
       return;
     }
     setSelectedMundoId(mundoId);
@@ -96,7 +102,7 @@ export const useDashboardController = () => {
     const handleRetomarProyecto = (proyecto) => {
     // Verificar EduCoins antes de ingresar (si no es admin)
     if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
-      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y continuar con tu misión.");
+      window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y continuar con tu misión.`);
       return;
     }
     localStorage.setItem('temp_proyecto_id', proyecto.id);
@@ -148,7 +154,7 @@ export const useDashboardController = () => {
 
   const toggleShowMundos = (val) => {
     if (val === true && !isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
-      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y crear una nueva misión.");
+      window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y crear una nueva misión.`);
       return;
     }
     setShowMundos(val);
@@ -163,7 +169,8 @@ export const useDashboardController = () => {
       editTitle,
       isQrModalOpen,
       qrUrl,
-      versiculoRandom
+      versiculoRandom,
+      numeroAdmin
     },
     actions: {
       handleCrearProyecto,
