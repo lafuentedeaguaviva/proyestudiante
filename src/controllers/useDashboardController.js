@@ -62,7 +62,7 @@ export const useDashboardController = () => {
 
     } catch (err) {
       console.error(err);
-      alert("Error al cargar los proyectos.");
+      window.showCustomAlert("Error al cargar los proyectos.");
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export const useDashboardController = () => {
     const handleRetomarProyecto = (proyecto) => {
     // Verificar EduCoins antes de ingresar (si no es admin)
     if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
-      alert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y continuar con tu misión.");
+      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y continuar con tu misión.");
       return;
     }
     localStorage.setItem('temp_proyecto_id', proyecto.id);

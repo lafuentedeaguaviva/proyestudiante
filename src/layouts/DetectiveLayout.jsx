@@ -22,7 +22,7 @@ const DetectiveLayout = ({ children, personajeHablando, canGoBack = true }) => {
   useEffect(() => {
     // Si no es mentor/admin y no tiene monedas, patear al dashboard
     if (!isMentor && (perfil?.educoins || 0) <= 0) {
-      alert("⚠️ ACCESO BLOQUEADO: Tus EduCoins han llegado a cero. Por favor, adquiere más monedas para continuar.");
+      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: Tus EduCoins han llegado a cero. Por favor, adquiere más monedas para continuar.");
       navigate('/dashboard');
       return;
     }

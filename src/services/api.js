@@ -1730,12 +1730,12 @@ export const cobrarEducoin = async () => {
   const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 10 });
   if (error) {
     console.error("Error consumiendo educoin:", error);
-    if (typeof window !== 'undefined') alert("Error interno al consumir EduCoins. Revisa la consola o corre el script SQL.");
+    if (typeof window !== 'undefined') window.showCustomAlert("Error interno al consumir EduCoins. Revisa la consola o corre el script SQL.");
     throw new Error("EDUCOINS_ERROR");
   }
   
   if (data !== true) {
-    if (typeof window !== 'undefined') alert("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
+    if (typeof window !== 'undefined') window.showCustomAlert("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
     throw new Error("EDUCOINS_ERROR");
   }
   

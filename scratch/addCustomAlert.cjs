@@ -1,8 +1,10 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import AppRouter from './AppRouter.jsx'
-import './index.css'
+const fs = require('fs');
+const path = require('path');
 
+const filePath = path.join(__dirname, '..', 'src', 'main.jsx');
+let content = fs.readFileSync(filePath, 'utf-8');
+
+const customAlertCode = `
 // Alerta global personalizada con el estilo de la plataforma
 window.showCustomAlert = (message, title = "Acceso Bloqueado") => {
   return new Promise((resolve) => {
@@ -77,10 +79,12 @@ window.showCustomAlert = (message, title = "Acceso Bloqueado") => {
     btn.onclick = closeAlert;
   });
 };
+`;
 
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <AppRouter />
-  </React.StrictMode>,
-)
+if (!content.includes('window.showCustomAlert')) {
+  content = content.replace("import './index.css'", "import './index.css'\n" + customAlertCode);
+  fs.writeFileSync(filePath, content, 'utf-8');
+  console.log("Global alert added to main.jsx");
+} else {
+  console.log("Already exists");
+}

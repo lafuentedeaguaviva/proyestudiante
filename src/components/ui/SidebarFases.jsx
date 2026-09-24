@@ -201,7 +201,7 @@ const SidebarFases = () => {
                       disabled={!isUnlocked}
                       onClick={() => {
                             if (!isMentor && (perfil?.educoins || 0) <= 0) {
-                              alert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
+                              window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
                               return;
                             }
                             if (fase.id > 0) {
@@ -262,7 +262,7 @@ const SidebarFases = () => {
                                   if (!isUnlockedPaso) return;
                                     e.stopPropagation();
                                     if (!isMentor && (perfil?.educoins || 0) <= 0) {
-                                      alert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
+                                      window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
                                       return;
                                     }
                                     navigate(`${fase.path}?paso=${pasoNumber}`);
@@ -382,7 +382,7 @@ const SidebarFases = () => {
                 </div>
                 <div style={{ textAlign: 'right', marginTop: '0.25rem', fontSize: '0.75rem', color: theme.textSub }}>
                   {(perfil?.educoins ?? 0) === 0 ? (
-                    <span style={{ color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => alert(`Para adquirir más EduCoins, por favor contacta a tu mentor o administrador. Contacte con el número de celular/WhatsApp: ${numeroAdmin}`)}>
+                    <span style={{ color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => window.showCustomAlert(`Para adquirir más EduCoins, por favor contacta a tu mentor o administrador. Contacte con el número de celular/WhatsApp: ${numeroAdmin}`)}>
                       0 EduCoins - ¡Compra más aquí!
                     </span>
                   ) : 'Quedan monedas'}
