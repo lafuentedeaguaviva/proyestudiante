@@ -53,7 +53,7 @@ export default function RecopilarInfo({ projectName, perfilIA, setAyudanteText, 
               <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', fontSize: '1.2rem', textAlign: 'center' }}>🎥 Aprende a hacer Encuestas de Mercado:</h3>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '2px solid rgba(255,255,255,0.1)' }}>
                 <YoutubePlayer 
-                  videoKey="video_f2_encuesta"
+                  videoKey="video_fase_2"
                   fallbackUrl="https://www.youtube.com/embed/zM2a1B8Wb20"
                   title="Cómo hacer encuestas"
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}

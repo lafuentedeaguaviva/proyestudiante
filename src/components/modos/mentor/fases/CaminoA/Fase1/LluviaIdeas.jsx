@@ -105,7 +105,7 @@ export default function LluviaIdeas({ camino, setAyudanteText, onComplete, initi
               <h3 style={{ color: 'var(--primary)', marginBottom: '1rem', fontSize: '1.2rem' }}>🎥 Antes de empezar, mira cómo hacer una Lluvia de Ideas:</h3>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', border: '2px solid rgba(255,255,255,0.1)' }}>
                 <YoutubePlayer 
-                  videoKey="video_f2_lluvia"
+                  videoKey="video_fase_2"
                   fallbackUrl="https://www.youtube.com/embed/yFjK8zFhN0k"
                   title="Tutorial Brainstorming"
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}

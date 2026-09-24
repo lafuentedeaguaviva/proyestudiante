@@ -88,7 +88,7 @@ const Fase7_Planteamiento = () => {
             </div>
             <p className="text-center text-slate-600 mb-6">Antes de comenzar, observa este video para entender cómo diagnosticar un problema.</p>
             <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_f7_diagnostico" title="Video sobre Diagnóstico del Problema" fallbackUrl="" />
+              <YoutubePlayer videoKey="video_fase_7" title="Video sobre Diagnóstico del Problema" fallbackUrl="" />
             </div>
           </div>
         );
@@ -185,7 +185,7 @@ const Fase7_Planteamiento = () => {
             </div>
             <p className="text-center text-slate-600 mb-6">Aprende a redactar objetivos claros y alcanzables para tu emprendimiento.</p>
             <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_f7_objetivos" title="Video sobre Objetivos SMART" fallbackUrl="" />
+              <YoutubePlayer videoKey="video_fase_7" title="Video sobre Objetivos SMART" fallbackUrl="" />
             </div>
           </div>
         );
@@ -279,7 +279,7 @@ const Fase7_Planteamiento = () => {
             </div>
             <p className="text-center text-slate-600 mb-6">Descubre cómo definir la razón de ser de tu negocio hoy.</p>
             <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_f7_mision" title="Video sobre la Misión" fallbackUrl="" />
+              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Misión" fallbackUrl="" />
             </div>
           </div>
         );
@@ -351,7 +351,7 @@ const Fase7_Planteamiento = () => {
             </div>
             <p className="text-center text-slate-600 mb-6">Aprende a proyectar tu emprendimiento hacia el futuro.</p>
             <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_f7_vision" title="Video sobre la Visión" fallbackUrl="" />
+              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Visión" fallbackUrl="" />
             </div>
           </div>
         );
@@ -418,7 +418,7 @@ const Fase7_Planteamiento = () => {
             </div>
             <p className="text-center text-slate-600 mb-6">Entiende por qué y para qué es importante tu proyecto.</p>
             <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_f7_justificacion" title="Video sobre la Justificación" fallbackUrl="" />
+              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Justificación" fallbackUrl="" />
             </div>
           </div>
         );

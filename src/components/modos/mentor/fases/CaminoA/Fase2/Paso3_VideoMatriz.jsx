@@ -15,7 +15,7 @@ const Paso3_VideoMatriz = ({ setAyudanteText, onComplete }) => {
       <div style={{ background: '#000', borderRadius: '1rem', padding: '1rem', border: '1px solid #cbd5e1', marginBottom: '2rem' }}>
         <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
           <YoutubePlayer 
-            videoKey="video_f2_matriz"
+            videoKey="video_fase_2"
             fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ"
             title="Video Matriz"
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '0.5rem' }}

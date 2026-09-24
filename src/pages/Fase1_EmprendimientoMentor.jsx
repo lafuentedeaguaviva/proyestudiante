@@ -234,7 +234,7 @@ const Fase1_EmprendimientoMentor = () => {
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.observacion?.titulo || "El arte de observar"}</h3>
                 <div style={{ marginBottom: '2rem' }}>
                   <YoutubePlayer 
-                    videoKey="video_f1_observacion"
+                    videoKey="video_fase_1"
                     fallbackUrl={mentorData.teoria_caminos?.recursos?.observacion?.url || "https://www.youtube.com/embed/T6mvaB7tZ9U"}
                     title="Observación del Entorno"
                   />
@@ -330,7 +330,7 @@ const Fase1_EmprendimientoMentor = () => {
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.fricciones?.titulo || "¿Por qué fallan las soluciones?"}</h3>
                 <div style={{ marginBottom: '2rem' }}>
                   <YoutubePlayer 
-                    videoKey="video_f1_fricciones"
+                    videoKey="video_fase_1"
                     fallbackUrl={mentorData.teoria_caminos?.recursos?.fricciones?.url || "https://www.youtube.com/embed/z4vG_y-J15o"}
                     title="Fricciones del Entorno"
                   />
@@ -404,7 +404,7 @@ const Fase1_EmprendimientoMentor = () => {
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.ideacion?.titulo || "Video: Brainstorming Efectivo"}</h3>
                 <div style={{ marginBottom: '2rem' }}>
                   <YoutubePlayer 
-                    videoKey="video_f1_ideacion"
+                    videoKey="video_fase_1"
                     fallbackUrl={mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('youtube') || mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('vimeo') ? mentorData.teoria_caminos.recursos.ideacion.url : "https://www.youtube.com/embed/pWp1-WvU7K8"}
                     title="Ideación"
                   />
@@ -540,7 +540,7 @@ const Fase1_EmprendimientoMentor = () => {
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.evaluacion?.titulo || "Evaluación objetiva de negocios"}</h3>
                 <div style={{ marginBottom: '2rem' }}>
                   <YoutubePlayer 
-                    videoKey="video_f1_evaluacion"
+                    videoKey="video_fase_1"
                     fallbackUrl={mentorData.teoria_caminos?.recursos?.evaluacion?.url || "https://www.youtube.com/embed/fAymKnd8b44"}
                     title="Evaluación Objetiva"
                   />

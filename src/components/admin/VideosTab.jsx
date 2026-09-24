@@ -5,20 +5,20 @@ import { obtenerVideosConfig, guardarVideoConfig, buildYoutubeEmbedUrl } from '.
 import { clearVideoCache } from '../ui/YoutubePlayer';
 
 const VIDEO_LIST = [
-  { key: 'video_encrucijada', fase: 0, desc: 'Encrucijada (Innovación vs Emprendimiento)' },
-  { key: 'video_f1_observacion', fase: 1, desc: 'Observación del entorno' },
-  { key: 'video_f1_fricciones', fase: 1, desc: 'Fricciones y soluciones' },
-  { key: 'video_f1_ideacion', fase: 1, desc: 'Brainstorming / Ideación' },
-  { key: 'video_f1_evaluacion', fase: 1, desc: 'Evaluación objetiva' },
-  { key: 'video_f2_validacion', fase: 2, desc: '¿Por qué validar?' },
-  { key: 'video_f2_matriz', fase: 2, desc: 'Matriz de validación' },
-  { key: 'video_f2_encuesta', fase: 2, desc: 'Cómo hacer encuestas' },
-  { key: 'video_f2_lluvia', fase: 2, desc: 'Lluvia de ideas' },
-  { key: 'video_f7_diagnostico', fase: 7, desc: 'Introducción Diagnóstico' },
-  { key: 'video_f7_objetivos', fase: 7, desc: 'Objetivos SMART' },
-  { key: 'video_f7_mision', fase: 7, desc: 'Introducción Misión' },
-  { key: 'video_f7_vision', fase: 7, desc: 'Introducción Visión' },
-  { key: 'video_f7_justificacion', fase: 7, desc: 'Introducción Justificación' }
+  { key: 'video_fase_0', fase: 0, desc: 'Fase 0 - Onboarding' },
+  { key: 'video_fase_1', fase: 1, desc: 'Fase 1 - Empatizar' },
+  { key: 'video_fase_2', fase: 2, desc: 'Fase 2 - Validación' },
+  { key: 'video_fase_3', fase: 3, desc: 'Fase 3 - Análisis de Competencia' },
+  { key: 'video_fase_4', fase: 4, desc: 'Fase 4 - Diseño de Producto' },
+  { key: 'video_fase_5', fase: 5, desc: 'Fase 5 - Modelo de Negocio' },
+  { key: 'video_fase_6', fase: 6, desc: 'Fase 6 - Prototipado' },
+  { key: 'video_fase_7', fase: 7, desc: 'Fase 7 - Planteamiento Estratégico' },
+  { key: 'video_fase_8', fase: 8, desc: 'Fase 8 - Plan de Operaciones' },
+  { key: 'video_fase_9', fase: 9, desc: 'Fase 9 - Plan de Marketing' },
+  { key: 'video_fase_10', fase: 10, desc: 'Fase 10 - Plan Financiero' },
+  { key: 'video_fase_11', fase: 11, desc: 'Fase 11 - Viabilidad' },
+  { key: 'video_fase_12', fase: 12, desc: 'Fase 12 - Pitch' },
+  { key: 'video_fase_13', fase: 13, desc: 'Fase 13 - Generación de Documento' }
 ];
 
 const VideosTab = ({ setMessage }) => {

@@ -185,7 +185,7 @@ const Fase0_OnboardingMentor = () => {
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <YoutubePlayer 
-                videoKey="video_encrucijada" 
+                videoKey="video_fase_0" 
                 fallbackUrl="https://www.youtube.com/embed/jZ0y9F6Y9g0" 
                 title="Video Introductorio" 
                 style={{ borderRadius: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }} 
