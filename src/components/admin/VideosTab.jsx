@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Video } from 'lucide-react';
 import { obtenerVideosConfig, guardarVideoConfig, buildYoutubeEmbedUrl } from '../../services/api';
+import { clearVideoCache } from '../ui/YoutubePlayer';
 
 const VIDEO_LIST = [
   { key: 'video_encrucijada', fase: 0, desc: 'Encrucijada (Innovación vs Emprendimiento)' },
@@ -60,6 +61,7 @@ const VideosTab = ({ setMessage }) => {
     try {
       const config = videosConfig[videoKey];
       await guardarVideoConfig(videoKey, config.url);
+      clearVideoCache();
       setMessage({ text: 'Configuración de video guardada exitosamente.', type: 'success' });
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (err) {

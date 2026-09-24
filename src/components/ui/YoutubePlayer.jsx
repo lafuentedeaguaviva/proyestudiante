@@ -20,6 +20,12 @@ const fetchConfigGlobal = async () => {
   return fetchPromise;
 };
 
+export const clearVideoCache = () => {
+  cachedVideosConfig = null;
+  isFetchingConfig = false;
+  fetchPromise = null;
+};
+
 /**
  * Componente reutilizable para iframes de YouTube con configuración dinámica (recorte de tiempo)
  */
