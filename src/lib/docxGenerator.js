@@ -777,7 +777,8 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${proyectoNombre.replace(/[^a-z0-9]/gi, '_')}.docx`;
+    const projectName = localStorage.getItem('temp_proyecto_nombre') || 'Proyecto_Final_Emprendimiento';
+    a.download = `${projectName.replace(/[^a-z0-9]/gi, '_')}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
