@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProyectoModel } from '../models/ProyectoModel';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 export const useDashboardController = () => {
   const navigate = useNavigate();
+  const { isAdmin, perfil } = useAuth();
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showMundos, setShowMundos] = useState(false);
@@ -79,7 +81,7 @@ export const useDashboardController = () => {
   }, [fetchProyectos]);
 
   const handleCrearProyecto = (mundoId) => {
-    if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+    if (!isAdmin && (perfil?.educoins || 0) <= 0) {
       window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y crear una misión.`);
       return;
     }
@@ -101,7 +103,7 @@ export const useDashboardController = () => {
 
     const handleRetomarProyecto = (proyecto) => {
     // Verificar EduCoins antes de ingresar (si no es admin)
-    if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+    if (!isAdmin && (perfil?.educoins || 0) <= 0) {
       window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y continuar con tu misión.`);
       return;
     }
@@ -153,7 +155,7 @@ export const useDashboardController = () => {
   };
 
   const toggleShowMundos = (val) => {
-    if (val === true && !isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+    if (val === true && !isAdmin && (perfil?.educoins || 0) <= 0) {
       window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y crear una nueva misión.`);
       return;
     }
