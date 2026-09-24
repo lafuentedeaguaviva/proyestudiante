@@ -316,16 +316,15 @@ const Fase6_LocalizacionDistribucion = () => {
       pasoActual={step}
       totalPasos={8}
       tabs={[
-        { id: 1, icon: <Video size={18} />, label: 'Video Distribución' },
-        { id: 2, icon: <MapPin size={18} />, label: 'Identificación Loc.' },
-        { id: 3, icon: <Truck size={18} />, label: 'Canales Distribución' },
-        { id: 4, icon: <MapPin size={18} />, label: 'Elección Lugar' },
-        { id: 5, icon: <Image size={18} />, label: 'Croquis' },
-        { id: 6, icon: <CreditCard size={18} />, label: 'Pagos' },
-        { id: 7, icon: <Video size={18} />, label: 'Video Plan Dist.' },
-        { id: 8, icon: <ClipboardList size={18} />, label: 'Plan Acción' },
-        { id: 9, icon: <Bot size={18} />, label: 'Resumen IA' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <MapPin size={18} />, label: 'Identificación Loc.' },
+          { id: 3, icon: <Truck size={18} />, label: 'Canales Distribución' },
+          { id: 4, icon: <MapPin size={18} />, label: 'Elección Lugar' },
+          { id: 5, icon: <Image size={18} />, label: 'Croquis' },
+          { id: 6, icon: <CreditCard size={18} />, label: 'Pagos' },
+          { id: 7, icon: <ClipboardList size={18} />, label: 'Plan Acción' },
+          { id: 8, icon: <Bot size={18} />, label: 'Resumen IA' }
+        ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);

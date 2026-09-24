@@ -1096,12 +1096,11 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
       pasoActual={step}
       totalPasos={5}
       tabs={[
-        { id: 1, icon: <Video size={18} />, label: 'Video Procesos' },
-        { id: 2, icon: <List size={18} />, label: 'Listado Pasos' },
-        { id: 3, icon: <CheckSquare size={18} />, label: 'Revisión' },
-        { id: 4, icon: <Video size={18} />, label: 'Video Diagrama' },
-        { id: 5, icon: <Network size={18} />, label: 'Diagrama' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <List size={18} />, label: 'Listado Pasos' },
+          { id: 3, icon: <CheckSquare size={18} />, label: 'Revisión' },
+          { id: 4, icon: <Network size={18} />, label: 'Diagrama' }
+        ]}
       onTabClick={(id) => {
         irAPaso(id);
       }}

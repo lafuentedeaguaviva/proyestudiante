@@ -667,10 +667,11 @@ const Fase9_Estructura = () => {
       pasoActual={step}
       totalPasos={3}
       tabs={[
-        { id: 1, icon: <Network size={18} />, label: 'Organigrama' },
-        { id: 2, icon: <Briefcase size={18} />, label: 'Roles y Funciones' },
-        { id: 3, icon: <Sparkles size={18} />, label: 'Resumen IA' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <Network size={18} />, label: 'Organigrama' },
+          { id: 3, icon: <Briefcase size={18} />, label: 'Roles y Funciones' },
+          { id: 4, icon: <Sparkles size={18} />, label: 'Resumen IA' }
+        ]}
       onTabClick={(id) => {
         irAPaso(id);
       }}

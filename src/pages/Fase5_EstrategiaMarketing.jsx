@@ -307,21 +307,18 @@ const Fase5_EstrategiaMarketing = () => {
       pasoActual={step}
       totalPasos={9}
       tabs={[
-        { id: 1, icon: <Video size={18} />, label: 'Video Competencia' },
-        { id: 2, icon: <Search size={18} />, label: 'Análisis Competencia' },
-        { id: 3, icon: <Video size={18} />, label: 'Video Ventaja' },
-        { id: 4, icon: <Rocket size={18} />, label: 'Ventaja Competitiva' },
-        { id: 5, icon: <Video size={18} />, label: 'Video Entorno' },
-        { id: 6, icon: <Globe size={18} />, label: 'PESTEL' },
-        { id: 7, icon: <Video size={18} />, label: 'Video Promoción' },
-        { id: 8, icon: <Megaphone size={18} />, label: 'Promoción' },
-        { id: 9, icon: <Bot size={18} />, label: 'Resumen IA' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <Search size={18} />, label: 'Análisis Competencia' },
+          { id: 3, icon: <Rocket size={18} />, label: 'Ventaja Competitiva' },
+          { id: 4, icon: <Globe size={18} />, label: 'PESTEL' },
+          { id: 5, icon: <Megaphone size={18} />, label: 'Promoción' },
+          { id: 6, icon: <Bot size={18} />, label: 'Resumen IA' }
+        ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
-      onSiguiente={() => step < 9 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 6 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={`Estás en el paso ${step} de 9. Revisa que los datos estén correctos antes de continuar.`}
       guardando={guardando}
