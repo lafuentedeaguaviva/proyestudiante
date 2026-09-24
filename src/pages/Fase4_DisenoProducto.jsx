@@ -86,7 +86,7 @@ const Fase4_DisenoProductoPage = () => {
                 if (globalData.tipoNegocio === 'Servicio' && t.id === 4) return false;
                 if (globalData.tipoNegocio === 'Producto' && t.id === 5) return false;
                 return true;
-              })}}
+              })}
             currentStep={step}
             onTabClick={async (id) => {
               irAPaso(id);
