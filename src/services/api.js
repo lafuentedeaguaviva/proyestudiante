@@ -1727,6 +1727,12 @@ export const cobrarEducoin = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Debes iniciar sesión para usar la IA.");
   
+    // Verificar si es admin para omitir cobro
+  const { data: perfilData } = await supabase.from('perfiles_usuario').select('rol').eq('id', user.id).single();
+  if (perfilData && perfilData.rol === 'admin') {
+    return true; // Los administradores no pagan EduCoins
+  }
+
   const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 10 });
   if (error) {
     console.error("Error consumiendo educoin:", error);
