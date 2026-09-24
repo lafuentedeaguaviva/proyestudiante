@@ -72,8 +72,11 @@ export const useDashboardController = () => {
     fetchProyectos();
   }, [fetchProyectos]);
 
-  // Actions
   const handleCrearProyecto = (mundoId) => {
+    if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y crear una misión.");
+      return;
+    }
     setSelectedMundoId(mundoId);
     setIsQrModalOpen(true);
   };
@@ -144,6 +147,10 @@ export const useDashboardController = () => {
   };
 
   const toggleShowMundos = (val) => {
+    if (val === true && !isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+      window.showCustomAlert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y crear una nueva misión.");
+      return;
+    }
     setShowMundos(val);
   };
 
