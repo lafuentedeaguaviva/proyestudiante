@@ -4,8 +4,19 @@ Todas las versiones y cambios notables de este proyecto están documentados aqu�
 
 ---
 
-## [v1.2.1] — 2026-09-23
+## [v1.2.2] — 2026-09-24
 
+### 🐛 Correcciones (Hotfixes)
+- **Plan Financiero (Fase 10):** Refactorizada la lógica matemática de `totalFijos` y `Costo Variable Global` para filtrar rigurosamente los gastos de infraestructura, personal y operativos, excluyendo elementos de capital de inversión como la maquinaria.
+- **Plan Financiero (Multi-producto):** Modificada la generación de la tabla de *Materiales e insumos*. Ahora consolida de manera automática e inteligente las recetas y costos variables mensuales para *N* productos, sin requerir carga manual.
+- **Exportación Word (Fase 11):** Sincronización absoluta de fórmulas en `docxGenerator.js` con la plataforma web. Las proyecciones, VAN, TIR, costos de operación y las tablas de estructura de costos cuadran ahora al 100%.
+- **Exportación Word (Índices y KPIs):** Eliminada por completo la sección obsoleta de KPIs (4.7) y añadida configuración `updateFields: true` para forzar a Microsoft Word a actualizar dinámicamente su *Índice de Contenidos* al abrir el documento.
+- **Servidor Nginx (Producción):** Creado archivo `nginx.conf` y actualizado el `Dockerfile` habilitando el enrutamiento correcto de React Router (SPA) para evitar errores "404 Not Found" al refrescar la página.
+- **Panel Admin de Videos:** Interfaz de administración simplificada (eliminados "Inicio/Fin"). Ahora procesa inteligentemente tanto URLs completas de YouTube como códigos enteros de `<iframe src="...">`, extrayendo automáticamente el video correcto.
+
+---
+
+## [v1.2.1] — 2026-09-23
 ### 🐛 Correcciones (Hotfixes)
 - **Persistencia de Sesión (F5):** Implementado `ProtectedRoute` envolviendo todas las rutas en `AppRouter.jsx` para evitar cierres de sesión accidentales al refrescar la página.
 - **Guardado de Videos (Base de Datos):** Creado script SQL para aplicar una restricción `UNIQUE` en la tabla `prompts_ia` permitiendo que Supabase procese los `upsert` correctamente al configurar los videos de la plataforma.
