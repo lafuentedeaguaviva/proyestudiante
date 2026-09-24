@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Map, X, Lock, CheckCircle2, User, Users, Rocket, Target, Star, Play, Coins, FileText, Presentation, Mic, ChevronDown, Megaphone, MapPin, Settings, Network, TrendingUp, Heart, Bot } from 'lucide-react';
+import { Map, X, Lock, CheckCircle2, User, Users, Rocket, Target, Star, Play, Coins, FileText, Presentation, Mic, ChevronDown, Megaphone, MapPin, Settings, Network, TrendingUp, Heart, Bot, Truck } from 'lucide-react';
 
 export default function MapaViaje({ isOpen, onClose, faseActiva, maxFaseDesbloqueada, jumpToPhase, caminoElegido }) {
   
@@ -12,47 +12,40 @@ export default function MapaViaje({ isOpen, onClose, faseActiva, maxFaseDesbloqu
       id: 1, 
       title: 'Fase 1: Encontrar la idea', 
       icon: <Rocket />, 
-      pasos: ['Selección de Área', 'Video: El Arte de observar problemas', 'Observación del Entorno', 'Video: ¿Por qué fallan las soluciones?', 'Análisis de Fricciones', 'Guía: Brainstorming Efectivo', 'Lluvia de Ideas', 'Video: Evaluación objetiva', 'Matriz de Batalla', 'Idea Ganadora y Pitch'] 
+      pasos: ['Video', 'Selección de Área', 'Observación del Entorno', 'Análisis de Fricciones', 'Guía: Brainstorming Efectivo', 'Lluvia de Ideas', 'Matriz de Batalla', 'Idea Ganadora y Pitch'] 
     },
     { 
       id: 2, 
       title: 'Fase 2: Validación de la Idea', 
       icon: <Target />, 
-      pasos: ['Introducción a la Validación', 'Diseño de la Encuesta', 'Explicación de la Matriz', 'Codificación de Preguntas', 'Tabulación de Resultados', 'Análisis de Resultados', 'Resumen IA'] 
+      pasos: ['Video', 'Introducción a la Validación', 'Diseño de la Encuesta', 'Explicación de la Matriz', 'Codificación de Preguntas', 'Tabulación de Resultados', 'Análisis de Resultados', 'Resumen IA'] 
     },
-    { id: 3, title: 'Fase 3: Público Objetivo', icon: <Users />, pasos: ['Video Público Objetivo', 'Público Objetivo'] },
+    { id: 3, title: 'Fase 3: Público Objetivo', icon: <Users />, pasos: ['Video', 'Público Objetivo'] },
     { 
       id: 4, 
       title: 'Fase 4: Diseño de producto', 
       icon: <Star />, 
-      pasos: ['Video Diseño Producto/Servicio', 'Qué vas a vender', 'Video Características', 'Características', 'Beneficios', 'Video Empaque', 'Empaque', 'Presentación', 'Video Demanda Potencial', 'Demanda Potencial', 'Resumen IA'] 
+      pasos: ['Video', 'Qué vas a vender', 'Características', 'Beneficios', 'Empaque', 'Presentación', 'Demanda Potencial', 'Resumen IA'] 
     },
     { 
       id: 5, 
       title: 'Fase 5: Estrategia de Marketing', 
       icon: <Megaphone />, 
-      pasos: ['1. Video: Análisis de competencia', '2. Análisis de competencia', '3. Video: Ventaja competitiva', '4. Tu Ventaja Competitiva', '5. Video: Análisis del entorno', '6. Análisis del entorno (Factores externos)', '7. Video: Estrategia de promoción', '8. Estrategia de promoción', '9. Resumen IA'] 
+      pasos: ['Video', 'Análisis de competencia', 'Tu Ventaja Competitiva', 'Análisis del entorno', 'Estrategia de promoción', 'Resumen IA'] 
     },
     { 
       id: 6, 
       title: 'Fase 6: Localización', 
       icon: <Truck />, 
-      pasos: ['Video Localización', 'Identificación', 'Canales', 'Elección Lugar', 'Croquis', 'Pagos', 'Video Plan Dist.', 'Plan Acción', 'Resumen IA'] 
+      pasos: ['Video', 'Identificación', 'Canales', 'Elección Lugar', 'Croquis', 'Pagos', 'Plan Acción', 'Resumen IA'] 
     },
-    { id: 7, title: 'Fase 7: Planteamiento', icon: <CheckCircle2 />, pasos: [
-        'Video Diagnóstico', 'Diagnóstico del contexto',
-        'Video Objetivos', 'Objetivos',
-        'Video Misión', 'Misión',
-        'Video Visión', 'Visión',
-        'Video Justificación', 'Justificación',
-        'Resumen IA'
-    ] },
-    { id: 8, title: 'Fase 8: La Operación', icon: <Settings />, pasos: ['1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos', '5. Juego: Clasificación de Procesos'] },
-    { id: 9, title: 'Fase 9: Estructura Org.', icon: <Network />, pasos: ['Organigrama', 'Roles'] },
-    { id: 10, title: 'Fase 10: Viabilidad', icon: <TrendingUp />, pasos: ['Inversión Inicial', 'Costos Fijos y Variables', 'Precios y Equilibrio', 'Video Utilidad', 'Utilidad e Impuestos', 'Video Equilibrio', 'Punto de Equilibrio', 'Video Evaluación', 'VAN y TIR'] },
-    { id: 11, title: 'Fase 11: Consolidación del Documento', icon: <FileText />, pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },
-    { id: 12, title: 'Fase 12: Proyecto de Vida', icon: <Heart />, pasos: ['Alineación', 'Metas', 'Equilibrio', 'Legado', 'Resumen IA'] },
-    { id: 13, title: 'Fase 13: Documento Final IA', icon: <Bot />, pasos: ['Configuración IA'] }
+    { id: 7, title: 'Fase 7: Planteamiento', icon: <CheckCircle2 />, pasos: ['Video', 'Diagnóstico del contexto', 'Objetivos', 'Misión', 'Visión', 'Justificación', 'Resumen IA'] },
+    { id: 8, title: 'Fase 8: La Operación', icon: <Settings />, pasos: ['Video', 'Definir Pasos', 'Revisión de Procesos', 'Clasificación de Procesos'] },
+    { id: 9, title: 'Fase 9: Estructura Org.', icon: <Network />, pasos: ['Video', 'Organigrama', 'Roles', 'Resumen IA'] },
+    { id: 10, title: 'Fase 10: Viabilidad', icon: <TrendingUp />, pasos: ['Video', 'Cap. Inversión', 'Costos por Prod.', 'Cap. Trabajo', 'Resumen', 'Costos', 'Precio Venta', 'Proy. Gan', 'Proy. Gastos', 'Utilidad', 'Equilibrio', 'VAN y TIR'] },
+    { id: 11, title: 'Fase 11: Consolidación del Documento', icon: <FileText />, pasos: ['Video', 'Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },
+    { id: 12, title: 'Fase 12: Proyecto de Vida', icon: <Heart />, pasos: ['Video', 'Alineación', 'Metas', 'Equilibrio', 'Legado', 'Resumen IA'] },
+    { id: 13, title: 'Fase 13: Documento Final IA', icon: <Bot />, pasos: ['Video', 'Configuración IA', 'Documento Generado'] }
   ];
 
   const checkStatus = (nivelId) => {

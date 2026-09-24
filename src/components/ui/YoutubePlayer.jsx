@@ -55,7 +55,7 @@ const YoutubePlayer = ({ videoKey, fallbackUrl, title = "YouTube video player", 
 
   if (loading) {
     return (
-      <div style={{ ...style, background: '#1e293b', borderRadius: '1rem', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }} className={className}>
+      <div style={{ width: '100%', ...style, background: '#1e293b', borderRadius: '1rem', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }} className={className}>
         <div style={{ width: '30px', height: '30px', border: '3px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
         <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
@@ -63,7 +63,7 @@ const YoutubePlayer = ({ videoKey, fallbackUrl, title = "YouTube video player", 
   }
 
   return (
-    <div style={{ ...style, background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }} className={className}>
+    <div style={{ width: '100%', ...style, background: '#000', borderRadius: '1rem', overflow: 'hidden', aspectRatio: '16/9', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }} className={className}>
       <iframe 
         width="100%" 
         height="100%" 

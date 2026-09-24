@@ -5,20 +5,20 @@ import { obtenerVideosConfig, guardarVideoConfig, buildYoutubeEmbedUrl } from '.
 import { clearVideoCache } from '../ui/YoutubePlayer';
 
 const VIDEO_LIST = [
-  { key: 'video_fase_0', fase: 0, desc: 'Fase 0 - Onboarding' },
-  { key: 'video_fase_1', fase: 1, desc: 'Fase 1 - Empatizar' },
-  { key: 'video_fase_2', fase: 2, desc: 'Fase 2 - Validación' },
-  { key: 'video_fase_3', fase: 3, desc: 'Fase 3 - Análisis de Competencia' },
-  { key: 'video_fase_4', fase: 4, desc: 'Fase 4 - Diseño de Producto' },
-  { key: 'video_fase_5', fase: 5, desc: 'Fase 5 - Modelo de Negocio' },
-  { key: 'video_fase_6', fase: 6, desc: 'Fase 6 - Prototipado' },
-  { key: 'video_fase_7', fase: 7, desc: 'Fase 7 - Planteamiento Estratégico' },
-  { key: 'video_fase_8', fase: 8, desc: 'Fase 8 - Plan de Operaciones' },
-  { key: 'video_fase_9', fase: 9, desc: 'Fase 9 - Plan de Marketing' },
-  { key: 'video_fase_10', fase: 10, desc: 'Fase 10 - Plan Financiero' },
-  { key: 'video_fase_11', fase: 11, desc: 'Fase 11 - Viabilidad' },
-  { key: 'video_fase_12', fase: 12, desc: 'Fase 12 - Pitch' },
-  { key: 'video_fase_13', fase: 13, desc: 'Fase 13 - Generación de Documento' }
+  { key: 'video_fase_0', fase: 0, desc: 'Fase 0 - El Inicio del Viaje' },
+  { key: 'video_fase_1', fase: 1, desc: 'Fase 1 - Encontrar la idea' },
+  { key: 'video_fase_2', fase: 2, desc: 'Fase 2 - Validación de la Idea' },
+  { key: 'video_fase_3', fase: 3, desc: 'Fase 3 - Público Objetivo' },
+  { key: 'video_fase_4', fase: 4, desc: 'Fase 4 - Diseño de producto o servicio' },
+  { key: 'video_fase_5', fase: 5, desc: 'Fase 5 - La Estrategia de Marketing' },
+  { key: 'video_fase_6', fase: 6, desc: 'Fase 6 - Localización y Distribución' },
+  { key: 'video_fase_7', fase: 7, desc: 'Fase 7 - Planteamiento del Emprendimiento' },
+  { key: 'video_fase_8', fase: 8, desc: 'Fase 8 - La Operación' },
+  { key: 'video_fase_9', fase: 9, desc: 'Fase 9 - Estructura Organizacional' },
+  { key: 'video_fase_10', fase: 10, desc: 'Fase 10 - Viabilidad y Sostenibilidad' },
+  { key: 'video_fase_11', fase: 11, desc: 'Fase 11 - Consolidación del Documento' },
+  { key: 'video_fase_12', fase: 12, desc: 'Fase 12 - Proyecto de Vida' },
+  { key: 'video_fase_13', fase: 13, desc: 'Fase 13 - Documento Final IA' }
 ];
 
 const VideosTab = ({ setMessage }) => {

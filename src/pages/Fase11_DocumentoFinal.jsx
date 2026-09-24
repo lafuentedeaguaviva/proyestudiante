@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PasoLayout from '../layouts/PasoLayout';
 import { useFase11Controller } from '../controllers/useFase11Controller';
-import { BookOpen, BarChart, CheckCircle, Gift, Heart, Play } from 'lucide-react';
+import { BookOpen, BarChart, CheckCircle, Gift, Heart, Play, Video } from 'lucide-react';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 import { NexusContext } from '../context/NexusContext';
 import { obtenerTodoElContenidoProyecto, generarRedaccionMediaIA } from '../services/api';
 
@@ -136,7 +137,7 @@ const Fase11_DocumentoFinal = () => {
           updates.intro_objetivos = await generarRedaccionMediaIA(contexto, 'Objetivos general y específicos', "Genera un Objetivo General y 3 Específicos basados en el contexto.", nivelIA);
         }
         await checkAndGen('intro_estructura', 'Estructura o capítulos de los que consta el documento final');
-      } else if (step === 4) {
+      } else if (step === 3) {
         await checkAndGen('resultados_mercado', 'Resultados del estudio de mercado y segmentación de clientes');
         await checkAndGen('resultados_tecnico', 'Resultados del estudio técnico y productivo');
         await checkAndGen('resultados_financiero', 'Resultados del estudio financiero y rentabilidad');
@@ -281,20 +282,14 @@ const Fase11_DocumentoFinal = () => {
   const getPasoContent = () => {
     switch(step) {
       case 1: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-slate-100">
-          <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">Recurso: Cómo redactar la Introducción</h3>
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1455390582262-044cdead27d8?auto=format&fit=crop&q=80&w=1000" alt="Introducción" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Documento Final</h2>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <YoutubePlayer videoKey="video_fase_11" title="Documento Final" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
             </div>
           </div>
-        </div>
-      );
-      case 2: return (
+        );
+        case 2: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-blue-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
@@ -346,21 +341,8 @@ const Fase11_DocumentoFinal = () => {
           </div>
         </div>
       );
-      case 3: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-slate-100">
-          <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">Recurso: Presentando los Resultados</h3>
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000" alt="Resultados" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 4: 
+      
+      case 3: 
         const autoCompletarResultados = () => {
           let mercado = data.resultados_mercado || '';
           let tecnico = data.resultados_tecnico || '';
@@ -463,21 +445,8 @@ const Fase11_DocumentoFinal = () => {
           </div>
         </div>
       );
-      case 5: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-slate-100">
-          <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">Recurso: Cómo hacer Conclusiones</h3>
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1000" alt="Conclusiones" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-purple-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 6: 
+      
+      case 4: 
         const parseObjetivos = (texto) => {
           let general = [];
           let especificos = [];
@@ -599,21 +568,8 @@ const Fase11_DocumentoFinal = () => {
           </div>
         </div>
       );
-      case 7: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-slate-100">
-          <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">Recurso: Agradecimientos</h3>
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=1000" alt="Agradecimientos" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-amber-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 8: return (
+      
+      case 5: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-amber-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
@@ -639,21 +595,8 @@ const Fase11_DocumentoFinal = () => {
           </div>
         </div>
       );
-      case 9: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-slate-100">
-          <h3 className="text-2xl font-black text-slate-800 mb-6 text-center">Recurso: Dedicatoria</h3>
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=1000" alt="Dedicatoria" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-rose-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 10: return (
+      
+      case 6: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-rose-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-rose-100 rounded-xl text-rose-600">
@@ -679,7 +622,7 @@ const Fase11_DocumentoFinal = () => {
           </div>
         </div>
       );
-      case 11: return (
+      case 7: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-indigo-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
@@ -766,27 +709,23 @@ const Fase11_DocumentoFinal = () => {
       pasoActual={step}
       totalPasos={11}
       tabs={[
-        { id: 1, icon: <Play size={16} />, label: 'V. Intro' },
-        { id: 2, icon: <BookOpen size={16} />, label: 'Intro' },
-        { id: 3, icon: <Play size={16} />, label: 'V. Resultados' },
-        { id: 4, icon: <BarChart size={16} />, label: 'Resultados' },
-        { id: 5, icon: <Play size={16} />, label: 'V. Conclusiones' },
-        { id: 6, icon: <CheckCircle size={16} />, label: 'Conclusiones' },
-        { id: 7, icon: <Play size={16} />, label: 'V. Agradecimientos' },
-        { id: 8, icon: <Gift size={16} />, label: 'Agradecimientos' },
-        { id: 9, icon: <Play size={16} />, label: 'V. Dedicatoria' },
-        { id: 10, icon: <Heart size={16} />, label: 'Dedicatoria' },
-        { id: 11, icon: <BookOpen size={16} />, label: 'Resumen IA' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <BookOpen size={16} />, label: 'Intro' },
+          { id: 3, icon: <BarChart size={16} />, label: 'Resultados' },
+          { id: 4, icon: <CheckCircle size={16} />, label: 'Conclusiones' },
+          { id: 5, icon: <Gift size={16} />, label: 'Agradecimientos' },
+          { id: 6, icon: <Heart size={16} />, label: 'Dedicatoria' },
+          { id: 7, icon: <BookOpen size={16} />, label: 'Resumen IA' }
+        ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
-      onSiguiente={() => step < 11 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 7 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={
         step === 1 || step === 2 ? "La introducción es la puerta de entrada a tu proyecto. Debe explicar el qué y el para qué." : 
-        step === 3 || step === 4 ? "Los resultados son la evidencia de tu trabajo. Sé objetivo, solo muestra los datos sin opinar." : 
+        step === 3 || step === 3 ? "Los resultados son la evidencia de tu trabajo. Sé objetivo, solo muestra los datos sin opinar." : 
         step === 5 || step === 6 ? "Las conclusiones responden a tus objetivos. Las recomendaciones guían el camino a futuro." : 
         step === 7 || step === 8 ? "Un buen líder reconoce a quienes lo ayudaron a llegar a la meta. Agradece a tu equipo, familia e instituciones." :
         step === 9 || step === 10 ? "La dedicatoria es algo muy personal y emotivo. ¿A quién le ofreces el esfuerzo de todos estos meses?" :

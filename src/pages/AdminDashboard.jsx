@@ -10,6 +10,7 @@ import PromptsTab from '../components/admin/PromptsTab';
 import UsersTab from '../components/admin/UsersTab';
 import VideosTab from '../components/admin/VideosTab';
 import SettingsTab from '../components/admin/SettingsTab';
+import VersiculosTab from '../components/admin/VersiculosTab';
 
 const DEFAULT_PROMPTS = [
   {
@@ -240,6 +241,7 @@ const AdminDashboard = () => {
             { id: 'usuarios', icon: <Users size={20} />, label: 'Usuarios y Roles', color: '#a855f7' },
             { id: 'prompts', icon: <MessageSquare size={20} />, label: 'Prompts IA', color: '#3b82f6' },
             { id: 'videos', icon: <Video size={20} />, label: 'Videos y URLs', color: '#ef4444' },
+            { id: 'versiculos', icon: <Database size={20} />, label: 'Versículos', color: '#f59e0b' },
             { id: 'config', icon: <Settings size={20} />, label: 'Límites y Pagos', color: '#10b981' },
             { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Volver a Dashboard', onClick: () => navigate('/dashboard'), color: '#94a3b8' },
           ].map((item) => {
@@ -306,12 +308,14 @@ const AdminDashboard = () => {
               {activeTab === 'prompts' ? 'Gestión de Prompts IA' : 
                activeTab === 'usuarios' ? 'Gestión de Usuarios' : 
                activeTab === 'videos' ? 'Biblioteca de Videos' : 
+               activeTab === 'versiculos' ? 'Versículos Bíblicos' : 
                'Configuración General'}
             </h1>
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>
               {activeTab === 'prompts' ? 'Ajusta las instrucciones maestras para el motor de Inteligencia Artificial.' : 
                activeTab === 'usuarios' ? 'Administra los roles, permisos y accesos de los usuarios registrados.' : 
                activeTab === 'videos' ? 'Configura las URLs de YouTube y sus marcas de tiempo.' : 
+               activeTab === 'versiculos' ? 'Administra los versículos bíblicos aleatorios para el Centro de Mando.' : 
                'Ajustes globales de pago y límites de uso de la plataforma.'}
             </p>
           </motion.div>
@@ -379,6 +383,9 @@ const AdminDashboard = () => {
                 )}
                 {activeTab === 'videos' && (
                   <VideosTab setMessage={setMessage} />
+                )}
+                {activeTab === 'versiculos' && (
+                  <VersiculosTab setMessage={setMessage} />
                 )}
                 {activeTab === 'config' && (
                   <SettingsTab 

@@ -127,7 +127,15 @@ const Fase9_Estructura = () => {
 
   const getPasoContent = () => {
     switch(step) {
-      case 4: return (
+      case 1: return (
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Estructura</h2>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <YoutubePlayer videoKey="video_fase_9" title="Estructura Organizacional" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
+            </div>
+          </div>
+        );
+        case 2: return (
         <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-4">
             <div className="flex items-center gap-3">
@@ -471,7 +479,7 @@ const Fase9_Estructura = () => {
           </div>
         </div>
       );
-      case 4: return (
+      case 3: return (
         <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">

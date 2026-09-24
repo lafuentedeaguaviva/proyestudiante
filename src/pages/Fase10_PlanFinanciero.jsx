@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import PasoLayout from '../layouts/PasoLayout';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import StepNavigation from '../components/ui/StepNavigation';
 import { useFase10Controller } from '../controllers/useFase10Controller';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DollarSign, Wallet, TrendingUp, Plus, Trash2, Calculator, Info, Package, Play, Bot, Sparkles, AlertTriangle, Lightbulb, Target, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { DollarSign, Wallet, TrendingUp, Plus, Trash2, Calculator, Info, Package, Play, Bot, Sparkles, AlertTriangle, Lightbulb, Target, ArrowUpRight, CheckCircle2, Video } from 'lucide-react';
 import { generarPlanFinancieroIA, generarConsejosDemandaIA } from '../services/api';
 
 const cajaHerramientas = {
@@ -284,45 +285,14 @@ const Fase10_PlanFinanciero = () => {
 
     switch (step) {
       case 1: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
-              <Play size={24} fill="currentColor" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-800">Cálculo de Inversiones</h2>
-              <p className="text-slate-500 font-medium">Aprende qué necesitas para arrancar tu proyecto.</p>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Viabilidad y Sostenibilidad</h2>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <YoutubePlayer videoKey="video_fase_10" title="Plan Financiero" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
             </div>
           </div>
-
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=1000" alt="Finanzas" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-emerald-800 mb-3 flex items-center gap-2">
-                <Package size={20} /> Cálculo de Inversiones
-              </h3>
-              <p className="text-emerald-700 text-sm leading-relaxed mb-2">
-                Antes de iniciar, debes conocer tu <strong>INVERSIÓN TOTAL</strong>, la cual se compone de:
-              </p>
-              <ul className="list-disc ml-6 text-emerald-700 text-sm mb-4 space-y-1">
-                <li><strong>Activos Fijos:</strong> Bienes tangibles (máquinas, equipos, muebles y vehículos) necesarios para empezar.</li>
-                <li><strong>Activos Diferidos / Intangibles:</strong> Gastos legales, constitución, patentes y licencias.</li>
-                <li><strong>Capital de Trabajo:</strong> El dinero para cubrir materiales, insumos, sueldos y servicios durante los primeros meses.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      );
-      case 2: return (
+        );
+        case 2: return (
         <div className="animate-fade-in w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
           {/* Columna Izquierda: Caja de herramientas */}
           <div className="lg:w-1/3 bg-white p-6 rounded-3xl shadow-xl h-fit border border-slate-100">
@@ -976,7 +946,7 @@ case 5: {
         </div>
       );
 
-      case 7: {
+      case 6: {
         const costosOpe = data.inversiones.filter(i => ['infraestructura', 'personal', 'operativo'].includes(i.tipo));
 
         const cfTotal = totalFijos;
@@ -1091,7 +1061,7 @@ case 5: {
         </div>
       );
 
-      case 9: {
+      case 7: {
         const totalFijos = data.inversiones?.filter(i => ['infraestructura', 'personal', 'operativo'].includes(i.tipo) && (i.comportamiento || 'fijo') !== 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) || 0;
         const totalVariablesGlo = data.inversiones?.filter(i => ['infraestructura', 'personal', 'operativo'].includes(i.tipo) && (i.comportamiento || 'fijo') === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) || 0;
         const totalProdMensual = (data.productos || []).reduce((acc, p) => acc + (parseFloat(p.produccionMensual) || 0), 0) || 1;
@@ -1226,7 +1196,7 @@ case 5: {
           </div>
         </div>
       );
-      case 11: {
+      case 8: {
         return (
           <div className="animate-fade-in p-4 sm:p-6 bg-white rounded-3xl shadow-xl w-full max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
@@ -1362,30 +1332,7 @@ case 5: {
           </div>
         );
       }
-case 12: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-red-100 rounded-xl text-red-600">
-              <Play size={24} fill="currentColor" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-800">Proyección de gastos</h2>
-              <p className="text-slate-500 font-medium">Anticipa cuánto te costará mantener el negocio funcionando.</p>
-            </div>
-          </div>
-
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000" alt="Proyeccion Gastos" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 13: return (
+case 9: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-red-100 rounded-xl text-red-600">
@@ -1439,30 +1386,7 @@ case 12: return (
         </div>
       );
 
-      case 14: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
-              <Play size={24} fill="currentColor" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-800">Utilidad Bruta y Neta</h2>
-              <p className="text-slate-500 font-medium">Conoce la diferencia antes y después de pagar impuestos.</p>
-            </div>
-          </div>
-
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1554224155-1696413565d3?auto=format&fit=crop&q=80&w=1000" alt="Utilidad" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-amber-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 15: return (
+      case 10: return (
         <div className="animate-fade-in p-4 sm:p-6 bg-white rounded-3xl shadow-xl w-full max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
@@ -1562,30 +1486,7 @@ case 12: return (
           </div>
         </div>
       );
-case 16: return (
-        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
-              <Play size={24} fill="currentColor" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-800">Punto de equilibrio</h2>
-              <p className="text-slate-500 font-medium">La meta principal de todo negocio en sus inicios.</p>
-            </div>
-          </div>
-
-          <div className="aspect-video w-full bg-slate-900 rounded-2xl overflow-hidden mb-6 relative group cursor-pointer shadow-lg">
-            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1000" alt="Equilibrio" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-110 transition-transform">
-                <Play size={40} fill="currentColor" className="ml-2" />
-              </div>
-              <p className="text-white font-bold text-lg drop-shadow-md">Ver Video Explicativo</p>
-            </div>
-          </div>
-        </div>
-      );
-      case 17: return (
+case 11: return (
         <div className="animate-fade-in p-4 sm:p-6 bg-white rounded-3xl shadow-xl w-full max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
@@ -1656,7 +1557,7 @@ case 18: return (
           </div>
         </div>
       );
-      case 19: {
+      case 12: {
         const inversionInicial = totalInversion;
 
         // Calculate consolidated Net Cash Flows for VAN and TIR
@@ -1808,31 +1709,24 @@ default: return <div>Paso no definido</div>;
       pasoActual={step}
       totalPasos={19}
       tabs={[
-        { id: 1, icon: <Play size={16} />, label: 'V. Inversión' },
-        { id: 2, icon: <Wallet size={16} />, label: 'Cap. Inversión' },
-        { id: 3, icon: <Calculator size={16} />, label: 'Costos por Prod.' },
-        { id: 4, icon: <Package size={16} />, label: 'Cap. Trabajo' },
-        { id: 5, icon: <Wallet size={16} />, label: 'Resumen' },
-        { id: 6, icon: <Play size={16} />, label: 'V. Costos' },
-        { id: 7, icon: <Calculator size={16} />, label: 'Costos' },
-        { id: 8, icon: <Play size={16} />, label: 'V. Precio Venta' },
-        { id: 9, icon: <Calculator size={16} />, label: 'Precio Venta' },
-        { id: 10, icon: <Play size={16} />, label: 'V. Proy. Gan' },
-        { id: 11, icon: <TrendingUp size={16} />, label: 'Proy. Gan' },
-        { id: 12, icon: <Play size={16} />, label: 'V. Gastos' },
-        { id: 13, icon: <Wallet size={16} />, label: 'Proy. Gastos' },
-        { id: 14, icon: <Play size={16} />, label: 'V. Utilidad' },
-        { id: 15, icon: <TrendingUp size={16} />, label: 'Utilidad' },
-        { id: 16, icon: <Play size={16} />, label: 'V. Equilibrio' },
-        { id: 17, icon: <Calculator size={16} />, label: 'Equilibrio' },
-        { id: 18, icon: <Play size={16} />, label: 'V. Evaluación' },
-        { id: 19, icon: <TrendingUp size={16} />, label: 'VAN y TIR' }
-      ]}
+          { id: 1, icon: <Video size={16} />, label: 'Video' },
+          { id: 2, icon: <Wallet size={16} />, label: 'Cap. Inversión' },
+          { id: 3, icon: <Calculator size={16} />, label: 'Costos por Prod.' },
+          { id: 4, icon: <Package size={16} />, label: 'Cap. Trabajo' },
+          { id: 5, icon: <Wallet size={16} />, label: 'Resumen' },
+          { id: 6, icon: <Calculator size={16} />, label: 'Costos' },
+          { id: 7, icon: <Calculator size={16} />, label: 'Precio Venta' },
+          { id: 8, icon: <TrendingUp size={16} />, label: 'Proy. Gan' },
+          { id: 9, icon: <Wallet size={16} />, label: 'Proy. Gastos' },
+          { id: 10, icon: <TrendingUp size={16} />, label: 'Utilidad' },
+          { id: 11, icon: <Calculator size={16} />, label: 'Equilibrio' },
+          { id: 12, icon: <TrendingUp size={16} />, label: 'VAN y TIR' }
+        ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
-      onSiguiente={() => step < 19 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 12 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={
         step === 1 ? "Comprender qué necesitas comprar antes de abrir es vital para no quedarte sin dinero a mitad del camino." :

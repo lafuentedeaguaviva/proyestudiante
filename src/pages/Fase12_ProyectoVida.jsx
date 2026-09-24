@@ -1,10 +1,11 @@
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SplashScreen from '../components/ui/SplashScreen';
 import PasoLayout from '../layouts/PasoLayout';
 import { useFase12Controller } from '../controllers/useFase12Controller';
-import { Heart, Target, Clock, Globe2, BookOpen } from 'lucide-react';
+import { Heart, Target, Clock, Globe2, BookOpen, Video } from 'lucide-react';
 import { NexusContext } from '../context/NexusContext';
 import { obtenerTodoElContenidoProyecto, generarRedaccionMediaIA } from '../services/api';
 
@@ -91,6 +92,14 @@ const Fase12_ProyectoVida = () => {
   const getPasoContent = () => {
     switch(step) {
       case 1: return (
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Proyecto de Vida</h2>
+            <div style={{ width: '100%', maxWidth: '800px' }}>
+              <YoutubePlayer videoKey="video_fase_12" title="Video Proyecto de Vida" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
+            </div>
+          </div>
+        );
+        case 2: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-rose-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-rose-100 rounded-xl text-rose-600">
@@ -133,7 +142,7 @@ const Fase12_ProyectoVida = () => {
           </div>
         </div>
       );
-      case 2: return (
+      case 3: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-5xl mx-auto border-2 border-blue-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
@@ -194,7 +203,7 @@ const Fase12_ProyectoVida = () => {
           </div>
         </div>
       );
-      case 3: return (
+      case 4: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-emerald-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
@@ -246,7 +255,7 @@ const Fase12_ProyectoVida = () => {
           </div>
         </div>
       );
-      case 4: return (
+      case 5: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-purple-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-purple-100 rounded-xl text-purple-600">
@@ -289,7 +298,7 @@ const Fase12_ProyectoVida = () => {
           </div>
         </div>
       );
-      case 5: return (
+      case 6: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border-2 border-indigo-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
@@ -329,13 +338,14 @@ const Fase12_ProyectoVida = () => {
     <PasoLayout 
       faseTitle="Fase 12: Proyecto de Vida"
       pasoActual={step}
-      totalPasos={5}
+      totalPasos={6}
       tabs={[
-        { id: 1, icon: <Heart size={16} />, label: 'Alineación' },
-        { id: 2, icon: <Target size={16} />, label: 'Metas' },
-        { id: 3, icon: <Clock size={16} />, label: 'Equilibrio' },
-        { id: 4, icon: <Globe2 size={16} />, label: 'Legado' },
-        { id: 5, icon: <BookOpen size={16} />, label: 'Resumen IA' }
+        { id: 1, icon: <Video size={16} />, label: 'Video' },
+        { id: 2, icon: <Heart size={16} />, label: 'Alineación' },
+        { id: 3, icon: <Target size={16} />, label: 'Metas' },
+        { id: 4, icon: <Clock size={16} />, label: 'Equilibrio' },
+        { id: 5, icon: <Globe2 size={16} />, label: 'Legado' },
+        { id: 6, icon: <BookOpen size={16} />, label: 'Resumen IA' }
       ]}
       onTabClick={(id) => {
         setPendingSave(true);

@@ -1,9 +1,10 @@
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import SplashScreenMentor from '../components/ui/SplashScreenMentor';
 import PasoLayout from '../layouts/PasoLayout';
-import { Bot, Settings, Download, CheckCircle, Sparkles } from 'lucide-react';
+import { Bot, Settings, Download, CheckCircle, Sparkles, Video } from 'lucide-react';
 import { obtenerTodoElContenidoProyecto, generarDocumentoConsolidadoIA, guardarContenidoFase, obtenerPerfilActivo } from '../services/api';
 import { generarYDescargarWord } from '../lib/docxGenerator';
 import html2canvas from 'html2canvas';
@@ -712,7 +713,7 @@ const Fase13_DocumentoIA = () => {
       setMejoradosListos(mejorados);
       setImagenesListas(imagenesBase64);
       setPerfilListo(perfilUsuario);
-      setStep(2);
+      setStep(3);
       
     } catch (err) {
       console.error(err);
@@ -753,7 +754,18 @@ const Fase13_DocumentoIA = () => {
 
     if (step === 1) {
       return (
-        <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Documento Final IA</h2>
+          <div style={{ width: '100%', maxWidth: '800px' }}>
+            <YoutubePlayer videoKey="video_fase_13" title="Video Documento Final IA" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
+          </div>
+        </div>
+      );
+    }
+
+    if (step === 2) {
+      return (
+        <motion.div key="step2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
           <div className={sectionClass}>
             <div className="flex items-center gap-4 mb-8">
               <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
@@ -810,9 +822,9 @@ const Fase13_DocumentoIA = () => {
       );
     }
 
-    if (step === 2) {
+    if (step === 3) {
       return (
-        <motion.div key="step2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={sectionClass + " text-center border-emerald-300 relative overflow-hidden w-full"}>
+        <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={sectionClass + " text-center border-emerald-300 relative overflow-hidden w-full"}>
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-50 to-teal-100 opacity-50 z-0 pointer-events-none"></div>
           
           <div className="relative z-10">
@@ -848,16 +860,17 @@ const Fase13_DocumentoIA = () => {
     <PasoLayout 
       faseTitle="Fase 13: Proyecto Final"
       pasoActual={step}
-      totalPasos={2}
+      totalPasos={3}
       tabs={[
-        { id: 1, icon: <Settings size={16} />, label: 'Configuración' },
-        { id: 2, icon: <CheckCircle size={16} />, label: 'Documento' }
+          { id: 1, icon: <Video size={16} />, label: 'Video' },
+        { id: 2, icon: <Settings size={16} />, label: 'Configuración' },
+        { id: 3, icon: <CheckCircle size={16} />, label: 'Documento' }
       ]}
-      onTabClick={() => {}}
+      onTabClick={(id) => setStep(id)}
       onSiguiente={null}
       onAnterior={step > 1 ? () => setStep(step - 1) : null}
       mentorText={
-        step === 1 ? "La Inteligencia Artificial tomará toda la información que llenaste en las fases anteriores y le dará estructura y formato académico." : 
+        step === 1 ? "Mira este video para entender cómo la IA te ayudará a consolidar todo." : step === 2 ? "La Inteligencia Artificial tomará toda la información que llenaste en las fases anteriores y le dará estructura y formato académico." : 
         "¡Excelente trabajo! Hemos llegado al final de este recorrido. Revisa tu documento y prepárate para presentarlo."
       }
     >

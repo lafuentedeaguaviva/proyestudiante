@@ -56,6 +56,39 @@ const DashboardView = ({ state, actions }) => {
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-lg)', marginTop: 'var(--spacing-md)', margin: 0, fontWeight: 'var(--font-weight-medium)' }}>
               Base de Operaciones Principal de la Agencia.
             </motion.p>
+            {state.versiculoRandom && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: 0.2 }} 
+                style={{ 
+                  marginTop: '1.5rem', 
+                  padding: '1.5rem 2rem', 
+                  background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%)', 
+                  borderRadius: '1.5rem', 
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderLeft: '4px solid var(--color-primary)', 
+                  maxWidth: '700px',
+                  boxShadow: '0 10px 30px -10px rgba(59, 130, 246, 0.15)',
+                  backdropFilter: 'blur(10px)',
+                  display: 'flex',
+                  gap: '1.25rem',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '1rem', color: 'var(--color-primary)' }}>
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <p style={{ margin: 0, color: 'var(--color-text-primary)', fontStyle: 'italic', fontSize: '1.15rem', lineHeight: 1.6, fontWeight: 500, letterSpacing: '0.01em' }}>
+                    "{state.versiculoRandom.texto}"
+                  </p>
+                  <p style={{ margin: '0.75rem 0 0 0', color: 'var(--color-primary)', fontWeight: '800', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    — {state.versiculoRandom.cita}
+                  </p>
+                </div>
+              </motion.div>
+            )}
           </div>
           
           <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>

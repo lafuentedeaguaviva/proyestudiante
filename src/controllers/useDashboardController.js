@@ -15,6 +15,7 @@ export const useDashboardController = () => {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [qrUrl, setQrUrl] = useState('');
   const [selectedMundoId, setSelectedMundoId] = useState(null);
+  const [versiculoRandom, setVersiculoRandom] = useState(null);
 
   const fetchProyectos = useCallback(async () => {
     try {
@@ -31,6 +32,33 @@ export const useDashboardController = () => {
         .eq('proposito', 'qr_pago_url')
         .single();
       if (qrData) setQrUrl(qrData.prompt_texto);
+
+      // Fetch Versículos
+      const { data: versesData, error: versesError } = await supabase
+        .from('prompts_ia')
+        .select('prompt_texto')
+        .eq('fase_id', 0)
+        .eq('proposito', 'versiculos_biblicos')
+        .single();
+        
+      let versesArray = [
+        { texto: "Todo lo puedo en Cristo que me fortalece.", cita: "Filipenses 4:13" },
+        { texto: "Porque yo sé muy bien los planes que tengo para ustedes...", cita: "Jeremías 29:11" }
+      ];
+
+      if (!versesError && versesData && versesData.prompt_texto) {
+        try {
+          const parsed = JSON.parse(versesData.prompt_texto);
+          if (parsed && parsed.length > 0) {
+            versesArray = parsed;
+          }
+        } catch(e) {
+          console.warn("Error parsing verses", e);
+        }
+      }
+      
+      const randomVerse = versesArray[Math.floor(Math.random() * versesArray.length)];
+      setVersiculoRandom(randomVerse);
 
     } catch (err) {
       console.error(err);
@@ -122,7 +150,8 @@ export const useDashboardController = () => {
       editingId,
       editTitle,
       isQrModalOpen,
-      qrUrl
+      qrUrl,
+      versiculoRandom
     },
     actions: {
       handleCrearProyecto,

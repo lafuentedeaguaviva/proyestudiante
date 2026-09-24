@@ -69,7 +69,7 @@ const Fase5_EstrategiaMarketing = () => {
   if (cargando) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando datos de la Fase 5...</div>;
 
   const renderVideoStep = (titulo) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
       <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{titulo}</h2>
       <div style={{ width: '100%', maxWidth: '800px' }}>
         <YoutubePlayer videoKey="video_fase_5" title={titulo} fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />

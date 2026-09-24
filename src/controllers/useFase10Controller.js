@@ -16,7 +16,7 @@ export const useFase10Controller = () => {
   // Todo el estado se guardará en `financiero`
   const baseController = useFaseController({
     faseId: 10,
-    totalPasos: 19,
+    totalPasos: 12,
     clavesDeGuardado: ['financiero'],
     estructuraJSON: true
   });
