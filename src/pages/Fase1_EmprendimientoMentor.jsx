@@ -138,15 +138,12 @@ const Fase1_EmprendimientoMentor = () => {
             <SubMenuFases 
               tabs={[
                 { id: 1, icon: <Monitor size={18} />, label: 'Área' },
-                { id: 2, icon: <Video size={18} />, label: 'Problemas' },
+                { id: 2, icon: <Video size={18} />, label: 'Video' },
                 { id: 3, icon: <Eye size={18} />, label: 'Observación' },
-                { id: 4, icon: <Video size={18} />, label: 'Soluciones' },
-                { id: 5, icon: <AlertCircle size={18} />, label: 'Fricciones' },
-                { id: 6, icon: <Video size={18} />, label: 'Ideación' },
-                { id: 7, icon: <Lightbulb size={18} />, label: 'Ideas' },
-                { id: 8, icon: <Video size={18} />, label: 'Evaluación' },
-                { id: 9, icon: <Zap size={18} />, label: 'Batalla' },
-                { id: 10, icon: <Award size={18} />, label: 'Ganadora' }
+                { id: 4, icon: <AlertCircle size={18} />, label: 'Fricciones' },
+                { id: 5, icon: <Lightbulb size={18} />, label: 'Ideas' },
+                { id: 6, icon: <Zap size={18} />, label: 'Batalla' },
+                { id: 7, icon: <Award size={18} />, label: 'Ganadora' }
               ]}
               currentStep={step}
               onTabClick={async (id) => {
