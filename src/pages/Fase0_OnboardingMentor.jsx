@@ -5,6 +5,7 @@ import { Play, ChevronRight, FileText, CheckCircle, Bot } from 'lucide-react';
 import { obtenerConfiguracionFase, crearProyectoMentor, guardarContenidoFase } from '../services/api';
 import SidebarFases from '../components/ui/SidebarFases';
 import SubMenuFases from '../components/ui/SubMenuFases';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
 
 const Fase0_OnboardingMentor = () => {
   const navigate = useNavigate();
@@ -183,14 +184,12 @@ const Fase0_OnboardingMentor = () => {
           {/* PASO 1: VIDEO */}
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <div style={{ background: 'white', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                <div style={{ position: 'absolute', inset: 0, background: '#f8fafc', opacity: 0.9 }}></div>
-                <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, color: '#0f172a' }}>
-                  <Play size={64} style={{ marginBottom: '1rem', color: '#ca8a04' }} />
-                  <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Video Introductorio</h2>
-                  <p style={{ color: '#475569' }}>(Placeholder del video)</p>
-                </div>
-              </div>
+              <YoutubePlayer 
+                videoKey="video_encrucijada" 
+                fallbackUrl="https://www.youtube.com/embed/jZ0y9F6Y9g0" 
+                title="Video Introductorio" 
+                style={{ borderRadius: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }} 
+              />
               <div style={{ textAlign: 'right', marginTop: '2rem' }}>
                 <button onClick={() => setStep(2)} style={{ background: '#ca8a04', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '0.5rem', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                   Continuar al Cuestionario <ChevronRight size={20} />
