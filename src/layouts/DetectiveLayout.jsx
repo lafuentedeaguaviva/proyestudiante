@@ -104,7 +104,10 @@ const DetectiveLayout = ({ children, personajeHablando, canGoBack = true }) => {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {/* Monedero Virtual EduCoins */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.4rem 1rem', borderRadius: '2rem', boxShadow: '0 0 10px rgba(245, 158, 11, 0.2)', backdropFilter: 'blur(5px)' }}>
+          <div 
+            title="Tus EduCoins son válidos únicamente durante la gestión 2026"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.4rem 1rem', borderRadius: '2rem', boxShadow: '0 0 10px rgba(245, 158, 11, 0.2)', backdropFilter: 'blur(5px)', cursor: 'help' }}
+          >
             <span style={{ fontSize: '1.2rem' }}>🪙</span>
             <span style={{ color: '#fcd34d', fontWeight: '900', fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '1px' }}>
               {perfil?.educoins ?? 0}

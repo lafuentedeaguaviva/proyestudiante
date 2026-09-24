@@ -343,12 +343,15 @@ const SidebarFases = () => {
 
               {/* Barra de progreso EduCoins */}
               <div style={{ padding: '0 0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fcd34d', fontWeight: 'bold', fontSize: '0.9rem' }}>
                     <Coins size={16} />
                     <span>EduCoins</span>
                   </div>
                   <span style={{ color: theme.textMain, fontWeight: 'bold', fontSize: '0.9rem' }}>{perfil?.educoins ?? 0}</span>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: theme.textSub, marginBottom: '0.5rem' }}>
+                  * Válidos solo por la gestión 2026
                 </div>
                 
                 <div style={{ width: '100%', height: '8px', background: isMentor ? '#e2e8f0' : 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -364,7 +367,11 @@ const SidebarFases = () => {
                   />
                 </div>
                 <div style={{ textAlign: 'right', marginTop: '0.25rem', fontSize: '0.75rem', color: theme.textSub }}>
-                  {(perfil?.educoins ?? 0) === 0 ? 'Sin monedas (IA Bloqueada)' : 'Quedan monedas'}
+                  {(perfil?.educoins ?? 0) === 0 ? (
+                    <span style={{ color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => alert('Para adquirir más EduCoins, por favor contacta a tu mentor o administrador.')}>
+                      0 EduCoins - ¡Compra más aquí!
+                    </span>
+                  ) : 'Quedan monedas'}
                 </div>
               </div>
             </div>
