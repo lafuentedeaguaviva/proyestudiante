@@ -326,6 +326,8 @@ export const useFase1Logic = () => {
       const proyecto_id = localStorage.getItem('temp_proyecto_id');
       if (proyecto_id) {
         await actualizarTituloProyecto(nombre, proyecto_id).catch(err => console.error("Error guardando titulo:", err));
+          localStorage.setItem('temp_proyecto_nombre', nombre);
+          window.dispatchEvent(new Event('proyectoNombreActualizado'));
       }
 
       const contextoData = {

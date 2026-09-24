@@ -701,7 +701,8 @@ const Fase13_DocumentoIA = () => {
       }
 
       setEstadoIA('Formateando el documento Word...');
-      await generarYDescargarWord(datosTotales, mejorados, imagenesBase64, perfilUsuario);
+      const nombreProyecto = localStorage.getItem('temp_proyecto_nombre') || 'Proyecto_Final_Emprendimiento';
+      await generarYDescargarWord(datosTotales, mejorados, imagenesBase64, perfilUsuario, nombreProyecto);
       
       try {
         await guardarContenidoFase(13, 'paso_actual', 2);
@@ -828,7 +829,7 @@ const Fase13_DocumentoIA = () => {
 
             <div className="space-y-4">
               <button 
-                onClick={() => generarYDescargarWord(datosListos, mejoradosListos, imagenesListas, perfilListo)}
+                onClick={() => generarYDescargarWord(datosListos, mejoradosListos, imagenesListas, perfilListo, localStorage.getItem('temp_proyecto_nombre') || 'Proyecto_Final_Emprendimiento')}
                 className="w-full bg-white text-emerald-600 border-2 border-emerald-200 hover:bg-emerald-50 font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 transition-all"
               >
                 <Download size={24} /> Volver a Descargar

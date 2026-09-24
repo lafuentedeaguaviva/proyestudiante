@@ -9,14 +9,16 @@ const SidebarFases = () => {
   const isMentor = localStorage.getItem('temp_entorno_seleccionado') === '55555555-5555-5555-5555-555555555555' || window.location.pathname.toLowerCase().includes('mentor');
   const [isOpen, setIsOpen] = useState(false);
   const [maxFaseDB, setMaxFaseDB] = useState(0); // Para guardar la fase máxima desde la BD
-  const [maxPasoFaseActual, setMaxPasoFaseActual] = useState(1); // Paso máximo alcanzado en la fase actual
-  const [fasesActivas, setFasesActivas] = useState([]);
-  const [loadingMapa, setLoadingMapa] = useState(true);
-  const [numeroAdmin, setNumeroAdmin] = useState("71541014");
-  const navigate = useNavigate();
-  const location = useLocation();
+  
+    const [maxPasoFaseActual, setMaxPasoFaseActual] = useState(1);
+    const [proyectoNombre, setProyectoNombre] = useState(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
 
-  // Consulta a la BD para la fase máxima alcanzada y asignar mapa estático
+    useEffect(() => {
+      const handleNombre = () => setProyectoNombre(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
+      window.addEventListener('proyectoNombreActualizado', handleNombre);
+      return () => window.removeEventListener('proyectoNombreActualizado', handleNombre);
+    }, []);
+
   useEffect(() => {
     const fetchMaxFase = async () => {
       const { supabase } = await import('../../lib/supabaseClient');
@@ -158,7 +160,7 @@ const SidebarFases = () => {
             <div style={{ padding: '1.5rem', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <MapPin color={theme.primary} size={24} />
-                <h2 style={{ margin: 0, fontSize: '1.25rem', color: theme.textMain }}>Mapa del Proyecto</h2>
+                <h2 style={{ margin: 0, fontSize: '1.15rem', color: theme.textMain, maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={proyectoNombre}>{proyectoNombre}</h2>
               </div>
               <button 
                 onClick={() => { navigate('/dashboard'); setIsOpen(false); }}
