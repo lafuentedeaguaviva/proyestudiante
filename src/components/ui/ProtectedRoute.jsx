@@ -8,8 +8,8 @@ import { useAuth } from '../../context/AuthContext';
  * - Si no hay usuario activo: redirige a /login.
  * - Si hay usuario: renderiza los children.
  */
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children, requireProfile = true }) => {
+  const { user, perfil, loading } = useAuth();
 
   if (loading) {
     return (
@@ -45,6 +45,11 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Si requiere perfil y no existe (y no está cargando), redirigir a completar-perfil
+  if (requireProfile && !perfil) {
+    return <Navigate to="/completar-perfil" replace />;
   }
 
   return children;

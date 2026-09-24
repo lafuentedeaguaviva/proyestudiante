@@ -41,7 +41,7 @@ const AppRouter = () => {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginScreen />} />
-              <Route path="/completar-perfil" element={<ProtectedRoute><CompletarPerfil /></ProtectedRoute>} />
+              <Route path="/completar-perfil" element={<ProtectedRoute requireProfile={false}><CompletarPerfil /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/fase/0" element={<ProtectedRoute><Fase0_OnboardingMentor /></ProtectedRoute>} />
               <Route path="/fase/:faseId/intro" element={<ProtectedRoute><FaseIntro /></ProtectedRoute>} />
