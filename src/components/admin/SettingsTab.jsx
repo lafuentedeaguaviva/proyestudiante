@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Save } from 'lucide-react';
 
-const SettingsTab = ({ qrUrl, setQrUrl, limiteIA, setLimiteIA, handleSaveQr }) => {
+const SettingsTab = ({ qrUrl, setQrUrl, numeroContacto, setNumeroContacto, handleSaveQr }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <motion.div 
@@ -66,12 +66,12 @@ const SettingsTab = ({ qrUrl, setQrUrl, limiteIA, setLimiteIA, handleSaveQr }) =
             </div>
 
             <div>
-              <label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 600 }}>Límite de usos de IA por Proyecto</label>
+              <label style={{ display: 'block', color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 600 }}>Número de Contacto (Venta de EduCoins)</label>
               <input
-                type="number"
-                min="1"
-                value={limiteIA}
-                onChange={(e) => setLimiteIA(parseInt(e.target.value, 10))}
+                type="text"
+                placeholder="Ej: 71541014"
+                value={numeroContacto}
+                onChange={(e) => setNumeroContacto(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '1rem',

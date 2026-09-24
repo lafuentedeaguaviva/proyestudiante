@@ -12,6 +12,7 @@ const SidebarFases = () => {
   const [maxPasoFaseActual, setMaxPasoFaseActual] = useState(1); // Paso máximo alcanzado en la fase actual
   const [fasesActivas, setFasesActivas] = useState([]);
   const [loadingMapa, setLoadingMapa] = useState(true);
+  const [numeroAdmin, setNumeroAdmin] = useState("71541014");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,6 +59,11 @@ const SidebarFases = () => {
       ];
 
       // Filtrar o ajustar si es necesario según isMentor (aunque como mentor usualmente se ven todas)
+      
+      // Obtener el número de admin
+      const configRes = await supabase.from('configuracion_prompts_ia').select('prompt_texto').eq('fase_id', 0).eq('proposito', 'numero_contacto_admin').single();
+      if (configRes.data?.prompt_texto) setNumeroAdmin(configRes.data.prompt_texto);
+
       setFasesActivas(mapaEstatico);
       setLoadingMapa(false);
     };
@@ -368,7 +374,7 @@ const SidebarFases = () => {
                 </div>
                 <div style={{ textAlign: 'right', marginTop: '0.25rem', fontSize: '0.75rem', color: theme.textSub }}>
                   {(perfil?.educoins ?? 0) === 0 ? (
-                    <span style={{ color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => alert('Para adquirir más EduCoins, por favor contacta a tu mentor o administrador.')}>
+                    <span style={{ color: '#ef4444', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => alert(`Para adquirir más EduCoins, por favor contacta a tu mentor o administrador. Contacte con el número de celular/WhatsApp: ${numeroAdmin}`)}>
                       0 EduCoins - ¡Compra más aquí!
                     </span>
                   ) : 'Quedan monedas'}

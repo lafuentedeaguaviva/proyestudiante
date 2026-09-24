@@ -77,7 +77,7 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('usuarios'); // Cambiado a 'usuarios' por defecto para que el usuario vea primero lo que pidió
   const [qrUrl, setQrUrl] = useState('');
-  const [limiteIA, setLimiteIA] = useState(10);
+  const [numeroContacto, setNumeroContacto] = useState('71541014');
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -117,8 +117,8 @@ const AdminDashboard = () => {
       const qrConfig = data?.find(p => p.fase_id === 0 && p.proposito === 'qr_pago_url');
       if (qrConfig) setQrUrl(qrConfig.prompt_texto);
 
-      const limiteConfig = data?.find(p => p.fase_id === 0 && p.proposito === 'ia_limite_intentos');
-      if (limiteConfig) setLimiteIA(parseInt(limiteConfig.prompt_texto, 10));
+      const numeroConfig = data?.find(p => p.fase_id === 0 && p.proposito === 'numero_contacto_admin');
+      if (numeroConfig) setNumeroContacto(numeroConfig.prompt_texto);
 
       setPrompts(mergedPrompts);
     } catch (error) {
@@ -161,7 +161,7 @@ const AdminDashboard = () => {
   const handleSaveQr = async () => {
     try {
       await guardarPromptIA(0, 'qr_pago_url', qrUrl);
-      await guardarPromptIA(0, 'ia_limite_intentos', limiteIA.toString());
+      await guardarPromptIA(0, 'numero_contacto_admin', numeroContacto);
       setMessage({ text: `Configuración guardada exitosamente`, type: 'success' });
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (error) {
@@ -391,8 +391,8 @@ const AdminDashboard = () => {
                   <SettingsTab 
                     qrUrl={qrUrl}
                     setQrUrl={setQrUrl}
-                    limiteIA={limiteIA}
-                    setLimiteIA={setLimiteIA}
+                    numeroContacto={numeroContacto}
+                    setNumeroContacto={setNumeroContacto}
                     handleSaveQr={handleSaveQr}
                   />
                 )}
