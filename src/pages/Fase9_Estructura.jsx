@@ -5,7 +5,7 @@ import PasoLayout from '../layouts/PasoLayout';
 import SplashScreenMentor from '../components/ui/SplashScreenMentor';
 import { useFase9Controller } from '../controllers/useFase9Controller';
 import { AnimatePresence, motion, Reorder } from 'framer-motion';
-import { Plus, Trash2, Users, FileText, ChevronRight, TrendingUp, Settings, Megaphone, Monitor, X, Network, Briefcase, Download, Sparkles, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Users, FileText, ChevronRight, TrendingUp, Settings, Megaphone, Monitor, X, Network, Briefcase, Download, Sparkles, RefreshCw, Video } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 
 const InlineInput = ({ value, onChange, className, placeholder }) => {
