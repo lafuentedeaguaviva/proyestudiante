@@ -14,6 +14,8 @@ const SidebarFases = () => {
   const [fasesActivas, setFasesActivas] = useState([]);
   const [loadingMapa, setLoadingMapa] = useState(true);
   const [numeroAdmin, setNumeroAdmin] = useState("71541014");
+  const navigate = useNavigate();
+  const location = useLocation();
   const [proyectoNombre, setProyectoNombre] = useState(localStorage.getItem('temp_proyecto_nombre') || 'Mi Proyecto');
 
   useEffect(() => {
