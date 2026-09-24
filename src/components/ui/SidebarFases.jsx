@@ -291,6 +291,7 @@ const SidebarFases = () => {
               })}
 
 
+            </div>
 
             {/* Widget de Usuario y EduCoins al final del Sidebar */}
             <div style={{
