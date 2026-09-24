@@ -200,7 +200,11 @@ const SidebarFases = () => {
                     <button 
                       disabled={!isUnlocked}
                       onClick={() => {
-                          if (fase.id > 0) {
+                            if (!isMentor && (perfil?.educoins || 0) <= 0) {
+                              alert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
+                              return;
+                            }
+                            if (fase.id > 0) {
                             navigate(`/fase/${fase.id}/intro`);
                           } else {
                             navigate(`${fase.path}?paso=1`);
@@ -256,8 +260,12 @@ const SidebarFases = () => {
                                 disabled={!isUnlockedPaso}
                                 onClick={(e) => {
                                   if (!isUnlockedPaso) return;
-                                  e.stopPropagation();
-                                  navigate(`${fase.path}?paso=${pasoNumber}`);
+                                    e.stopPropagation();
+                                    if (!isMentor && (perfil?.educoins || 0) <= 0) {
+                                      alert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes para ingresar. Contacta a tu mentor o administrador al celular ${numeroAdmin}`);
+                                      return;
+                                    }
+                                    navigate(`${fase.path}?paso=${pasoNumber}`);
                                   setIsOpen(false);
                                 }}
                                 style={{

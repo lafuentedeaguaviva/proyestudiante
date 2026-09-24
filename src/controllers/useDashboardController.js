@@ -90,7 +90,12 @@ export const useDashboardController = () => {
     }
   };
 
-  const handleRetomarProyecto = (proyecto) => {
+    const handleRetomarProyecto = (proyecto) => {
+    // Verificar EduCoins antes de ingresar (si no es admin)
+    if (!isAdmin && (user?.educoins || user?.perfil?.educoins || 0) <= 0) {
+      alert("⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador para recargar saldo y continuar con tu misión.");
+      return;
+    }
     localStorage.setItem('temp_proyecto_id', proyecto.id);
     navigate(`/fase/${proyecto.fase_actual}`);
   };
