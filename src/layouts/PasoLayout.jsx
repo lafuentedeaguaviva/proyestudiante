@@ -37,7 +37,6 @@ const PasoLayout = ({
 
   const [maxFaseDB, setMaxFaseDB] = React.useState(0);
   const [maxPasoFaseActual, setMaxPasoFaseActual] = React.useState(1);
-  const isMentor = localStorage.getItem('temp_entorno_seleccionado') === '55555555-5555-5555-5555-555555555555' || window.location.pathname.toLowerCase().includes('mentor');
 
   React.useEffect(() => {
     const fetchMaxFase = async () => {
