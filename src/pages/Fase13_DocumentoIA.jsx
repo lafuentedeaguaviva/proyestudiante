@@ -857,7 +857,7 @@ const Fase13_DocumentoIA = () => {
           { id: 2, icon: <CheckCircle size={16} />, label: 'Documento' }
         ]}
       onTabClick={(id) => setStep(id)}
-      onSiguiente={null}
+      onSiguiente={step === 1 ? () => setStep(2) : null}
       onAnterior={step > 1 ? () => setStep(step - 1) : null}
       mentorText={
           step === 1 ? "La Inteligencia Artificial tomará toda la información que llenaste en las fases anteriores y le dará estructura y formato académico." : 

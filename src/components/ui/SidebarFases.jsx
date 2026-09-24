@@ -55,7 +55,7 @@ const SidebarFases = () => {
         { id: 10, titulo: 'Viabilidad y Sostenibilidad', path: '/fase/10', pasos: ['Video', 'Cap. Inversión', 'Costos por Prod.', 'Cap. Trabajo', 'Resumen', 'Costos', 'Precio Venta', 'Proy. Gan', 'Proy. Gastos', 'Utilidad', 'Equilibrio', 'VAN y TIR'] },
         { id: 11, titulo: 'Consolidación del Documento', path: '/fase/11', pasos: ['Video', 'Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },
         { id: 12, titulo: 'Proyecto de Vida', path: '/fase/12', pasos: ['Video', 'Alineación', 'Metas', 'Equilibrio', 'Legado', 'Resumen IA'] },
-        { id: 13, titulo: 'Documento Final IA', path: '/fase/13', pasos: ['Video', 'Configuración IA', 'Documento Generado'] }
+        { id: 13, titulo: 'Documento Final IA', path: '/fase/13', pasos: [ 'Configuración IA', 'Documento Generado'] }
       ];
 
       // Filtrar o ajustar si es necesario según isMentor (aunque como mentor usualmente se ven todas)
