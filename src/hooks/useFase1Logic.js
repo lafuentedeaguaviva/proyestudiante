@@ -19,7 +19,7 @@ export const useFase1Logic = () => {
   useEffect(() => {
     if (pasoQuery) {
       const p = parseInt(pasoQuery);
-      if (p >= 0 && p <= 10 && p !== step) {
+      if (p >= 0 && p <= 7 && p !== step) {
         setStep(p);
       }
     }
@@ -83,7 +83,7 @@ export const useFase1Logic = () => {
           if (!pasoQuery) {
             const savedStep = parseInt(contenidoGuardado.paso_actual, 10);
             if (!isNaN(savedStep)) {
-              handleSetStep(savedStep > 10 ? 10 : savedStep);
+              handleSetStep(savedStep > 7 ? 7 : savedStep);
             }
           } else {
             // Sincroniza la DB si hay pasoQuery
@@ -176,7 +176,7 @@ export const useFase1Logic = () => {
     try {
       if (step === 1 && area) {
         await guardarContenidoFase(1, 'area_seleccionada', { nombre_area: area });
-      } else if (step === 3 || step === 5) {
+      } else if (step === 3 || step === 4) {
         const datosCompletos = observaciones.map((obs, index) => ({
           id: index + 1,
           ...obs,
@@ -184,7 +184,7 @@ export const useFase1Logic = () => {
           fricciones: fricciones[index] || { solucionActual: '', friccion: '', solucionIdeal: '' }
         }));
         await guardarContenidoFase(1, 'problemas_detectados', datosCompletos);
-      } else if (step === 7) {
+      } else if (step === 5) {
         // Asegurar que las ideas editadas se guarden al avanzar
         await guardarContenidoFase(1, 'ideas_generadas', ideasIA);
         await guardarContenidoFase(1, 'ideas_seleccionadas', ideasSeleccionadas);
@@ -197,7 +197,7 @@ export const useFase1Logic = () => {
   const handleSiguiente = async () => {
     try {
       await autoGuardar(); // Reutilizamos la lógica
-      if (step === 6) {
+      if (step === 4) {
         // Al entrar al paso 7, pre-popular las ideas con las soluciones ideales
         const solucionesIdeales = fricciones.map(f => f.solucionIdeal).filter(Boolean);
         setIdeasIA(solucionesIdeales);

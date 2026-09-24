@@ -57,7 +57,7 @@ const Fase1_EmprendimientoMentor = () => {
   } = logic;
 
   useEffect(() => {
-    if (step === 10 && ideaGanadora && nombresSugeridos.length === 0) {
+    if (step === 7 && ideaGanadora && nombresSugeridos.length === 0) {
       solicitarNombresIA(ideaGanadora);
     }
   }, [step, ideaGanadora, nombresSugeridos, solicitarNombresIA]);
@@ -324,35 +324,9 @@ const Fase1_EmprendimientoMentor = () => {
               </motion.div>
             )}
 
-            {/* 4. Recurso Fricciones */}
-            {step === 4 && (
-              <motion.div key="s4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.fricciones?.titulo || "¿Por qué fallan las soluciones?"}</h3>
-                <div style={{ marginBottom: '2rem' }}>
-                  <YoutubePlayer 
-                    videoKey="video_fase_1"
-                    fallbackUrl={mentorData.teoria_caminos?.recursos?.fricciones?.url || "https://www.youtube.com/embed/z4vG_y-J15o"}
-                    title="Fricciones del Entorno"
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
-                  {step > 1 && (
-                    <button 
-                      onClick={logic.handleAnterior}
-                      style={{ padding: '1rem 2rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
-                    >
-                      ← Volver
-                    </button>
-                  )}
-                  <button onClick={handleSiguiente} style={{ padding: '1rem 2rem', background: '#ca8a04', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold' }}>Entendido, a la acción</button>
-                </div>
-              </motion.div>
-            )}
 
-            {/* 5. Formulario de Fricciones */}
-            {step === 5 && (
+            {/* 4. Formulario de Fricciones */}
+            {step === 4 && (
               <motion.div key="s5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h2 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '2rem' }}>Análisis de Fricciones</h2>
                 
@@ -398,42 +372,9 @@ const Fase1_EmprendimientoMentor = () => {
               </motion.div>
             )}
 
-            {/* 6. Recurso Ideación */}
-            {step === 6 && (
-              <motion.div key="s6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.ideacion?.titulo || "Video: Brainstorming Efectivo"}</h3>
-                <div style={{ marginBottom: '2rem' }}>
-                  <YoutubePlayer 
-                    videoKey="video_fase_1"
-                    fallbackUrl={mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('youtube') || mentorData.teoria_caminos?.recursos?.ideacion?.url?.includes('vimeo') ? mentorData.teoria_caminos.recursos.ideacion.url : "https://www.youtube.com/embed/pWp1-WvU7K8"}
-                    title="Ideación"
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
-                  {step > 1 && (
-                    <button 
-                      onClick={logic.handleAnterior}
-                      style={{ padding: '1rem 2rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
-                    >
-                      ← Volver
-                    </button>
-                  )}
-                  <button 
-                  onClick={() => {
-                    handleSiguiente();
-                    solicitarIdeasIA();
-                  }} 
-                  style={{ padding: '1rem 2rem', background: '#ca8a04', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', }}>
-                  <Bot size={24} /> Entendido, generar ideas con IA
-                </button>
-                </div>
-              </motion.div>
-            )}
 
-            {/* 7. Lluvia de Ideas */}
-            {step === 7 && (
+            {/* 5. Lluvia de Ideas */}
+            {step === 5 && (
               <motion.div key="s7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h2 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '1rem' }}>Lluvia de Ideas y Asistencia IA</h2>
                 <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '1.1rem' }}>Selecciona hasta 3 ideas geniales para llevar a la batalla final.</p>
@@ -534,35 +475,9 @@ const Fase1_EmprendimientoMentor = () => {
               </motion.div>
             )}
 
-            {/* 8. Recurso Evaluación */}
-            {step === 8 && (
-              <motion.div key="s8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>{mentorData.teoria_caminos?.recursos?.evaluacion?.titulo || "Evaluación objetiva de negocios"}</h3>
-                <div style={{ marginBottom: '2rem' }}>
-                  <YoutubePlayer 
-                    videoKey="video_fase_1"
-                    fallbackUrl={mentorData.teoria_caminos?.recursos?.evaluacion?.url || "https://www.youtube.com/embed/fAymKnd8b44"}
-                    title="Evaluación Objetiva"
-                  />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem' }}>
-                  {step > 1 && (
-                    <button 
-                      onClick={logic.handleAnterior}
-                      style={{ padding: '1rem 2rem', background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
-                    >
-                      ← Volver
-                    </button>
-                  )}
-                  <button onClick={handleSiguiente} style={{ padding: '1rem 2rem', background: '#ca8a04', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold' }}>A la Matriz de Batalla</button>
-                </div>
-              </motion.div>
-            )}
 
-            {/* 9. Matriz de Batalla */}
-            {step === 9 && (
+            {/* 6. Matriz de Batalla */}
+            {step === 6 && (
               <motion.div key="s9" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <h2>Matriz de Batalla (Max: 25 pts)</h2>
                 <p style={{ color: '#64748b', marginBottom: '2rem' }}>Puntúa cada idea de 0 (Nada) a 5 (Mucho) en los siguientes criterios.</p>
@@ -663,8 +578,8 @@ const Fase1_EmprendimientoMentor = () => {
               </motion.div>
             )}
 
-            {/* 10. Pitch & Nombres */}
-            {step === 10 && (
+            {/* 7. Pitch & Nombres */}
+            {step === 7 && (
               <motion.div key="s10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                   <Award size={64} color="#ca8a04" style={{ marginBottom: '1rem' }} />
