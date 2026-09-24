@@ -12,12 +12,14 @@ const CompletarPerfil = () => {
   const [formData, setFormData] = useState({
     nombre: '', celular: '', colegio: '', curso: '', caracteristicas: ''
   });
+  const [isNewUser, setIsNewUser] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await obtenerPerfilActivo();
         if (data && data.perfil) {
+          setIsNewUser(false);
           setFormData({
             nombre: data.perfil.nombre_completo || '',
             celular: data.perfil.celular || '',
@@ -40,7 +42,7 @@ const CompletarPerfil = () => {
     setLoading(true);
     setErrorStr(null);
     try {
-      await actualizarPerfilCompleto(formData);
+      await actualizarPerfilCompleto(formData, isNewUser);
       navigate('/dashboard');
     } catch (err) {
       console.error(err);

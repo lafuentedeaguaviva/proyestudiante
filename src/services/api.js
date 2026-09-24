@@ -115,21 +115,27 @@ export const obtenerMisProyectos = async () => {
 /**
  * Guarda o actualiza los datos personales del perfil del usuario (One-time).
  */
-export const actualizarPerfilCompleto = async (datos) => {
+export const actualizarPerfilCompleto = async (datos, isNewUser = false) => {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("No hay usuario autenticado.");
 
+  const upsertData = {
+    id: user.id,
+    email: user.email,
+    nombre_completo: datos.nombre,
+    celular: datos.celular,
+    colegio: datos.colegio,
+    curso: datos.curso,
+    caracteristicas_personales: datos.caracteristicas
+  };
+
+  if (isNewUser) {
+    upsertData.educoins = 0;
+  }
+
   const { data, error } = await supabase
     .from('perfiles_usuario')
-    .upsert({
-      id: user.id,
-      email: user.email,
-      nombre_completo: datos.nombre,
-      celular: datos.celular,
-      colegio: datos.colegio,
-      curso: datos.curso,
-      caracteristicas_personales: datos.caracteristicas
-    }, { onConflict: 'id' })
+    .upsert(upsertData, { onConflict: 'id' })
     .select();
 
   if (error) throw error;
