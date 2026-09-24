@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Bot, ArrowLeft, ArrowRight, Save, Check } from 'lucide-react';
 import SidebarFases from '../components/ui/SidebarFases';
 import SubMenuFases from '../components/ui/SubMenuFases';
-import { useNavigate, useLocation } from 'react-router-dom';
 import StepperFases from '../components/ui/StepperFases';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const PasoLayout = ({ 
   children, 
@@ -21,6 +22,18 @@ const PasoLayout = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { perfil } = useAuth();
+  
+  const isAdmin = perfil?.rol === 'admin';
+  const isMentor = localStorage.getItem('temp_entorno_seleccionado') === '55555555-5555-5555-5555-555555555555' || window.location.pathname.toLowerCase().includes('mentor') || isAdmin;
+
+  useEffect(() => {
+    // Si no es mentor/admin y no tiene monedas, patear al dashboard
+    if (!isMentor && (perfil?.educoins || 0) <= 0) {
+      alert("⚠️ ACCESO BLOQUEADO: Tus EduCoins han llegado a cero. Por favor, adquiere más monedas para continuar.");
+      navigate('/dashboard');
+    }
+  }, [perfil?.educoins, isMentor, navigate]);
 
   const [maxFaseDB, setMaxFaseDB] = React.useState(0);
   const [maxPasoFaseActual, setMaxPasoFaseActual] = React.useState(1);

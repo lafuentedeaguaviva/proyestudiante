@@ -16,12 +16,17 @@ const DetectiveLayout = ({ children, personajeHablando, canGoBack = true }) => {
   const { nexusInfluence, nexusMessage } = useContext(NexusContext) || { nexusInfluence: 0, nexusMessage: null };
   const { perfil } = useAuth();
 
+  const isAdmin = perfil?.rol === 'admin';
+  const isMentor = localStorage.getItem('temp_entorno_seleccionado') === '55555555-5555-5555-5555-555555555555' || window.location.pathname.toLowerCase().includes('mentor') || isAdmin;
+
   useEffect(() => {
-    // En Modo Mentor, desactivamos la redirección a gameover y la mecánica de Nexus
-    // if (nexusInfluence >= 100 && location.pathname !== '/gameover') {
-    //   navigate('/gameover');
-    // }
-  }, [nexusInfluence, location.pathname, navigate]);
+    // Si no es mentor/admin y no tiene monedas, patear al dashboard
+    if (!isMentor && (perfil?.educoins || 0) <= 0) {
+      alert("⚠️ ACCESO BLOQUEADO: Tus EduCoins han llegado a cero. Por favor, adquiere más monedas para continuar.");
+      navigate('/dashboard');
+      return;
+    }
+  }, [perfil?.educoins, isMentor, navigate]);
 
   // Función para obtener colores y estilos según el rol del personaje
   const getEstiloPersonaje = (rol) => {
