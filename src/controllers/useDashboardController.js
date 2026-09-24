@@ -85,8 +85,13 @@ export const useDashboardController = () => {
       window.showCustomAlert(`⚠️ ACCESO BLOQUEADO: No tienes EduCoins suficientes. Contacta a tu administrador al celular/WhatsApp ${numeroAdmin} para recargar saldo y crear una misión.`);
       return;
     }
-    setSelectedMundoId(mundoId);
-    setIsQrModalOpen(true);
+    // Saltamos el modal QR temporalmente
+    localStorage.setItem('temp_entorno_seleccionado', mundoId);
+    if (mundoId === '55555555-5555-5555-5555-555555555555') {
+      navigate('/fase/0');
+    } else {
+      navigate('/fase/1');
+    }
   };
 
   const handleConfirmarPago = () => {
