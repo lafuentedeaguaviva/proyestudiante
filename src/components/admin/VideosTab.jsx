@@ -59,7 +59,7 @@ const VideosTab = ({ setMessage }) => {
     setSavingVideo(videoKey);
     try {
       const config = videosConfig[videoKey];
-      await guardarVideoConfig(videoKey, config.url, config.startStr, config.endStr);
+      await guardarVideoConfig(videoKey, config.url);
       setMessage({ text: 'Configuración de video guardada exitosamente.', type: 'success' });
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (err) {
@@ -132,10 +132,10 @@ const VideosTab = ({ setMessage }) => {
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>URL del Video</label>
+                    <label style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>Enlace o Código Embebido</label>
                     <input 
                       type="text" 
-                      placeholder="Ej: https://www.youtube.com/embed/fAymKnd8b44"
+                      placeholder="Pega el enlace o el código de embebido (<iframe...)"
                       value={config.url}
                       onChange={(e) => handleChange(v.key, 'url', e.target.value)}
                       style={{ 
@@ -148,40 +148,7 @@ const VideosTab = ({ setMessage }) => {
                     />
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <label style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>Inicio (MM:SS)</label>
-                      <input 
-                        type="text" 
-                        placeholder="00:00"
-                        value={config.startStr}
-                        onChange={(e) => handleChange(v.key, 'startStr', e.target.value)}
-                        style={{ 
-                          width: '100%', padding: '0.85rem', borderRadius: '0.75rem', 
-                          background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', 
-                          color: '#f8fafc', fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s', textAlign: 'center'
-                        }}
-                        onFocus={(e) => { e.target.style.borderColor = '#60a5fa'; }}
-                        onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                      />
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <label style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>Fin (MM:SS)</label>
-                      <input 
-                        type="text" 
-                        placeholder="Final"
-                        value={config.endStr}
-                        onChange={(e) => handleChange(v.key, 'endStr', e.target.value)}
-                        style={{ 
-                          width: '100%', padding: '0.85rem', borderRadius: '0.75rem', 
-                          background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', 
-                          color: '#f8fafc', fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s', textAlign: 'center'
-                        }}
-                        onFocus={(e) => { e.target.style.borderColor = '#60a5fa'; }}
-                        onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                      />
-                    </div>
-                  </div>
+
 
                   {previewUrl && (
                     <div style={{ 

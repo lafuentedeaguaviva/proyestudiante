@@ -1,0 +1,173 @@
+      case 4: return (
+        <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+              <Wallet size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-800">Capital de Trabajo</h2>
+              <p className="text-slate-500 font-medium">Gastos operativos mensuales (Infraestructura y Personal).</p>
+            </div>
+          </div>
+          
+          <div className="bg-slate-100 p-4 rounded-xl flex justify-between items-center border border-slate-200 mb-6">
+            <span className="font-bold text-slate-700 block">Total Mensual de Materiales e Insumos (Calculado en el Paso anterior):</span>
+            <span className="text-2xl font-black text-slate-800">
+              Bs. {((data.productos || []).reduce((sum, p) => {
+                const unitCost = (p.ingredientes || []).reduce((acc, ing) => acc + ((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0)), 0);
+                return sum + (unitCost * (parseInt(p.demanda) || 1));
+              }, 0)).toFixed(2)}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+
+{/* TABLA 2: INFRAESTRUCTURA Y SERVICIOS */}
+                <div className="mt-4">
+                  <h3 className="text-md font-bold text-slate-800 mb-3 border-b border-slate-200 pb-2">
+                    b. Determinamos los costos por infraestructura y servicios.
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm bg-white border border-slate-300 shadow-sm">
+                      <thead className="bg-slate-200 text-slate-700 border-b border-slate-300">
+                        <tr>
+                          <th className="p-2 border-r border-slate-300">Detalle</th>
+                          <th className="p-2 border-r border-slate-300 text-center w-24">Cantidad</th>
+                          <th className="p-2 border-r border-slate-300 text-center w-32">Costo Mensual (Bs.)</th>
+                          <th className="p-2 text-center w-32">Total, Anual (Bs.)</th>
+                          <th className="p-2 w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.inversiones.filter(i => i.tipo === 'infraestructura').map((inv) => (
+                          <tr key={inv.id} className="border-b border-slate-200">
+                            <td className="p-1 border-r border-slate-300">
+                              <input className="w-full p-2 outline-none focus:bg-emerald-50" placeholder="Ej. Alquiler" value={inv.concepto} onChange={e => { updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, concepto: e.target.value } : x) }); }} />
+                            </td>
+                            <td className="p-1 border-r border-slate-300">
+                              <input type="number" min="1" className="w-full p-2 outline-none text-center focus:bg-emerald-50" value={inv.cantidad ?? 1} onChange={e => { const cant = e.target.value === '' ? '' : (parseInt(e.target.value) || 1); updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, cantidad: cant, monto: cant * (x.precio || 0) } : x) }); }} />
+                            </td>
+                            <td className="p-1 border-r border-slate-300">
+                              <input type="number" min="0" className="w-full p-2 outline-none text-center focus:bg-emerald-50" value={inv.precio ?? inv.monto ?? ''} onChange={e => { const prec = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0); updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, precio: prec, monto: (x.cantidad || 1) * prec } : x) }); }} />
+                            </td>
+                            <td className="p-2 text-center font-bold text-slate-600">
+                              {((inv.monto || 0) * 12).toFixed(2)}
+                            </td>
+                            <td className="p-1 text-center">
+                              <button onClick={() => updateGlobalData({ inversiones: data.inversiones.filter(x => x.id !== inv.id) })} className="text-slate-300 hover:text-red-500 p-1"><Trash2 size={16} /></button>
+                            </td>
+                          </tr>
+                        ))}
+                        {data.inversiones.filter(i => i.tipo === 'infraestructura').length === 0 && (
+                          <tr><td colSpan="5" className="p-4 text-center text-slate-400">Sin detalles. Usa la caja de herramientas o añade uno manual.</td></tr>
+                        )}
+                        <tr className="bg-slate-50 border-t-2 border-slate-300">
+                          <td colSpan="3" className="p-2 text-right font-medium text-slate-700">Total, costo infraestructura y servicio</td>
+                          <td className="p-2 text-center font-bold text-emerald-700">
+                            {data.inversiones.filter(i => i.tipo === 'infraestructura').reduce((acc, curr) => acc + ((curr.monto || 0) * 12), 0).toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button onClick={() => updateGlobalData({ inversiones: [...data.inversiones, { id: Date.now(), concepto: '', cantidad: 1, precio: 0, monto: 0, tipo: 'infraestructura' }] })} className="mt-2 text-emerald-600 font-bold text-sm hover:underline flex items-center gap-1"><Plus size={14} /> Añadir Detalle</button>
+                </div>
+
+                {/* TABLA 3: PERSONAL O MANO DE OBRA */}
+                <div className="mt-4">
+                  <h3 className="text-md font-bold text-slate-800 mb-3 border-b border-slate-200 pb-2">
+                    c. Determinamos los costos de personal o mano de obra.
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm bg-white border border-slate-300 shadow-sm">
+                      <thead className="bg-slate-200 text-slate-700 border-b border-slate-300">
+                        <tr>
+                          <th className="p-2 border-r border-slate-300">Personal/Cargo</th>
+                          <th className="p-2 border-r border-slate-300 text-center w-24">Cantidad</th>
+                          <th className="p-2 border-r border-slate-300 text-center w-36">Costo O Sueldo Mensual (Bs.)</th>
+                          <th className="p-2 text-center w-32">Total, Anual (Bs.)</th>
+                          <th className="p-2 w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.inversiones.filter(i => i.tipo === 'personal').map((inv) => (
+                          <tr key={inv.id} className="border-b border-slate-200">
+                            <td className="p-1 border-r border-slate-300">
+                              <input className="w-full p-2 outline-none focus:bg-indigo-50" placeholder="Ej. Vendedor" value={inv.concepto} onChange={e => { updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, concepto: e.target.value } : x) }); }} />
+                            </td>
+                            <td className="p-1 border-r border-slate-300">
+                              <input type="number" min="1" className="w-full p-2 outline-none text-center focus:bg-indigo-50" value={inv.cantidad ?? 1} onChange={e => { const cant = e.target.value === '' ? '' : (parseInt(e.target.value) || 1); updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, cantidad: cant, monto: cant * (x.precio || 0) } : x) }); }} />
+                            </td>
+                            <td className="p-1 border-r border-slate-300">
+                              <input type="number" min="0" className="w-full p-2 outline-none text-center focus:bg-indigo-50" value={inv.precio ?? inv.monto ?? ''} onChange={e => { const prec = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0); updateGlobalData({ inversiones: data.inversiones.map(x => x.id === inv.id ? { ...x, precio: prec, monto: (x.cantidad || 1) * prec } : x) }); }} />
+                            </td>
+                            <td className="p-2 text-center font-bold text-slate-600">
+                              {((inv.monto || 0) * 12).toFixed(2)}
+                            </td>
+                            <td className="p-1 text-center">
+                              <button onClick={() => updateGlobalData({ inversiones: data.inversiones.filter(x => x.id !== inv.id) })} className="text-slate-300 hover:text-red-500 p-1"><Trash2 size={16} /></button>
+                            </td>
+                          </tr>
+                        ))}
+                        {data.inversiones.filter(i => i.tipo === 'personal').length === 0 && (
+                          <tr><td colSpan="5" className="p-4 text-center text-slate-400">Sin personal. Usa la caja de herramientas o añade uno manual.</td></tr>
+                        )}
+                        <tr className="bg-slate-50 border-t-2 border-slate-300">
+                          <td colSpan="3" className="p-2 text-right font-medium text-slate-700">Total, costo de personal</td>
+                          <td className="p-2 text-center font-bold text-indigo-700">
+                            {data.inversiones.filter(i => i.tipo === 'personal').reduce((acc, curr) => acc + ((curr.monto || 0) * 12), 0).toFixed(2)}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button onClick={() => updateGlobalData({ inversiones: [...data.inversiones, { id: Date.now(), concepto: '', cantidad: 1, precio: 0, monto: 0, tipo: 'personal' }] })} className="mt-2 text-indigo-600 font-bold text-sm hover:underline flex items-center gap-1"><Plus size={14} /> Añadir Cargo</button>
+                </div>
+
+                <div className="mt-8 bg-slate-800 text-white p-6 rounded-2xl flex justify-between items-center shadow-lg">
+                  <div>
+                    <span className="block text-slate-300 font-medium">Subtotal Capital de Trabajo</span>
+                    <span className="text-sm text-slate-400">Materiales + Infraestructura + Personal (Mensualizado)</span>
+                  </div>
+                  <div className="text-3xl md:text-4xl font-black text-amber-400">
+                    Bs. {((data.inversiones.filter(i => i.tipo === 'infraestructura' || i.tipo === 'personal').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0)) + ((data.productos || []).reduce((sum, p) => {
+                        const unitCost = (p.ingredientes || []).reduce((acc, ing) => acc + ((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0)), 0);
+                        return sum + (unitCost * (parseInt(p.demanda) || 1));
+                      }, 0))).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+      case 5: {
+        const invFija = data.inversiones.filter(i => i.tipo === 'fijo').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        const invDiferida = data.inversiones.filter(i => i.tipo === 'diferido').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+        
+        const capOperacionMaterials = (data?.productos || []).reduce((sum, p) => {
+            const unitCost = (p.ingredientes || []).reduce((acc, ing) => acc + ((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0)), 0);
+            return sum + (unitCost * (parseInt(p.demanda) || 1));
+        }, 0) || (data?.inversiones?.filter(i => i.tipo === 'materiales').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) || 0);
+        
+        const capOperacion = data.inversiones.filter(i => ['infraestructura', 'personal'].includes(i.tipo)).reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) + capOperacionMaterials;
+
+
+        const invTotal = invFija + invDiferida + capOperacion;
+
+        return (
+          <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+                <Wallet size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">Resumen de Inversión</h2>
+                <p className="text-slate-500 font-medium">Desglose total de lo que necesitas para iniciar.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-center shadow-sm">
+              <div>

@@ -497,9 +497,10 @@ const Fase13_DocumentoIA = () => {
         mejorados['conclusiones'] = textoConclusiones || ds(11, 'conclusiones') || '';
         mejorados['recomendaciones'] = ds(11, 'recomendaciones') || '';
 
-        const resultadosText = (ds(11, 'resultados_mercado') || ds(11, 'resultados_tecnico') || ds(11, 'resultados_financiero')) 
-          ? `Mercado: ${ds(11, 'resultados_mercado')}\nTécnico: ${ds(11, 'resultados_tecnico')}\nFinanciero: ${ds(11, 'resultados_financiero')}` : '';
-        mejorados['resultados'] = resultadosText;
+        const v = pDT[11]?.viabilidad || {};
+        mejorados['viabilidad_comercial'] = v.viabilidadComercial || ds(11, 'resultados_mercado') || '';
+        mejorados['viabilidad_tecnica'] = v.viabilidadTecnica || ds(11, 'resultados_tecnico') || '';
+        mejorados['viabilidad_legal'] = v.viabilidadLegal || ds(11, 'resultados_financiero') || '';
 
 
         // Fase 7 - Copiado directo sin pasar por IA
@@ -550,6 +551,7 @@ const Fase13_DocumentoIA = () => {
         const r4 = datosTotales[4]?.resumen_fase4 || datosTotales[4] || {};
         const textoDemanda = r4.resumen_demanda || ds(3, 'tamano_mercado');
         addOrPushIA('demanda', textoDemanda, 'Análisis de Demanda');
+        addOrPushIA('explicacion_indices_demanda', '', 'Explicación de los índices utilizados para la demanda estimada (ej. INE, crecimiento poblacional, encuestas)');
         addOrPushIA('publico_objetivo', ds(3, 'perfil_cliente'), 'Público Objetivo');
 
         // Fase 4
@@ -567,7 +569,6 @@ const Fase13_DocumentoIA = () => {
 
         // Fase 8
         addOrPushIA('procesos_intro', '', 'Redacta un solo párrafo introductorio sobre el ciclo de producción, indicando que a continuación se detalla el diagrama de procesos.');
-        addOrPushIA('layout_intro', '', 'Redacta un solo párrafo introductorio sobre la distribución de la planta, indicando que a continuación se muestra el layout.');
 
         // Fase 9
         const r9 = datosTotales[9] || {};
@@ -600,25 +601,37 @@ const Fase13_DocumentoIA = () => {
         const capitalOperacion = inversionesLoc.filter(i => ['materiales', 'infraestructura', 'personal'].includes(i.tipo));
         
         const cfTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) !== 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-        const cvTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-        const numProd = parseInt(pDT10.produccionMensual) || 1;
-        const costoTotalOp = capitalOperacion.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-        const costoUnitario = costoTotalOp / numProd;
-        const costoVariableUnitario = cvTotal / numProd;
-        const margen = parseFloat(pDT10.porcentajeGanancia || 30);
-        const precioSinFacturaCalc = margen < 100 ? costoUnitario / (1 - (margen / 100)) : costoUnitario;
-        const precioFacturadoCalc = precioSinFacturaCalc / 0.84;
+        const cvGlobal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
         
+        const totalProdMensual = (pDT10.productos || []).reduce((acc, p) => acc + (parseFloat(p.produccionMensual) || 0), 0) || 1;
+        const fijoPorUnidad = cfTotal / totalProdMensual;
+        const variableGlobalPorUnidad = cvGlobal / totalProdMensual;
+
         const numMeses = parseInt(pDT10.mesesProyeccion) || 6;
         const flujos = [];
         for (let m = 1; m <= numMeses; m++) {
-          const multiplicador = 1 + ((m - 1) * 0.13);
-          const unidades = Math.round(numProd * multiplicador);
-          const ingresos = unidades * precioFacturadoCalc;
-          const vars = unidades * costoVariableUnitario;
-          const gastosTotales = cfTotal + vars;
-          const uBruta = ingresos - gastosTotales;
-          const impuestos = ingresos * 0.16;
+          let ingresosTotalesMes = 0;
+          let gastosVarsMes = 0;
+          const multiplicador = 1;
+
+          (pDT10.productos || []).forEach(prod => {
+            const prodBase = parseFloat(prod.produccionMensual) || 0;
+            const unidades = Math.round(prodBase * multiplicador);
+
+            const costoMaterialesUnitario = (prod.ingredientes || []).reduce((acc, curr) => acc + (curr.monto || 0), 0);
+            const cvUnitario = costoMaterialesUnitario + variableGlobalPorUnidad;
+            const costoUnitarioTotal = cvUnitario + fijoPorUnidad;
+
+            const margen = parseFloat(prod.margenGanancia ?? pDT10.porcentajeGanancia ?? 30);
+            const precioSinFactura = margen < 100 ? costoUnitarioTotal / (1 - (margen / 100)) : costoUnitarioTotal;
+            const precioFacturado = precioSinFactura / 0.84;
+
+            ingresosTotalesMes += (unidades * precioFacturado);
+            gastosVarsMes += (unidades * cvUnitario);
+          });
+
+          const uBruta = ingresosTotalesMes - gastosVarsMes - cfTotal;
+          const impuestos = ingresosTotalesMes * 0.16;
           const uNeta = uBruta - impuestos;
           flujos.push(uNeta);
         }

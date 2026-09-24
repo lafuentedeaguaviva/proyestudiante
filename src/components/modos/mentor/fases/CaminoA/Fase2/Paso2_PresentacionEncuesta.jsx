@@ -154,21 +154,30 @@ const Paso2_PresentacionEncuesta = ({ setAyudanteText, onComplete }) => {
           new Paragraph({ children: [new TextRun({ text: `15. Si existiera un producto/servicio que ofrezca: "${proyectoInfo.beneficio}", ¿lo usarías/comprarías?`, bold: true })] }),
           new Paragraph({ text: "   ( ) Sí, definitivamente    ( ) Tal vez, depende de los detalles    ( ) No me interesa", spacing: { after: 100 } }),
 
-          new Paragraph({ children: [new TextRun({ text: "16. ¿Cuánto estarías dispuesto a pagar por esto?", bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: "16. Si el producto/servicio estuviera disponible, ¿con qué frecuencia lo comprarías o usarías?", bold: true })] }),
+          new Paragraph({ text: "   ( ) Todos los días  ( ) 3-5 veces por semana  ( ) 1-2 veces por semana  ( ) 1 vez por semana  ( ) 1 vez al mes  ( ) Rara vez  ( ) Nunca", spacing: { after: 100 } }),
+
+          new Paragraph({ children: [new TextRun({ text: "17. Cuando compres o uses este producto/servicio, ¿cuántas unidades o porciones adquirirías por vez?", bold: true })] }),
+          new Paragraph({ text: "   ( ) 1    ( ) 2    ( ) 3    ( ) 4 o más", spacing: { after: 100 } }),
+
+          new Paragraph({ children: [new TextRun({ text: "18. ¿En qué momento o situación preferirías usar o consumir este producto/servicio? (Puedes marcar más de una)", bold: true })] }),
+          new Paragraph({ text: "   ( ) Mañana / Inicio del día  ( ) Mediodía / Almuerzo  ( ) Tarde / Merienda  ( ) Noche / Cena  ( ) Fines de semana  ( ) Momentos de estrés  ( ) Otro", spacing: { after: 100 } }),
+
+          new Paragraph({ children: [new TextRun({ text: "19. ¿Cuánto estarías dispuesto a pagar por esto?", bold: true })] }),
           new Paragraph({ text: "   ( ) < Bs. 50    ( ) Bs. 50-150    ( ) Bs. 151-300    ( ) Bs. 301-500    ( ) > Bs. 500    ( ) No pagaría", spacing: { after: 100 } }),
 
-          new Paragraph({ children: [new TextRun({ text: "17. ¿Qué característica crees que sería la más importante para que decidas usarlo?", bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: "20. ¿Qué característica crees que sería la más importante para que decidas usarlo?", bold: true })] }),
           new Paragraph({ text: "   ( ) Económico  ( ) Calidad  ( ) Rápido  ( ) Variedad  ( ) Excelente servicio  ( ) Otro", spacing: { after: 100 } }),
 
-          new Paragraph({ children: [new TextRun({ text: "18. ¿Hay algo en especial que te gustaría que tuviera, mejorara o incluyera?", bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: "21. ¿Hay algo en especial que te gustaría que tuviera, mejorara o incluyera?", bold: true })] }),
           new Paragraph({ text: "   __________________________________________________________________________________________", spacing: { after: 100 } }),
 
           // SECCIÓN 6
           new Paragraph({ children: [new TextRun({ text: "🔴 SECCIÓN 6: CONTACTO (Opcional)", bold: true })], spacing: { before: 100, after: 100 } }),
-          new Paragraph({ children: [new TextRun({ text: "19. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?", bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: "22. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?", bold: true })] }),
           new Paragraph({ text: "   ( ) Sí, claro    ( ) No, solo quería ayudar con la encuesta", spacing: { after: 100 } }),
 
-          new Paragraph({ children: [new TextRun({ text: "20. Si respondiste SÍ, por favor déjanos tu correo electrónico o número de WhatsApp:", bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: "23. Si respondiste SÍ, por favor déjanos tu correo electrónico o número de WhatsApp:", bold: true })] }),
           new Paragraph({ text: "   __________________________________________________________________________________________", spacing: { after: 100 } }),
         ],
       }],
@@ -240,13 +249,16 @@ const Paso2_PresentacionEncuesta = ({ setAyudanteText, onComplete }) => {
           <strong>Solución propuesta:</strong> <em>"{proyectoInfo.beneficio}"</em>
         </div>
         <p style={{ marginBottom: '0.5rem' }}><strong>15. Si existiera un servicio/producto que ofrezca lo anterior, ¿lo usarías o comprarías?</strong><br />☐ Sí, definitivamente ☐ Tal vez, depende de los detalles ☐ No me interesa</p>
-        <p style={{ marginBottom: '0.5rem' }}><strong>16. ¿Cuánto estarías dispuesto a pagar por esto?</strong><br />☐ Menos de Bs. 50 ☐ Bs. 50 - 150 ☐ Bs. 151 - 300 ☐ Bs. 301 - 500 ☐ Más de Bs. 500 ☐ No pagaría nada</p>
-        <p style={{ marginBottom: '0.5rem' }}><strong>17. ¿Qué característica crees que sería la más importante para decidirte?</strong><br />☐ Económico ☐ Calidad garantizada ☐ Rápido de obtener ☐ Mucha variedad ☐ Excelente servicio al cliente ☐ Otro: _______</p>
-        <p style={{ marginBottom: '0.5rem' }}><strong>18. ¿Hay algo en especial que te gustaría que tuviera o mejorara?</strong><br />__________________________________________________________________________</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>16. Si el producto/servicio estuviera disponible, ¿con qué frecuencia lo comprarías o usarías?</strong><br />☐ Todos los días ☐ 3-5 veces por semana ☐ 1-2 veces por semana ☐ 1 vez por semana ☐ 1 vez al mes ☐ Rara vez ☐ Nunca</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>17. Cuando compres o uses este producto/servicio, ¿cuántas unidades o porciones adquirirías por vez?</strong><br />☐ 1 ☐ 2 ☐ 3 ☐ 4 o más</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>18. ¿En qué momento o situación preferirías usar o consumir este producto/servicio?</strong><br />☐ Mañana / Inicio del día ☐ Mediodía / Almuerzo ☐ Tarde / Merienda ☐ Noche / Cena ☐ Fines de semana ☐ Momentos de estrés o prisa ☐ Otro: _______</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>19. ¿Cuánto estarías dispuesto a pagar por esto?</strong><br />☐ Menos de Bs. 50 ☐ Bs. 50 - 150 ☐ Bs. 151 - 300 ☐ Bs. 301 - 500 ☐ Más de Bs. 500 ☐ No pagaría nada</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>20. ¿Qué característica crees que sería la más importante para decidirte?</strong><br />☐ Económico ☐ Calidad garantizada ☐ Rápido de obtener ☐ Mucha variedad ☐ Excelente servicio al cliente ☐ Otro: _______</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>21. ¿Hay algo en especial que te gustaría que tuviera o mejorara?</strong><br />__________________________________________________________________________</p>
 
         <h3 style={{ borderBottom: '2px solid #ef4444', color: '#ef4444', paddingBottom: '0.5rem', marginTop: '2rem', marginBottom: '1rem' }}>🔴 SECCIÓN 6: CONTACTO (Opcional)</h3>
-        <p style={{ marginBottom: '0.5rem' }}><strong>19. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?</strong><br />☐ Sí, claro ☐ No, solo quería ayudar con la encuesta</p>
-        <p style={{ marginBottom: '0.5rem' }}><strong>20. Si respondiste SÍ, por favor déjanos tu correo electrónico o número de WhatsApp:</strong><br />__________________________________________________________________________</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>22. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?</strong><br />☐ Sí, claro ☐ No, solo quería ayudar con la encuesta</p>
+        <p style={{ marginBottom: '0.5rem' }}><strong>23. Si respondiste SÍ, por favor déjanos tu correo electrónico o número de WhatsApp:</strong><br />__________________________________________________________________________</p>
 
       </div>
 

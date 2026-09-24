@@ -37,6 +37,24 @@ const Fase8_Operacion = () => {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
 
+  
+  const finishPhase = async () => {
+    setIsFinishing(true);
+    try {
+      if(typeof setPendingSave === 'function') setPendingSave(true);
+      const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
+      await Promise.race([
+        FaseModel.guardarDatos(8, 'operacion', data),
+        timeoutPromise
+      ]);
+      await FaseModel.actualizarProgreso(9, 1);
+      navigate('/fase/9/intro');
+    } catch (err) {
+      console.error(err);
+      navigate('/fase/9/intro');
+    }
+  };
+
   const handleSiguienteClick = async () => {
     if (step === 3 && data.pasosProduccion?.filter(p => !p.categoria).length > 0) {
       setConfirmDialog({
@@ -89,38 +107,21 @@ const Fase8_Operacion = () => {
           cancelText: "Corregir",
           onConfirm: () => {
             setConfirmDialog(null);
-            irAPaso(6);
+            finishPhase();
           },
           onCancel: () => setConfirmDialog(null)
         });
         return;
       } else {
-        irAPaso(6);
+        finishPhase();
         return;
       }
     }
     
-    if (step < 7) {
+    if (step < 5) {
       siguientePaso();
     } else {
-      setIsFinishing(true);
-      try {
-        if(typeof setPendingSave === 'function') setPendingSave(true);
-        
-        // Prevent hanging forever due to DB locks
-        const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
-        await Promise.race([
-          FaseModel.guardarDatos(8, 'operacion', data),
-          timeoutPromise
-        ]);
-        
-        await FaseModel.actualizarProgreso(9, 1);
-        navigate('/fase/9/intro');
-      } catch (err) {
-        console.error(err);
-        // Force navigation anyway to prevent soft-locks
-        navigate('/fase/9/intro');
-      }
+      finishPhase();
     }
   };
 
@@ -686,7 +687,7 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
           };
         });
         
-        let n = [...data.pasosProduccion, ...nuevosObjetos];
+        let n = [...nuevosObjetos].slice(0, 10); // LIMITAMOS A 10 PASOS MÁXIMO
         // Quitar el primer paso si estaba vacío
         if (n.length > 0 && (!n[0].texto || n[0].texto.trim() === '')) n.shift();
         
@@ -709,6 +710,8 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
           <h2 className="text-2xl font-bold text-slate-800 mb-2">2. Define tus Pasos de Producción</h2>
           <p className="text-slate-500 mb-6">¿Cuáles son los pasos exactos para crear tu producto o dar tu servicio?</p>
           
+          
+
           <div className="space-y-3 mb-4">
             {data.pasosProduccion.map((p, i) => (
               <div key={p.id} className="flex gap-3 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
@@ -722,6 +725,13 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <button 
+              onClick={() => updateGlobalData({ pasosProduccion: [] })}
+              className="py-3 px-4 rounded-xl border-2 border-red-200 bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+              title="Borrar Todos los Pasos"
+            >
+              <Eraser size={20} /> Borrar Todos
+            </button>
             <button 
               onClick={() => updateGlobalData({ pasosProduccion: [...data.pasosProduccion, { id: Date.now(), texto: '', categoria: null }] })} 
               className="flex-1 py-3 px-4 rounded-xl border-2 border-blue-200 bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition-colors"
@@ -1086,15 +1096,13 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
     <PasoLayout 
       faseTitle="Fase 8: La Operación"
       pasoActual={step}
-      totalPasos={7}
+      totalPasos={5}
       tabs={[
         { id: 1, icon: <Video size={18} />, label: 'Video Procesos' },
         { id: 2, icon: <List size={18} />, label: 'Listado Pasos' },
         { id: 3, icon: <CheckSquare size={18} />, label: 'Revisión' },
         { id: 4, icon: <Video size={18} />, label: 'Video Diagrama' },
-        { id: 5, icon: <Network size={18} />, label: 'Diagrama' },
-        { id: 6, icon: <Video size={18} />, label: 'Video Layout' },
-        { id: 7, icon: <Map size={18} />, label: 'Layout' }
+        { id: 5, icon: <Network size={18} />, label: 'Diagrama' }
       ]}
       onTabClick={(id) => {
         irAPaso(id);

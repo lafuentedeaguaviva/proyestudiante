@@ -25,7 +25,8 @@ const Fase2_ValidacionIdea = () => {
     resumenIAData, setResumenIAData,
     handleFinalizar,
     setPendingSave,
-    showCompletionModal, setShowCompletionModal
+    showCompletionModal, setShowCompletionModal,
+    updateData, data
   } = useFase2ValidacionController();
 
   const navigate = useNavigate();
@@ -104,7 +105,7 @@ const Fase2_ValidacionIdea = () => {
               )}
               {step === 6 && (
                 <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Paso6_Resultados setAyudanteText={setAyudanteText} encuestasData={encuestasData} onComplete={() => irAPaso(7)} />
+                  <Paso6_Resultados setAyudanteText={setAyudanteText} encuestasData={encuestasData} updateData={updateData} onComplete={() => irAPaso(7)} />
                 </motion.div>
               )}
               {step === 7 && (
@@ -112,6 +113,7 @@ const Fase2_ValidacionIdea = () => {
                   <Paso7_ResumenIA 
                     setAyudanteText={setAyudanteText} 
                     encuestasData={encuestasData} 
+                    necesidadValidada={data.necesidadValidada}
                     resumenIAData={resumenIAData} 
                     setResumenIAData={setResumenIAData} 
                     onComplete={handleFinalizar} 

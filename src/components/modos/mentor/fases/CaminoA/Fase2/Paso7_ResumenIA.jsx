@@ -3,11 +3,73 @@ import { Bot, Save, Sparkles, AlertCircle, RefreshCw, CheckCircle } from 'lucide
 import { motion } from 'framer-motion';
 import { generarResumenEncuestasIA } from '../../../../../../services/api';
 
-const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], resumenIAData, setResumenIAData }) => {
+const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], necesidadValidada, resumenIAData, setResumenIAData }) => {
   const [generando, setGenerando] = useState(false);
   const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const calcularMetricas = () => {
+    if (!encuestasData || encuestasData.length === 0) return null;
+    const total = encuestasData.length;
+
+    // 1. IN (Índice de Necesidad) - dif (1-5)
+    let sumDif = 0;
+    encuestasData.forEach(d => {
+      sumDif += parseInt(d.dif) || 1;
+    });
+    const avgDif = sumDif / total;
+    const IN = (avgDif - 1) / 4;
+
+    // 2. IC (Intención de Compra) - uso
+    let countSi = 0;
+    let countTalVez = 0;
+    encuestasData.forEach(d => {
+      if (d.uso === 'Sí' || d.uso === 'Si') countSi++;
+      if (d.uso === 'Tal vez') countTalVez++;
+    });
+    const IC = (countSi / total) + (0.5 * (countTalVez / total));
+
+    // 3. FC (Frecuencia de Compra) - frecCompra
+    const frecValues = {
+      "Todos los dias": 30,
+      "3-5 veces semana": 16,
+      "1-2 veces semana": 6,
+      "1 vez semana": 4,
+      "1 vez mes": 1,
+      "Rara vez": 0.5,
+      "Nunca": 0
+    };
+    let sumFC = 0;
+    encuestasData.forEach(d => {
+      const val = d.frecCompra;
+      if (frecValues[val] !== undefined) sumFC += frecValues[val];
+    });
+    const FC = sumFC / total;
+
+    // 4. QC (Cantidad por Compra) - unidades
+    const unitValues = {
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4 o más": 4.5
+    };
+    let sumQC = 0;
+    encuestasData.forEach(d => {
+      const val = d.unidades;
+      if (unitValues[val] !== undefined) sumQC += unitValues[val];
+    });
+    const QC = sumQC / total;
+
+    return {
+      IN: IN.toFixed(2),
+      IC: IC.toFixed(2),
+      FC: FC.toFixed(1),
+      QC: QC.toFixed(1)
+    };
+  };
+
+  const metricas = calcularMetricas();
 
   useEffect(() => {
     if (!resumenIAData) {
@@ -34,8 +96,8 @@ const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], resu
     setGenerando(true);
     setError('');
     try {
-      const resumen = await generarResumenEncuestasIA(encuestasData);
-      setResumenIAData(resumen);
+      const resumen = await generarResumenEncuestasIA(encuestasData, metricas);
+      setResumenIAData(resumen, metricas);
     } catch (err) {
       console.error(err);
       setError("Hubo un error al generar el resumen con IA. Por favor, inténtalo de nuevo.");
@@ -76,6 +138,80 @@ const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], resu
         <Sparkles color="#3b82f6" /> Análisis Estructural con IA
       </h2>
 
+      {metricas && (
+        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', marginBottom: '2rem' }}>
+          <h3 style={{ margin: '0 0 1.5rem 0', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem' }}>
+            <Sparkles size={20} color="#3b82f6" /> Desglose Cuantitativo de Componentes
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'bold', marginBottom: '0.5rem' }}>Índice de Necesidad (IN)</div>
+              <div style={{ fontSize: '2rem', color: '#3b82f6', fontWeight: 'bold' }}>{metricas.IN}</div>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Escala 0 a 1 (Basado en Dificultad)</div>
+              <div style={{ marginTop: 'auto', padding: '1rem', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', margin: '1rem -1rem -1rem -1rem', borderBottomLeftRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>
+                <div style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#334155', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  IN = (X̄ - 1) / 4
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                  <li><strong>X̄:</strong> Promedio de respuestas en escala 1-5 (1=Nada, 5=Extremo).</li>
+                </ul>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: '1.4' }}>
+                  <span style={{ fontWeight: 'bold', color: '#3b82f6' }}>Interpretación:</span> Mide qué tan difícil es el problema para el cliente. Valores cercanos a 1 indican necesidad urgente.
+                </div>
+              </div>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'bold', marginBottom: '0.5rem' }}>Índice de Intención de Compra (IC)</div>
+              <div style={{ fontSize: '2rem', color: '#10b981', fontWeight: 'bold' }}>{metricas.IC}</div>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Escala 0 a 1 (Sí + 50% Tal vez)</div>
+              <div style={{ marginTop: 'auto', padding: '1rem', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', margin: '1rem -1rem -1rem -1rem', borderBottomLeftRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>
+                <div style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#334155', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  IC = %Sí + (0.5 × %Tal vez)
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                  <li><strong>0.5:</strong> Factor de ajuste conservador (solo la mitad de dudosos convierten).</li>
+                </ul>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: '1.4' }}>
+                  <span style={{ fontWeight: 'bold', color: '#10b981' }}>Interpretación:</span> Mide la disposición real a pagar. Es conservadora asumiendo que la mitad de indecisos comprarán.
+                </div>
+              </div>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'bold', marginBottom: '0.5rem' }}>Frecuencia de Compra (FC)</div>
+              <div style={{ fontSize: '2rem', color: '#8b5cf6', fontWeight: 'bold' }}>{metricas.FC}</div>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Veces por mes (Promedio)</div>
+              <div style={{ marginTop: 'auto', padding: '1rem', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', margin: '1rem -1rem -1rem -1rem', borderBottomLeftRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>
+                <div style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#334155', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  FC = ∑(%Opción × Veces/mes)
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                  <li><strong>Opción:</strong> Ej: "Todos los días"=30, "1 vez/sem"=4, "Rara vez"=0.5</li>
+                </ul>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: '1.4' }}>
+                  <span style={{ fontWeight: 'bold', color: '#8b5cf6' }}>Interpretación:</span> Convierte las opciones cualitativas en un promedio numérico mensual.
+                </div>
+              </div>
+            </div>
+            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'bold', marginBottom: '0.5rem' }}>Cantidad por Compra (QC)</div>
+              <div style={{ fontSize: '2rem', color: '#f59e0b', fontWeight: 'bold' }}>{metricas.QC}</div>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>Unidades/Porciones (Promedio)</div>
+              <div style={{ marginTop: 'auto', padding: '1rem', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', margin: '1rem -1rem -1rem -1rem', borderBottomLeftRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}>
+                <div style={{ fontFamily: 'monospace', background: '#e2e8f0', padding: '0.5rem', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#334155', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                  QC = ∑(%Opción × Unidades)
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                  <li><strong>Unidades:</strong> Ej: Opción "3" = 3 u., "4 o más" = 4.5 u.</li>
+                </ul>
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: '1.4' }}>
+                  <span style={{ fontWeight: 'bold', color: '#f59e0b' }}>Interpretación:</span> Cuántos productos en promedio se lleva el cliente por transacción.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!resumenIAData && !generando && (
         <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '1rem', border: '1px dashed #93c5fd' }}>
           <Bot size={64} color="#3b82f6" style={{ margin: '0 auto 1rem auto' }} />
@@ -107,7 +243,9 @@ const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], resu
       )}
 
       {resumenIAData && !generando && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          
+          <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
           
           <div style={cardStyle}>
             <div style={titleStyle}>👥 Perfil Demográfico</div>
@@ -176,6 +314,7 @@ const Paso7_ResumenIA = ({ setAyudanteText, onComplete, encuestasData = [], resu
             </button>
           </div>
 
+          </div>
         </motion.div>
       )}
       

@@ -15,8 +15,10 @@ const Fase2_EncontrarIdea = () => {
     showSplash, setShowSplash, retoDB, mostrarReto, setMostrarReto,
     mostrarVideoPista, setMostrarVideoPista, sugerenciasIA, setSugerenciasIA,
     cargandoIA, generarIdeasIA, handleMatrizChange, calcularTotal, ideaGanadoraIndex, handleFinalizar,
-    area, otraArea, observaciones, ideas, matriz, tituloOficial, updateData
-  , setPendingSave } = useFase2Controller();
+    area, otraArea, observaciones, ideas, matriz, tituloOficial, updateData, setStep, setPendingSave
+  } = useFase2Controller();
+
+  const navigate = useNavigate();
 
   const setArea = (v) => updateData({ area: v });
   const setOtraArea = (v) => updateData({ otraArea: v });
@@ -111,32 +113,60 @@ const Fase2_EncontrarIdea = () => {
                       key={a.name}
                       whileHover={{ scale: 1.05, y: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={siguientePaso}} 
-              style={{ padding: '0.75rem 2rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              Siguiente Paso
-            </button>
+                      onClick={() => setArea(a.name)}
+                      style={{ 
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                        padding: '1.5rem', borderRadius: '1rem', 
+                        border: area === a.name ? `2px solid ${a.color}` : '1px solid #e2e8f0', 
+                        background: area === a.name ? `${a.color}15` : 'white', 
+                        cursor: 'pointer', transition: 'all 0.2s' 
+                      }}
+                    >
+                      <div style={{ color: a.color, marginBottom: '0.5rem' }}>{a.icon}</div>
+                      <span style={{ fontWeight: 600, color: '#1e293b', textAlign: 'center', fontSize: '0.875rem' }}>{a.name}</span>
+                    </motion.button>
+                  ))}
+                </div>
+
+                {area === 'Otra' && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ marginTop: '1.5rem' }}>
+                    <label style={labelStyle}>Especifica el área:</label>
+                    <input type="text" value={otraArea || ''} onChange={e => setOtraArea(e.target.value)} style={inputStyle} placeholder="Ej: Mecatrónica y Robótica" />
+                  </motion.div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+                  <button 
+                    onClick={siguientePaso}
+                    disabled={!area || (area === 'Otra' && !otraArea)}
+                    style={{ padding: '0.75rem 2rem', background: (!area || (area === 'Otra' && !otraArea)) ? '#94a3b8' : '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: (!area || (area === 'Otra' && !otraArea)) ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+                  >
+                    Siguiente Paso
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </AnimatePresence>
+
+        {/* GATEKEEPER */}
+        <div className="animate-presence-removed">
+          {mostrarReto && retoDB && (
+            <RetoValidacion 
+              retoInfo={retoDB}
+              onSuperado={() => {
+                setMostrarReto(false);
+                navigate('/fase/3/intro');
+              }}
+              onFalladoCompleto={() => {
+                setMostrarReto(false);
+              }}
+            />
           )}
         </div>
-
       </div>
-
-      {/* GATEKEEPER */}
-      <div className="animate-presence-removed">
-        {mostrarReto && retoDB && (
-          <RetoValidacion 
-            retoInfo={retoDB}
-            onSuperado={() => {
-              setMostrarReto(false);
-              navigate('/fase/3/intro');
-            }}
-            onFalladoCompleto={() => {
-              setMostrarReto(false);
-            }}
-          />
-        )}
       </div>
-    </div>
     </DetectiveLayout>
   );
 };

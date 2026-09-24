@@ -16,7 +16,7 @@ export const useFase10Controller = () => {
   // Todo el estado se guardará en `financiero`
   const baseController = useFaseController({
     faseId: 10,
-    totalPasos: 18,
+    totalPasos: 19,
     clavesDeGuardado: ['financiero'],
     estructuraJSON: true
   });
@@ -99,6 +99,83 @@ export const useFase10Controller = () => {
           if (!data.produccionMensual || data.produccionMensual === 100 || data.produccionMensual === 1 || data.produccionMensual === 0) {
             updateData({ produccionMensual: finalPot });
           }
+
+          
+          let f4ProductsRaw = await FaseModel.obtenerDatosFase(4);
+          let f4Products = {};
+          
+          if (f4ProductsRaw && f4ProductsRaw.diseno_producto) {
+            try {
+              f4Products = typeof f4ProductsRaw.diseno_producto === 'string' ? JSON.parse(f4ProductsRaw.diseno_producto) : f4ProductsRaw.diseno_producto;
+            } catch(e) {}
+          }
+
+          if (!f4Products || !f4Products.listaProductos || f4Products.listaProductos.length === 0) {
+            try {
+              const dbDataStr = localStorage.getItem('datosFases');
+              if (dbDataStr) {
+                const dbFases = JSON.parse(dbDataStr);
+                if (dbFases[4] && dbFases[4].listaProductos) {
+                  f4Products = dbFases[4];
+                } else if (dbFases[4] && dbFases[4].diseno_producto) {
+                  f4Products = typeof dbFases[4].diseno_producto === 'string' ? JSON.parse(dbFases[4].diseno_producto) : dbFases[4].diseno_producto;
+                }
+              }
+            } catch (e) {}
+          }
+
+          if (f4Products && f4Products.listaProductos && f4Products.listaProductos.length > 0) {
+            const N = parseFloat(f4Products.mercadoTotalN) || 0;
+            const mets = f4Products.metricasAplicadas || { IN: 0.5, IC: 0.5, FC: 1, QC: 1 };
+            const globalPot = Math.round(N * mets.IN * mets.IC * mets.FC * mets.QC);
+            const demandasF4 = f4Products.demandas || {};
+
+            const productosMapeados = f4Products.listaProductos.map(p => {
+              let pct = parseFloat(demandasF4[p.id]?.porcentajeAsignado);
+              if (isNaN(pct)) pct = 100 / f4Products.listaProductos.length;
+              const prodMensual = Math.round(globalPot * (pct / 100));
+
+              // Buscar si ya existe para no sobrescribir ingredientes
+              const prodExistente = data?.productos?.find(ep => ep.id === p.id);
+
+              return {
+                id: p.id || (Date.now() + Math.random()),
+                nombre: p.nombre || p.nomProd || p.tipo || '',
+                produccionMensual: prodMensual > 0 ? prodMensual : 0,
+                ingredientes: prodExistente ? prodExistente.ingredientes : []
+              };
+            });
+
+            // Solo actualizar si hay productos nuevos o no había productos antes
+            if (!data.productos || data.productos.length === 0) {
+              updateData({ productos: productosMapeados });
+            } else {
+              let needsUpdate = false;
+              const merged = productosMapeados.map(mp => {
+                const existing = data.productos.find(ep => ep.id === mp.id);
+                if (existing) {
+                  if (existing.nombre !== mp.nombre || existing.produccionMensual !== mp.produccionMensual) {
+                    needsUpdate = true;
+                  }
+                  return { ...existing, nombre: mp.nombre, produccionMensual: mp.produccionMensual };
+                } else {
+                  needsUpdate = true;
+                  return mp;
+                }
+              });
+
+              // Si se eliminó algún producto en la fase 4
+              if (merged.length !== data.productos.length) {
+                needsUpdate = true;
+              }
+
+              if (needsUpdate) {
+                updateData({ productos: merged });
+              }
+            }
+          }
+
+
 
           // Fase 9: Organigrama (roles para sueldos)
           const f9 = await FaseModel.obtenerDatosFase(9);

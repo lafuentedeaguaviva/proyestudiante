@@ -16,7 +16,7 @@ const Paso5_ExplicacionLlenado = ({ setAyudanteText, onComplete, initialData = [
   const addEncuesta = () => {
     setEncuestas([...encuestas, { 
       id: Date.now(), 
-      edad: '', genero: '', zona: '', est: '', ing: '', cant: '', gasto: '', frec: '', import: '', lugar: '', redes: '', dif: '', intent: '', act: '', uso: '', pago: '', carac: '', mejora: '', info: '', cont: '' 
+      edad: '', genero: '', zona: '', est: '', ing: '', cant: '', gasto: '', frec: '', import: '', lugar: '', redes: '', dif: '', intent: '', act: '', uso: '', frecCompra: '', unidades: '', momento: '', pago: '', carac: '', mejora: '', info: '', cont: '' 
     }]);
   };
 
@@ -36,6 +36,9 @@ const Paso5_ExplicacionLlenado = ({ setAyudanteText, onComplete, initialData = [
     { key: 'intent', label: 'INTENT', options: ["Buena solución", "Ninguna convence", "No intenté", "No sabía"] },
     { key: 'act', label: 'ACT', options: ["Ignoro", "Busco ayuda", "Casera", "Pago algo malo", "Internet", "Otro"] },
     { key: 'uso', label: 'USO', options: ["Sí", "Tal vez", "No"] },
+    { key: 'frecCompra', label: 'FREC. USO', options: ["Todos los dias", "3-5 veces semana", "1-2 veces semana", "1 vez semana", "1 vez mes", "Rara vez", "Nunca"] },
+    { key: 'unidades', label: 'UNIDADES', options: ["1", "2", "3", "4 o más"] },
+    { key: 'momento', label: 'MOMENTO', options: ["Mañana", "Mediodía", "Tarde", "Noche", "Fines de semana", "Estrés/Prisa", "Otro"] },
     { key: 'pago', label: 'PAGO', options: ["< Bs. 50", "Bs. 50 - 150", "Bs. 151 - 300", "Bs. 301 - 500", "> Bs. 500", "Nada"] },
     { key: 'carac', label: 'CARAC', options: ["Económico", "Calidad", "Rápido", "Variedad", "Servicio", "Otro"] },
     { key: 'mejora', label: 'MEJORA' },

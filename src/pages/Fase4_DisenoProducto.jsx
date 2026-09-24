@@ -12,7 +12,6 @@ import Paso3_VideoProductoServicio from '../components/modos/mentor/fases/Camino
 import Paso4_DisenoProducto from '../components/modos/mentor/fases/CaminoA/Fase4/Paso4_DisenoProducto';
 import Paso5_VideoCaracteristicas from '../components/modos/mentor/fases/CaminoA/Fase4/Paso5_VideoCaracteristicas';
 import Paso6_Caracteristicas from '../components/modos/mentor/fases/CaminoA/Fase4/Paso6_Caracteristicas';
-import Paso7_BeneficiosCaracteristicas from '../components/modos/mentor/fases/CaminoA/Fase4/Paso7_BeneficiosCaracteristicas';
 import Paso8_VideoEmpaque from '../components/modos/mentor/fases/CaminoA/Fase4/Paso8_VideoEmpaque';
 import Paso9_EmpaqueProducto from '../components/modos/mentor/fases/CaminoA/Fase4/Paso9_EmpaqueProducto';
 import Paso10_PresentacionServicio from '../components/modos/mentor/fases/CaminoA/Fase4/Paso10_PresentacionServicio';
@@ -39,22 +38,22 @@ const Fase4_DisenoProductoPage = () => {
 
   const handleNext = () => {
     let nextStep = step + 1;
-    if (globalData.tipoNegocio === 'Servicio' && step === 6) {
+    if (globalData.tipoNegocio === 'Servicio' && step === 5) {
+      nextStep = 7;
+    }
+    if (globalData.tipoNegocio === 'Producto' && step === 6) {
       nextStep = 8;
     }
-    if (globalData.tipoNegocio === 'Producto' && step === 7) {
-      nextStep = 9;
-    }
-    irAPaso(Math.min(nextStep, 11));
+    irAPaso(Math.min(nextStep, 10));
   };
 
   const handlePrev = () => {
     let prevStep = step - 1;
-    if (globalData.tipoNegocio === 'Servicio' && step === 8) {
-      prevStep = 6;
+    if (globalData.tipoNegocio === 'Servicio' && step === 7) {
+      prevStep = 5;
     }
-    if (globalData.tipoNegocio === 'Producto' && step === 9) {
-      prevStep = 7;
+    if (globalData.tipoNegocio === 'Producto' && step === 8) {
+      prevStep = 6;
     }
     irAPaso(Math.max(prevStep, 1));
   };
@@ -83,16 +82,15 @@ const Fase4_DisenoProductoPage = () => {
               { id: 2, icon: <FileText size={18} />, label: 'Concepto' },
               { id: 3, icon: <Video size={18} />, label: 'Video Atributos' },
               { id: 4, icon: <CheckCircle size={18} />, label: 'Características' },
-              { id: 5, icon: <CheckCircle size={18} />, label: 'Beneficios' },
-              { id: 6, icon: <Video size={18} />, label: 'Video Empaque' },
-              { id: 7, icon: <Package size={18} />, label: 'Empaque' },
-              { id: 8, icon: <Package size={18} />, label: 'Presentación' },
-              { id: 9, icon: <Video size={18} />, label: 'Video Demanda' },
-              { id: 10, icon: <Users size={18} />, label: 'Demanda Potencial' },
-              { id: 11, icon: <Bot size={18} />, label: 'Resumen IA' }
+              { id: 5, icon: <Video size={18} />, label: 'Video Empaque' },
+              { id: 6, icon: <Package size={18} />, label: 'Empaque' },
+              { id: 7, icon: <Package size={18} />, label: 'Presentación' },
+              { id: 8, icon: <Video size={18} />, label: 'Video Demanda' },
+              { id: 9, icon: <Users size={18} />, label: 'Demanda Potencial' },
+              { id: 10, icon: <Bot size={18} />, label: 'Resumen IA' }
             ].filter(t => {
-              if (globalData.tipoNegocio === 'Servicio' && (t.id === 6 || t.id === 7)) return false;
-              if (globalData.tipoNegocio === 'Producto' && t.id === 8) return false;
+              if (globalData.tipoNegocio === 'Servicio' && (t.id === 5 || t.id === 6)) return false;
+              if (globalData.tipoNegocio === 'Producto' && t.id === 7) return false;
               return true;
             })}
             currentStep={step}
@@ -104,7 +102,7 @@ const Fase4_DisenoProductoPage = () => {
 
           {/* Progress Indicator */}
           <div style={{ marginBottom: '2rem', textAlign: 'center', color: '#64748b', fontWeight: 'bold' }}>
-            Paso {step} de 11
+            Paso {step} de 10
           </div>
 
           {/* Renderizador de Pasos */}
@@ -115,13 +113,12 @@ const Fase4_DisenoProductoPage = () => {
                 {step === 2 && <motion.div key="2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso4_DisenoProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
                 {step === 3 && <motion.div key="3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso5_VideoCaracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
                 {step === 4 && <motion.div key="4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso6_Caracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 5 && <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso7_BeneficiosCaracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 6 && <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso8_VideoEmpaque setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
-                {step === 7 && <motion.div key="7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso9_EmpaqueProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 8 && <motion.div key="8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso10_PresentacionServicio setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 9 && <motion.div key="9" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso11_VideoDemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
-                {step === 10 && <motion.div key="10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso12_DemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
-                {step === 11 && <motion.div key="11" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso13_ResumenProductoIA setAyudanteText={setAyudanteText} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
+                {step === 5 && <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso8_VideoEmpaque setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
+                {step === 6 && <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso9_EmpaqueProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
+                {step === 7 && <motion.div key="7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso10_PresentacionServicio setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
+                {step === 8 && <motion.div key="8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso11_VideoDemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
+                {step === 9 && <motion.div key="9" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso12_DemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
+                {step === 10 && <motion.div key="10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso13_ResumenProductoIA setAyudanteText={setAyudanteText} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
               </AnimatePresence>
             ) : (
               <div style={{ padding: '4rem', textAlign: 'center', color: '#0f172a' }}>Cargando datos...</div>
@@ -138,7 +135,7 @@ const Fase4_DisenoProductoPage = () => {
               <ArrowLeft size={18} /> Anterior
             </button>
 
-            {step < 11 && (
+            {step < 10 && (
               <button 
                 onClick={handleNext}
                 disabled={cargando}

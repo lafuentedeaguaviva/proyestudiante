@@ -47,7 +47,7 @@ export default function MapaViaje({ isOpen, onClose, faseActiva, maxFaseDesbloqu
         'Video Justificación', 'Justificación',
         'Resumen IA'
     ] },
-    { id: 8, title: 'Fase 8: La Operación', icon: <Settings />, pasos: ['1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos', '5. Juego: Clasificación de Procesos', '6. Video: Layout del Negocio', '7. Juego: Zonas de Trabajo'] },
+    { id: 8, title: 'Fase 8: La Operación', icon: <Settings />, pasos: ['1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos', '5. Juego: Clasificación de Procesos'] },
     { id: 9, title: 'Fase 9: Estructura Org.', icon: <Network />, pasos: ['Organigrama', 'Roles'] },
     { id: 10, title: 'Fase 10: Viabilidad', icon: <TrendingUp />, pasos: ['Inversión Inicial', 'Costos Fijos y Variables', 'Precios y Equilibrio', 'Video Utilidad', 'Utilidad e Impuestos', 'Video Equilibrio', 'Punto de Equilibrio', 'Video Evaluación', 'VAN y TIR'] },
     { id: 11, title: 'Fase 11: Consolidación del Documento', icon: <FileText />, pasos: ['Intro', 'Resultados', 'Conclusiones', 'Agradecimientos', 'Dedicatoria', 'Resumen IA'] },

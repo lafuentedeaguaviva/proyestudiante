@@ -22,17 +22,23 @@ export const useFase2ValidacionController = () => {
     estructuraJSON: true 
   });
 
-  const { data, updateData, step, irAPaso, cargando, guardando } = baseController;
+  const { data, updateData, step, irAPaso, cargando, guardando, forceSave, setPendingSave } = baseController;
 
   const encuestasData = data.encuestas || [];
   const resumenIAData = data.resumen_ia || null;
+  const metricasClaveData = data.metricas_clave || null;
 
   const setEncuestasData = async (nuevasEncuestas) => {
     updateData({ encuestas: nuevasEncuestas });
+    setPendingSave(true);
   };
 
-  const setResumenIAData = async (nuevoResumen) => {
-    updateData({ resumen_ia: nuevoResumen });
+  const setResumenIAData = async (nuevoResumen, metricas = null) => {
+    const payload = { resumen_ia: nuevoResumen };
+    if (metricas) payload.metricas_clave = metricas;
+    updateData(payload);
+    // Activar guardado automático para que se guarde cuando React termine de actualizar el estado 'data'
+    setPendingSave(true);
   };
 
   const handleFinalizar = async () => {
@@ -56,6 +62,7 @@ export const useFase2ValidacionController = () => {
     ayudanteText, setAyudanteText,
     encuestasData, setEncuestasData,
     resumenIAData, setResumenIAData,
+    metricasClaveData,
     handleFinalizar,
     showCompletionModal, setShowCompletionModal
   };

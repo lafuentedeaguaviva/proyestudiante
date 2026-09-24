@@ -68,7 +68,7 @@ const SidebarFases = () => {
         ] },
         { id: 8, titulo: 'La Operación', path: '/fase/8', pasos: [
           '1. Video: Listado de procesos', '2. Definir Pasos', '3. Revisión de Procesos', '4. Video: Diagrama de Procesos',
-          '5. Juego: Clasificación de Procesos', '6. Video: Layout del Negocio', '7. Juego: Zonas de Trabajo'
+          '5. Juego: Clasificación de Procesos'
         ] },
         { id: 9, titulo: 'Estructura Organizacional', path: '/fase/9', pasos: ['Organigrama', 'Roles', 'Resumen IA'] },
         { id: 10, titulo: 'Viabilidad y Sostenibilidad', path: '/fase/10', pasos: ['Inversión Inicial', 'Costos Fijos y Variables', 'Precios y Equilibrio', 'Video Utilidad', 'Utilidad e Impuestos', 'Video Equilibrio', 'Punto de Equilibrio', 'Video Evaluación', 'VAN y TIR'] },

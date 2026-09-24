@@ -2,12 +2,31 @@ import React from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Bot, Save, CheckCircle } from 'lucide-react';
 
-const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [] }) => {
+const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [], updateData }) => {
   const [guardando, setGuardando] = React.useState(false);
 
   React.useEffect(() => {
     setAyudanteText("¡Estos son los resultados! Revisa las gráficas. ¿Tu idea tiene potencial según los números?");
-  }, []);
+    
+    if (updateData && encuestasData && encuestasData.length > 0) {
+      let sum = 0;
+      let n = 0;
+      encuestasData.forEach(d => {
+        const val = d.dif;
+        if (val) {
+          const weight = parseInt(val, 10);
+          if (!isNaN(weight)) {
+            sum += weight; // fi * wi equivalent since we iterate per response
+            n += 1; // N
+          }
+        }
+      });
+      if (n > 0) {
+        const necesidadPorcentaje = Math.round((sum / (n * 5)) * 100);
+        updateData({ necesidadValidada: necesidadPorcentaje });
+      }
+    }
+  }, [encuestasData, setAyudanteText]);
 
   const cols = [
     { key: 'edad', label: '1. Edad', type: 'pie' },
@@ -25,8 +44,11 @@ const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [] }) =
     { key: 'intent', label: '13. Intentos previos', type: 'bar' },
     { key: 'act', label: '14. Acción actual', type: 'bar' },
     { key: 'uso', label: '15. ¿Usarías el producto?', type: 'pie' },
-    { key: 'pago', label: '16. ¿Cuánto pagarías?', type: 'bar' },
-    { key: 'carac', label: '17. Característica clave', type: 'bar' }
+    { key: 'frecCompra', label: '16. Frecuencia de uso/compra', type: 'bar' },
+    { key: 'unidades', label: '17. Unidades por vez', type: 'pie' },
+    { key: 'momento', label: '18. Momento de uso', type: 'bar' },
+    { key: 'pago', label: '19. ¿Cuánto pagarías?', type: 'bar' },
+    { key: 'carac', label: '20. Característica clave', type: 'bar' }
   ];
 
   const datos = encuestasData.length > 0 ? encuestasData : [
@@ -43,8 +65,18 @@ const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [] }) =
     datos.forEach(d => {
       const val = d[key];
       if (val) {
-        stats[val] = (stats[val] || 0) + 1;
-        total++;
+        if (typeof val === 'string' && (key === 'gasto' || key === 'redes' || key === 'momento')) {
+          val.split(',').forEach(v => {
+            const trimmed = v.trim();
+            if (trimmed) {
+              stats[trimmed] = (stats[trimmed] || 0) + 1;
+              total++;
+            }
+          });
+        } else {
+          stats[val] = (stats[val] || 0) + 1;
+          total++;
+        }
       }
     });
     return Object.keys(stats)
@@ -57,10 +89,44 @@ const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [] }) =
       .sort((a, b) => b.value - a.value);
   };
 
-  const generateComment = (chartData) => {
+  const generateComment = (chartData, colKey) => {
     if (chartData.length === 0) return '';
+    
+    if (colKey === 'dif') {
+      let sum = 0;
+      let n = 0;
+      chartData.forEach(d => {
+        const weight = parseInt(d.name, 10);
+        if (!isNaN(weight)) {
+          sum += d.value * weight;
+          n += d.value;
+        }
+      });
+      
+      if (n > 0) {
+        const necesidadPorcentaje = Math.round((sum / (n * 5)) * 100);
+        return (
+          <span>
+            <strong>Necesidad Validada: {necesidadPorcentaje}%</strong>
+            <br/><br/>
+            Esta métrica utiliza la fórmula ponderada <code>Necesidad = (∑(fi×wi)) / (N×5) × 100</code>.
+            <br/>
+            <strong>Donde:</strong>
+            <ul style={{ margin: '0.25rem 0', paddingLeft: '1.5rem' }}>
+              <li><strong>fi</strong> = Cantidad de personas que eligieron esa respuesta</li>
+              <li><strong>wi</strong> = Peso de la respuesta (1, 2, 3, 4, 5)</li>
+              <li><strong>N</strong> = Total de personas encuestadas</li>
+            </ul>
+            <strong>Escala:</strong> 1 (Muy fácil) a 5 (Muy difícil de resolver). 
+            <br/>
+            <strong>Interpretación:</strong> El <strong>{necesidadPorcentaje}%</strong> de los encuestados tienen una necesidad real de buscar una nueva alternativa, debido a la dificultad de sus soluciones actuales.
+          </span>
+        );
+      }
+    }
+
     const top = chartData[0];
-    return `La opción predominante es "${top.name}" con un ${top.percentage}% de respuestas.`;
+    return <span>La opción predominante es "{top.name}" con un {top.percentage}% de respuestas.</span>;
   };
 
   const tooltipFormatter = (value, name, props) => {
@@ -107,15 +173,15 @@ const Paso6_Resultados = ({ setAyudanteText, onComplete, encuestasData = [] }) =
                     <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 40, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
                       <XAxis type="number" stroke="#94a3b8" allowDecimals={false} />
-                      <YAxis dataKey="name" type="category" stroke="#94a3b8" width={90} tick={{fontSize: 11}} />
+                      <YAxis dataKey="name" type="category" stroke="#94a3b8" width={140} tick={{fontSize: 11}} />
                       <Tooltip formatter={tooltipFormatter} contentStyle={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a' }} itemStyle={{ color: '#0f172a' }} />
                       <Bar dataKey="value" fill={COLORS[idx % COLORS.length]} radius={[0, 4, 4, 0]} barSize={20} label={{ position: 'right', fill: '#cbd5e1', fontSize: 12, formatter: (val) => { const cd = chartData.find(d => d.value === val); return cd ? `${cd.percentage}%` : ''; } }} />
                     </BarChart>
                   )}
                 </ResponsiveContainer>
               </div>
-              <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #3b82f6', color: '#64748b', fontSize: '0.9rem', marginTop: 'auto' }}>
-                💡 <strong>Análisis rápido:</strong> {generateComment(chartData)}
+              <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: '0.5rem', borderLeft: '3px solid #3b82f6', color: '#64748b', fontSize: '0.9rem', marginTop: 'auto', lineHeight: '1.5' }}>
+                💡 <strong>Análisis rápido:</strong> {generateComment(chartData, col.key)}
               </div>
             </div>
           );

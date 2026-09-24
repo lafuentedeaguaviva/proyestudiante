@@ -1144,30 +1144,34 @@ export const generarPlanFinancieroIA = async (contextoProyecto) => {
   if (systemPrompt) {
     systemPrompt = systemPrompt.replace('{contextoProyecto}', contextoProyecto || "Proyecto de emprendimiento general.");
   } else {
-    systemPrompt = `Eres un experto financiero para startups y emprendimientos. Tu tarea es generar un plan financiero simulado y realista basado en la idea de negocio del usuario.
+    systemPrompt = `Eres un experto financiero para startups y emprendimientos. Tu tarea es generar un plan financiero MULTIPRODUCTO simulado, certero y realista basado en la idea de negocio del usuario, ubicado en Bolivia (Moneda: Bolivianos - Bs).
 Contexto del Proyecto:
 ${contextoProyecto || "Proyecto de emprendimiento general."}
 
-DEBES devolver EXACTAMENTE un objeto JSON con las siguientes llaves (y sin texto adicional, sin formato markdown):
+DEBES devolver EXACTAMENTE un objeto JSON con las siguientes llaves (y sin texto adicional ni bloques markdown):
 1. "inversiones": Un array de objetos, donde cada uno tiene:
-   - "concepto": string (nombre del item, ej. "Máquina de coser")
+   - "id": número entero único
+   - "concepto": string (nombre del item, ej. "Alquiler Local Comercial")
    - "tipo": string (debe ser EXACTAMENTE uno de: 'fijo', 'diferido', 'materiales', 'infraestructura', 'personal')
    - "cantidad": número entero
-   - "precio": número (precio unitario en moneda local)
+   - "precio": número (precio unitario realista mensual en Bolivianos)
    - "monto": número (cantidad * precio)
-2. "precios": Un objeto con:
-   - "precioSinFactura": número
-   - "precioFacturado": número
-   - "porcentajeGanancia": número
-3. "proyecciones": Un array vacío (ya no es necesario, el sistema las calcula dinámicamente).
-4. "puntoEquilibrio": 0 (el sistema lo calcula).
-5. "produccionMensual": número entero (cantidad inicial de unidades/servicios al mes).
-6. "porcentajeGanancia": número (ej: 30).
+2. "productos": Un array de objetos, donde cada uno tiene:
+   - "id": número entero único
+   - "nombre": string (Nombre del producto o servicio)
+   - "produccionMensual": número entero (demanda/cantidad de ventas estimadas por mes realistas)
+   - "margenGanancia": número (ej: 35, 40, o 50 para el margen deseado)
+   - "ingredientes": Un array de objetos que representan la receta o insumos unitarios para crear UN (1) producto. DEBES PROVEER LA ESTRUCTURA EXACTA:
+      - "id": número entero
+      - "concepto": string (nombre del ingrediente, ej. "Harina")
+      - "cantidad": número (ej: 0.5)
+      - "unidad": string (ej: "kg", "litros", "Pzas", "gramos", "ml")
+      - "precio": número (precio unitario por esa unidad en Bs.)
+      - "monto": número (cantidad * precio, costo final de la porción)
 
-Usa estimaciones lógicas y realistas para el tipo de negocio.
-REGLA DE ORO: Asegura que el plan financiero sea siempre viable y muy rentable.
-Ten en cuenta que el sistema calculará las proyecciones automáticamente aplicando un crecimiento mensual del 13% en ventas y un 16% de descuento por impuestos sobre los ingresos.
-Ajusta la 'produccionMensual', los 'precios' (altos) y las 'inversiones' (bajas/moderadas) para garantizar que, con esos descuentos, el VAN sea positivo y la TIR supere el 13% mensual.
+Usa estimaciones certeras y muy reales para los precios del mercado boliviano.
+REGLA DE ORO 1: Asegura que el plan financiero sea viable. Trata de mantener los costos fijos lógicos y realistas, y asegúrate que la cantidad de 'produccionMensual' multiplicada por el 'margenGanancia' sea capaz de cubrir los gastos fijos para que el VAN y la TIR sean positivos, pero creíbles. No exageres las ventas iniciales, pero tampoco las pongas tan bajas que el negocio quiebre. Haz los costos de los ingredientes (monto, cantidad, precio) muy precisos al centavo si es necesario.
+REGLA DE ORO 2: NO INVENTES NI AGREGUES NUEVOS PRODUCTOS. Limítate a devolver la información detallada únicamente de los productos que el usuario ya ha especificado.
 RESPONDE SOLO CON EL JSON VÁLIDO.`;
   }
 
@@ -1299,7 +1303,7 @@ Usa un tono positivo, alentador, profesional y muy práctico. RESPONDE SOLO CON 
 /**
  * Genera el resumen estructurado de las encuestas usando DeepSeek (Fase 2 Paso 7)
  */
-export const generarResumenEncuestasIA = async (encuestasData) => {
+export const generarResumenEncuestasIA = async (encuestasData, metricasAvanzadas = null) => {
   const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
   if (!apiKey) throw new Error("No se encontró API Key de DeepSeek.");
 
@@ -1310,7 +1314,7 @@ export const generarResumenEncuestasIA = async (encuestasData) => {
 - "buyer_persona": (string) Pequeña redacción describiendo al cliente ideal basado en las respuestas.
 - "publico_objetivo_resumido": (string) Resume el público objetivo en máximo 5 palabras (mejor si son 2 o 3, ej: "Jóvenes universitarios", "Amas de casa").
 - "precio_sugerido": (string) Análisis de ingresos y rango de precio recomendado.
-- "frecuencia": (string) Frecuencia estimada de consumo/compra.
+- "frecuencia": (string) Frecuencia estimada de consumo/compra, cantidad de unidades/porciones por compra, y los momentos/situaciones preferidos de uso.
 - "educacion": (string) Nivel de educación u ocupación dominante y tono sugerido para hablarles.
 - "dolores": (string) Principales problemas o pain points urgentes que intentan resolver.
 - "canales": (string) Medios por donde preferirían comprar o enterarse del producto.
@@ -1329,8 +1333,8 @@ Responde ÚNICAMENTE con el objeto JSON, sin formato markdown, para que sea pars
     body: JSON.stringify({
       model: "deepseek-chat",
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: "Aquí están los datos de las encuestas:\n" + JSON.stringify(encuestasData) }
+        { role: "system", content: systemPrompt + `\n\nATENCIÓN: Analiza explícitamente los datos de 'unidades' (unidades por vez) y 'momento' (momento o situación de uso) y asegúrate de incluirlos en tu respuesta bajo la sección de "frecuencia" o donde veas conveniente.` },
+        { role: "user", content: "Aquí están los datos de las encuestas:\n" + JSON.stringify(encuestasData) + (metricasAvanzadas ? `\n\nDATOS CLAVE PRE-CALCULADOS:\nÍndice de Necesidad (0-1): ${metricasAvanzadas.IN}\nÍndice de Intención de Compra (0-1): ${metricasAvanzadas.IC}\nFrecuencia de Compra (veces/mes): ${metricasAvanzadas.FC}\nCantidad por Compra (unidades): ${metricasAvanzadas.QC}\nUsa estas métricas explícitamente en tu conclusión o en la sección de frecuencia.` : "") }
       ],
       temperature: 0.7,
       response_format: { type: "json_object" }
@@ -1483,17 +1487,24 @@ export const generarResumenFase4IA = async (dataFase4) => {
       - Beneficios: ${JSON.stringify(dataFase4.beneficios || [])}
       - Empaque/Presentación: ${dataFase4.disenoEmpaque || dataFase4.descripcionServicio || 'No especificado'}
       - Demanda (Clientes mensuales estimados): ${dataFase4.calculoMensual || 'No calculado'}
+      - Métrica N (Población Total): ${dataFase4.mercadoTotalN || 'No especificado'}
+      - MÉTRICAS REALES CALCULADAS (¡OBLIGATORIO USAR ESTOS VALORES EXACTOS Y NO INVENTAR OTROS!): 
+        IN: ${dataFase4.metricasAplicadas?.IN || '0'}
+        IC: ${dataFase4.metricasAplicadas?.IC || '0'}
+        FC: ${dataFase4.metricasAplicadas?.FC || '0'}
+        QC: ${dataFase4.metricasAplicadas?.QC || '0'}
+      - Distribución de demanda entre productos: ${dataFase4.calculoMensual || 'No calculado'}
 
       REGLA DE ORO 1: SIEMPRE DEBES REDACTAR EN POSITIVO, MEJORANDO TODO LO QUE EL EMPRENDEDOR ESCRIBIÓ. NUNCA USES TONO NEGATIVO NI PESIMISTA.
       REGLA DE ORO 2: REDACTA ABSOLUTAMENTE TODO EN PRIMERA PERSONA DEL SINGULAR (ej: "Mi proyecto", "Ofrezco", "Mi producto"). El texto debe sonar como si el propio emprendedor lo estuviera presentando con extrema seguridad.
       NUNCA debes decir "no está definido", "falta detallar" o "no se especificó". Si falta información, DEBES INVENTARLA o ASUMIRLA de forma lógica basándote en el nombre del producto o el contexto del proyecto. Actúa como si el proyecto ya fuera un éxito y redacta de manera asertiva y convincente.
 
-      IMPORTANTE: DEBES responder EXCLUSIVAMENTE con un objeto JSON (sin formato Markdown adicional, ni \`\`\`json) que contenga exactamente estas 5 propiedades (tipo string, de 2 a 3 líneas cada una):
+      IMPORTANTE: DEBES responder EXCLUSIVAMENTE con un objeto JSON (sin formato Markdown adicional, ni \`\`\`json) que contenga exactamente estas 5 propiedades (tipo string, puede tener saltos de línea para las fórmulas usando \\n):
       {
         "resumen_concepto": "Concepto y funcionalidad del servicio/producto (MEJORADO Y EN POSITIVO).",
         "resumen_ventaja": "Los beneficios redactados en base a las características del producto, pero de forma MUY MEJORADA y comercial.",
         "resumen_empaque": "La estrategia de empaque o presentación del servicio, redactada de forma MEJORADA, creativa y en positivo.",
-        "resumen_demanda": "La viabilidad del negocio explicada utilizando LOS DATOS DE DEMANDA MENSUAL ingresados, redactada en positivo demostrando que es viable.",
+        "resumen_demanda": "TITÚLALO INTERNAMENTE COMO 'Demanda Potencial'. Redacta de forma detallada, en primera persona y en tono muy positivo cómo se calculó la demanda. Muestra la fórmula Dmes = N * IN * IC * FC * QC y REEMPLAZA las letras por los VALORES EXACTOS proporcionados en las 'MÉTRICAS REALES CALCULADAS' (N, IN, IC, FC, QC) y el resultado total de 'Demanda (Clientes mensuales)'. Explica matemáticamente qué significa cada métrica. Luego, explica cómo esta demanda total se distribuye exactamente entre los diferentes productos (usa los datos de Distribución proporcionados). Usa viñetas o saltos de línea (\\n) para que se vea como una explicación matemática bonita y profesional.",
         "recomendacion_estrategica": "Un consejo experto para potenciar su diseño."
       }
       `;
@@ -1646,23 +1657,11 @@ export const obtenerVideosConfig = async () => {
 /**
  * Guarda o actualiza la configuración de un video
  */
-export const guardarVideoConfig = async (videoKey, url, startStr, endStr) => {
-  // Convertimos 'MM:SS' a segundos
-  const timeToSeconds = (timeStr) => {
-    if (!timeStr) return null;
-    const parts = timeStr.split(':');
-    if (parts.length === 2) {
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-    }
-    return parseInt(timeStr, 10) || null;
-  };
-
+export const guardarVideoConfig = async (videoKey, url) => {
   const configJson = JSON.stringify({
     url,
-    start: timeToSeconds(startStr),
-    end: timeToSeconds(endStr),
-    startStr: startStr || '',
-    endStr: endStr || ''
+    startStr: '',
+    endStr: ''
   });
 
   return await guardarPromptIA(0, videoKey, configJson);
@@ -1675,6 +1674,12 @@ export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
   let finalUrl = config?.url || fallbackUrl;
   
   if (!finalUrl) return '';
+
+  // Si es un iframe embebido entero, sacamos el src
+  const iframeMatch = finalUrl.match(/src=["'](.*?)["']/);
+  if (iframeMatch && iframeMatch[1]) {
+    finalUrl = iframeMatch[1];
+  }
 
   // Extraer el ID del video de forma robusta
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -1690,14 +1695,12 @@ export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
   }
 
   const params = [];
-  if (config?.start) params.push(`start=${config.start}`);
-  if (config?.end) params.push(`end=${config.end}`);
   
-  // Siempre agregar rel=0 y showinfo=0 para mejor UX
+  // Siempre agregar rel=0 para mejor UX
   params.push('rel=0');
 
   if (params.length > 0) {
-    finalUrl += `?${params.join('&')}`;
+    finalUrl += (finalUrl.includes('?') ? '&' : '?') + params.join('&');
   }
 
   return finalUrl;

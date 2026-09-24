@@ -225,30 +225,21 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
 
   // Tablas financieras
   const capitalInversion = inversionesLoc.filter(i => ['fijo', 'diferido'].includes(i.tipo));
-  const capitalOperacion = inversionesLoc.filter(i => ['materiales', 'infraestructura', 'personal'].includes(i.tipo));
+  const capitalOperacion = inversionesLoc.filter(i => ['infraestructura', 'personal', 'operativo'].includes(i.tipo));
   
   // --- Cálculo Dinámico idéntico a la UI de Fase 10 ---
-  const cfTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) !== 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-  const cvTotal = capitalOperacion.filter(inv => (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-  const numProd = parseInt(pDT[10]?.produccionMensual) || 1;
-  const costoTotalOp = capitalOperacion.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
-  const costoUnitario = costoTotalOp / numProd;
-  const costoVariableUnitario = cvTotal / numProd;
-  const margen = parseFloat(pDT[10]?.porcentajeGanancia || 30);
-  const precioSinFacturaCalc = margen < 100 ? costoUnitario / (1 - (margen / 100)) : costoUnitario;
-  const precioFacturadoCalc = precioSinFacturaCalc / 0.84;
+  const cfTotal = capitalOperacion.filter(inv => (inv.comportamiento || 'fijo') !== 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
+  const cvGlobal = capitalOperacion.filter(inv => (inv.comportamiento || 'fijo') === 'variable').reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
   
-  const precioVentaEfectivo = (pDT[10]?.precios?.precioFacturado && parseFloat(pDT[10].precios.precioFacturado) > 0)
-    ? parseFloat(pDT[10].precios.precioFacturado)
-    : (pDT[10]?.precioVenta && parseFloat(pDT[10].precioVenta) > 0)
-      ? parseFloat(pDT[10].precioVenta)
-      : precioFacturadoCalc;
+  const totalProdMensual = (pDT[10]?.productos || []).reduce((acc, p) => acc + (parseFloat(p.produccionMensual) || 0), 0) || 1;
+  const fijoPorUnidad = cfTotal / totalProdMensual;
+  const variableGlobalPorUnidad = cvGlobal / totalProdMensual;
 
   const numMeses = parseInt(pDT[10]?.mesesProyeccion) || 6;
   const headerMeses = ["Meses", ...Array.from({ length: numMeses }, (_, i) => `Mes ${i + 1}`)];
   
-  const rowUnidades = ["N° de productos o servicios"];
-  const rowPrecio = ["Precio (Bs.)"];
+  const rowUnidades = ["N° de unidades vendidas (Total)"];
+  const rowPrecio = ["Precio Promedio (Bs.)"];
   const rowIngresos = ["Ingresos (Bs.)"];
   
   const rowCostosFijos = ["Costos Fijos (Bs.)"];
@@ -259,29 +250,47 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
   const rowImpuestos = ["Impuestos (IVA 13% + IT 3%)"];
   const rowUtilidadNeta = ["Utilidad Neta (Bs.)"];
 
-
   const flujos = [];
   
   for (let m = 1; m <= numMeses; m++) {
-    const multiplicador = 1 + ((m - 1) * 0.13);
-    const unidades = Math.round(numProd * multiplicador);
-    const ingresos = unidades * precioFacturadoCalc;
+    const multiplicador = 1; // FLAT DEMAND
     
-    const vars = unidades * costoVariableUnitario;
-    const gastosTotales = cfTotal + vars;
+    let ingresosTotalesMes = 0;
+    let gastosVarsMes = 0;
+    let unidadesTotalesMes = 0;
+
+    (pDT[10]?.productos || []).forEach(prod => {
+      const prodBase = parseFloat(prod.produccionMensual) || 0;
+      const unidades = Math.round(prodBase * multiplicador);
+      unidadesTotalesMes += unidades;
+
+      const costoMaterialesUnitario = (prod.ingredientes || []).reduce((acc, curr) => acc + (curr.monto || 0), 0);
+      const cvUnitario = costoMaterialesUnitario + variableGlobalPorUnidad;
+      const costoUnitarioTotal = cvUnitario + fijoPorUnidad;
+
+      const margen = parseFloat(prod.margenGanancia ?? pDT[10]?.porcentajeGanancia ?? 30);
+      const precioSinFactura = margen < 100 ? costoUnitarioTotal / (1 - (margen / 100)) : costoUnitarioTotal;
+      const precioFacturado = precioSinFactura / 0.84;
+
+      ingresosTotalesMes += (unidades * precioFacturado);
+      gastosVarsMes += (unidades * cvUnitario);
+    });
     
-    const uBruta = ingresos - gastosTotales;
-    const impuestos = ingresos * 0.16; // IVA 13% + IT 3%
+    const gastosTotales = cfTotal + gastosVarsMes;
+    const uBruta = ingresosTotalesMes - gastosTotales;
+    const impuestos = ingresosTotalesMes * 0.16; // IVA 13% + IT 3%
     const uNeta = uBruta - impuestos;
     
     flujos.push(uNeta);
     
-    rowUnidades.push(String(unidades));
-    rowPrecio.push(formatCurrency(precioFacturadoCalc));
-    rowIngresos.push(formatCurrency(ingresos));
+    const precioPromedio = unidadesTotalesMes > 0 ? (ingresosTotalesMes / unidadesTotalesMes) : 0;
+
+    rowUnidades.push(String(unidadesTotalesMes));
+    rowPrecio.push(formatCurrency(precioPromedio));
+    rowIngresos.push(formatCurrency(ingresosTotalesMes));
     
     rowCostosFijos.push(formatCurrency(cfTotal));
-    rowCostosVariables.push(formatCurrency(vars));
+    rowCostosVariables.push(formatCurrency(gastosVarsMes));
     rowGastoTotal.push(formatCurrency(gastosTotales));
     
     rowUtilidadBruta.push(formatCurrency(uBruta));
@@ -289,9 +298,19 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
     rowUtilidadNeta.push(formatCurrency(uNeta));
   }
   
-  // Punto de equilibrio
-  const margenContribucion = precioFacturadoCalc - costoVariableUnitario;
-  const puntoEquilibrio = margenContribucion > 0 ? Math.ceil(cfTotal / margenContribucion) : 0;
+  // Punto de equilibrio Multi-producto (En valor monetario)
+  let margenContribucionPonderado = 0;
+  let puntoEquilibrioBs = 0;
+  // Use first month as baseline
+  const baselineIngresos = parseFloat(rowIngresos[1].replace('Bs. ', '')) || 0;
+  const baselineVars = parseFloat(rowCostosVariables[1].replace('Bs. ', '')) || 0;
+  
+  if (baselineIngresos > 0) {
+    margenContribucionPonderado = (baselineIngresos - baselineVars) / baselineIngresos;
+  }
+  if (margenContribucionPonderado > 0) {
+    puntoEquilibrioBs = cfTotal / margenContribucionPonderado;
+  }
 
   // VAN y TIR
   const totalInversion = capitalInversion.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
@@ -320,11 +339,7 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
     tir_mensual = low * 100;
   }
 
-  const preciosFin = {
-    precioSinFactura: precioSinFacturaCalc,
-    precioFacturado: precioFacturadoCalc,
-    porcentajeGanancia: margen
-  };
+  
   
 
   
@@ -340,7 +355,18 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
   const rowsFijos = activosFijos.map(i => [i.concepto || "N/A", String(i.cantidad || 1), formatCurrency(i.precio || i.monto), formatCurrency(i.monto)]);
   const rowsDiferidos = activosDiferidos.map(i => [i.concepto || "N/A", String(i.cantidad || 1), formatCurrency(i.precio || i.monto), formatCurrency(i.monto)]);
 
-  const matInsumos = capitalOperacion.filter(i => i.tipo === 'materiales');
+  const matInsumos = [];
+  (pDT[10]?.productos || []).forEach(prod => {
+    (prod.ingredientes || []).forEach(ing => {
+      matInsumos.push({
+        concepto: `${ing.concepto} (${prod.nombre})`,
+        cantidad: ing.cantidad * (parseFloat(prod.produccionMensual) || 1),
+        precio: ing.precio,
+        monto: ing.monto * (parseFloat(prod.produccionMensual) || 1),
+        tipo: 'materiales'
+      });
+    });
+  });
   const infraServicios = capitalOperacion.filter(i => i.tipo === 'infraestructura');
   const personalData = capitalOperacion.filter(i => i.tipo === 'personal');
 
@@ -359,11 +385,21 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
 
   const headersEstructuraCostos = ["DESCRIPCIÓN", "TIPO DE COSTO", "COSTO (BS.)"];
   const rowsEstructuraCostos = capitalOperacion.map(inv => {
-    const isVariable = (inv.comportamiento || (inv.tipo === 'materiales' ? 'variable' : 'fijo')) === 'variable';
+    const isVariable = (inv.comportamiento || 'fijo') === 'variable';
     const tipoLabel = isVariable ? "Costo Variable" : "Costo Fijo";
     const desc = `${inv.concepto || "N/A"} (${inv.tipo.toUpperCase()})`;
     return [desc, tipoLabel, formatCurrency(inv.monto)];
   });
+  
+  // Agregar materiales dinámicos a la estructura de costos en el word
+  const totalMaterialesGlobal = matInsumos.reduce((acc, curr) => acc + (curr.monto || 0), 0);
+  if (totalMaterialesGlobal > 0) {
+    rowsEstructuraCostos.push([
+      "Materiales e Insumos (Por todos los productos)", 
+      "Costo Variable", 
+      formatCurrency(totalMaterialesGlobal)
+    ]);
+  }
 
   const rowsTotal = [
     ["Capital de Inversión", formatCurrency(totalInversion)],
@@ -385,6 +421,9 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
 
   try {
     const doc = new Document({
+      features: {
+        updateFields: true,
+      },
       styles: {
         default: {
           document: {
@@ -518,8 +557,10 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
           createHeading("3.2.1 Oferta", 3),
           createParagraph(getDato('oferta') || "Análisis de oferta."),
           
-          createHeading("3.2.2 Demanda", 3),
+          createHeading("3.2.2 Demanda Estimada", 3),
           createParagraph(getDato('demanda') || safeGet(pDT[3], 'tamano_mercado')),
+          createHeading("Explicación de Índices de Demanda", 4),
+          createParagraph(getDato('explicacion_indices_demanda') || "Explicación de los índices estadísticos y proyecciones utilizados para estimar la demanda."),
           
           createHeading("3.2.3 Público objetivo (cliente y/o usuario)", 3),
           createParagraph(getDato('publico_objetivo') || safeGet(pDT[3], 'perfil_cliente')),
@@ -578,14 +619,6 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
             ),
             createSource("Fuente: Elaboración propia.")
           ] : []),
-          
-          createHeading("3.6.2 Layout", 3),
-          createParagraph(getDato('layout_intro') || getDato('layout') || "Descripción del layout."),
-          ...(imagenesBase64.layout ? [
-            createCaption(`Figura ${fCount++}: Layout del Proyecto`, 'figura'),
-            createImage(imagenesBase64.layout, 500, 300),
-            createSource("Fuente: Elaboración propia.")
-          ] : []),
 
           // 4. VIABILIDAD Y SOSTENIBILIDAD
           createHeading("4. VIABILIDAD Y SOSTENIBILIDAD", 1),
@@ -639,30 +672,34 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
           createCaption(`Tabla ${tCount++}: Estructura de Costos`),
           createTable(headersEstructuraCostos, rowsEstructuraCostos),
           createSource("Fuente: Elaboración propia."),
-          createParagraph(`TOTALES -> CF: ${formatCurrency(cfTotal)} | CV: ${formatCurrency(cvTotal)} | GLOBAL: ${formatCurrency(cfTotal + cvTotal)}`, true, AlignmentType.RIGHT),
+          createParagraph(`TOTALES -> CF: ${formatCurrency(cfTotal)} | CV: ${formatCurrency(cvGlobal + totalMaterialesGlobal)} | GLOBAL: ${formatCurrency(cfTotal + cvGlobal + totalMaterialesGlobal)}`, true, AlignmentType.RIGHT),
           
           createHeading("4.3. Precio de Venta", 2),
           createParagraph(`Cálculo de precio de venta estimado según proyecciones del proyecto (Fase 10).`),
           
-          createHeading("1. Cálculo de Costo Unitario", 4),
-          createCaption(`Tabla ${tCount++}: Cálculo de Costo Unitario`),
-          createTable(["Concepto", "Monto"], [
-            ["Costo Operativo Mensual", `Bs. ${formatCurrency(costoTotalOp)}`],
-            ["Productos por mes", `${numProd} u.`],
-            ["Costo Unitario (CU)", `Bs. ${formatCurrency(costoUnitario)}`]
-          ]),
-          createSource("Fuente: Elaboración propia."),
           
-          createHeading("2. Proyección de Precio", 4),
-          createCaption(`Tabla ${tCount++}: Proyección de Precio`),
-          createTable(["Concepto", "Monto"], [
-            ["Margen de Ganancia (%)", `${margen} %`],
-            ["Precio (Sin factura)", `Bs. ${formatCurrency(precioSinFacturaCalc)}`],
-            ["Precio Facturado (Bolivia)", `Bs. ${formatCurrency(precioFacturadoCalc)}`]
-          ]),
+          createHeading("1. Resumen de Precios por Producto", 4),
+          createCaption(`Tabla ${tCount++}: Precios Estimados`),
+          createTable(["Producto", "Costo Unitario", "Margen", "Precio (Sin Factura)", "Precio Facturado"], 
+            (pDT[10]?.productos || []).map(p => {
+              const costoMat = (p.ingredientes || []).reduce((a, b) => a + (b.monto || 0), 0);
+              const cuTotal = costoMat + variableGlobalPorUnidad + fijoPorUnidad;
+              const mg = parseFloat(p.margenGanancia ?? pDT[10]?.porcentajeGanancia ?? 30);
+              const pSinFac = mg < 100 ? cuTotal / (1 - (mg/100)) : cuTotal;
+              const pFac = pSinFac / 0.84;
+              return [
+                p.nombre || "Producto",
+                `Bs. ${formatCurrency(cuTotal)}`,
+                `${mg}%`,
+                `Bs. ${formatCurrency(pSinFac)}`,
+                `Bs. ${formatCurrency(pFac)}`
+              ];
+            })
+          ),
           createSource("Fuente: Elaboración propia."),
           
           createHeading("4.4. Proyecciones Financieras", 2),
+
           
           createHeading("4.4.1. Proyección de Ganancias (Ingresos)", 3),
           createCaption(`Tabla ${tCount++}: Proyección de Ganancias`),
@@ -680,7 +717,7 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
           createSource("Fuente: Elaboración propia."),
           
           createHeading("4.5. Punto de Equilibrio", 2),
-          createParagraph(`Unidades a vender por mes para no perder dinero: ${puntoEquilibrio} unidades.`),
+          createParagraph(`El punto de equilibrio se alcanza cuando la utilidad neta acumulada en las proyecciones logra cubrir la inversión inicial.`),
           
           createHeading("4.6. Evaluación Financiera (VAN y TIR)", 2),
           createCaption(`Tabla ${tCount++}: VAN y TIR`),
@@ -693,9 +730,15 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
           createHeading("Interpretación de Viabilidad y Rentabilidad", 4),
           createParagraph(getDato('viabilidad_interpretacion') || getDato('viabilidad') || "La viabilidad del proyecto se sustenta en el análisis de sus indicadores financieros. Un VAN positivo confirma la generación de valor, mientras que la TIR supera la tasa exigida, confirmando su rentabilidad y viabilidad en el mercado."),
 
-          // 5. RESULTADOS
-          createHeading("5. RESULTADOS", 1),
-          createParagraph(getDato('resultados') || `Mercado: ${safeGet(pDT[11], 'resultados_mercado')} - Técnico: ${safeGet(pDT[11], 'resultados_tecnico')} - Financiero: ${safeGet(pDT[11], 'resultados_financiero')}`),
+          // 5. RESULTADOS DE VIABILIDAD
+          createHeading("5. RESULTADOS DE VIABILIDAD", 1),
+          createCaption(`Tabla ${tCount++}: Análisis de Viabilidad del Proyecto`),
+          createTable(["Criterio de Viabilidad", "Justificación y Resultados"], [
+            ["Viabilidad Comercial", getDato('viabilidad_comercial') || safeGet(pDT[11]?.viabilidad, 'viabilidadComercial') || "Pendiente de análisis"],
+            ["Viabilidad Técnica", getDato('viabilidad_tecnica') || safeGet(pDT[11]?.viabilidad, 'viabilidadTecnica') || "Pendiente de análisis"],
+            ["Viabilidad Legal y Ambiental", getDato('viabilidad_legal') || safeGet(pDT[11]?.viabilidad, 'viabilidadLegal') || "Pendiente de análisis"]
+          ]),
+          createSource("Fuente: Elaboración propia."),
 
           // 6. PROYECTO DE VIDA
           createHeading("6. PROYECTO DE VIDA", 1),
@@ -741,5 +784,6 @@ export const generarYDescargarWord = async (datosTotales, mejoradosConIA = {}, i
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Error al generar docx", error);
+    alert("Error al generar docx: " + error.message + "\n" + error.stack);
   }
 };

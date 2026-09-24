@@ -71,7 +71,7 @@ const EncuestaPublica = () => {
     recibeDinero: '', dineroSemana: '', gastos: [],
     frecuenciaActividad: '', factorImportante: '', dondeAdquiere: '', redes: [],
     dificultadProblema: '', intentoResolver: '', queHaceActualmente: '',
-    usariaSolucion: '', cuantoPagaria: '', caracteristicaImportante: '', mejora: '',
+    usariaSolucion: '', frecuenciaCompra: '', unidadesPorVez: '', momentoUso: [], cuantoPagaria: '', caracteristicaImportante: '', mejora: '',
     quiereInfo: '', contacto: ''
   });
 
@@ -159,6 +159,9 @@ const EncuestaPublica = () => {
         intent: datos.intentoResolver,
         act: datos.queHaceActualmente,
         uso: datos.usariaSolucion,
+        frecCompra: datos.frecuenciaCompra,
+        unidades: datos.unidadesPorVez,
+        momento: datos.momentoUso.join(', '),
         pago: datos.cuantoPagaria,
         carac: datos.caracteristicaImportante,
         mejora: datos.mejora,
@@ -503,7 +506,49 @@ const EncuestaPublica = () => {
               </div>
 
               <div className="mb-6">
-                <label className="block text-slate-200 mb-2 font-semibold">16. ¿Cuánto estarías dispuesto a pagar por esto?</label>
+                <label className="block text-slate-200 mb-2 font-semibold">16. Si el producto/servicio estuviera disponible, ¿con qué frecuencia lo comprarías o usarías?</label>
+                <RadioGroup 
+                  value={datos.frecuenciaCompra} 
+                  onChange={v => handleChange('frecuenciaCompra', v)}
+                  options={[
+                    {value: 'Todos los dias', label: 'Todos los días'},
+                    {value: '3-5 veces semana', label: '3-5 veces por semana'},
+                    {value: '1-2 veces semana', label: '1-2 veces por semana'},
+                    {value: '1 vez semana', label: '1 vez por semana'},
+                    {value: '1 vez mes', label: '1 vez al mes'},
+                    {value: 'Rara vez', label: 'Rara vez'},
+                    {value: 'Nunca', label: 'Nunca'}
+                  ]} 
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-slate-200 mb-2 font-semibold">17. Cuando compres o uses este producto/servicio, ¿cuántas unidades o porciones adquirirías por vez?</label>
+                <RadioGroup 
+                  value={datos.unidadesPorVez} 
+                  onChange={v => handleChange('unidadesPorVez', v)}
+                  options={[
+                    {value: '1', label: '1'},
+                    {value: '2', label: '2'},
+                    {value: '3', label: '3'},
+                    {value: '4 o mas', label: '4 o más'}
+                  ]} 
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-slate-200 mb-2 font-semibold">18. ¿En qué momento o situación preferirías usar o consumir este producto/servicio? (Puedes marcar más de una)</label>
+                <CheckboxGroup 
+                  values={datos.momentoUso} 
+                  onChange={v => handleCheckboxArray('momentoUso', v)}
+                  options={[
+                    'Mañana / Inicio del día', 'Mediodía / Almuerzo', 'Tarde / Merienda', 'Noche / Cena', 'Fines de semana', 'Momentos de estrés o prisa', 'Otro'
+                  ]} 
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-slate-200 mb-2 font-semibold">19. ¿Cuánto estarías dispuesto a pagar por esto?</label>
                 <RadioGroup 
                   value={datos.cuantoPagaria} 
                   onChange={v => handleChange('cuantoPagaria', v)}
@@ -519,7 +564,7 @@ const EncuestaPublica = () => {
               </div>
 
               <div className="mb-6">
-                <label className="block text-slate-200 mb-2 font-semibold">17. ¿Qué característica crees que sería la más importante para decidirte?</label>
+                <label className="block text-slate-200 mb-2 font-semibold">20. ¿Qué característica crees que sería la más importante para decidirte?</label>
                 <RadioGroup 
                   value={datos.caracteristicaImportante} 
                   onChange={v => handleChange('caracteristicaImportante', v)}
@@ -535,7 +580,7 @@ const EncuestaPublica = () => {
               </div>
 
               <div className="mb-6">
-                <label className="block text-slate-200 mb-2 font-semibold">18. ¿Hay algo en especial que te gustaría que tuviera o mejorara? (Opcional)</label>
+                <label className="block text-slate-200 mb-2 font-semibold">21. ¿Hay algo en especial que te gustaría que tuviera o mejorara? (Opcional)</label>
                 <textarea className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl p-4 text-white focus:border-[#38BDF8] focus:outline-none transition-colors min-h-[100px]" placeholder="Escribe tu opinión aquí..." value={datos.mejora} onChange={e => handleChange('mejora', e.target.value)}></textarea>
               </div>
             </div>
@@ -546,7 +591,7 @@ const EncuestaPublica = () => {
               <h2 className="text-xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Sección 6: Contacto (Opcional)</h2>
               
               <div className="mb-6">
-                <label className="block text-slate-200 mb-2 font-semibold">19. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?</label>
+                <label className="block text-slate-200 mb-2 font-semibold">22. ¿Te gustaría recibir más información, descuentos o noticias sobre este proyecto cuando esté listo?</label>
                 <RadioGroup 
                   value={datos.quiereInfo} 
                   onChange={v => handleChange('quiereInfo', v)}
@@ -559,7 +604,7 @@ const EncuestaPublica = () => {
 
               {datos.quiereInfo === 'Si' && (
                 <div className="mb-6" style={{animation: 'fadeIn 0.3s ease'}}>
-                  <label className="block text-slate-200 mb-2 font-semibold">20. Déjanos tu correo electrónico o número de WhatsApp:</label>
+                  <label className="block text-slate-200 mb-2 font-semibold">23. Déjanos tu correo electrónico o número de WhatsApp:</label>
                   <input type="text" placeholder="Ej: micorreo@gmail.com o +591 7..." className="w-full bg-slate-800/50 border-2 border-slate-700 rounded-xl p-4 text-white focus:border-[#38BDF8] focus:outline-none transition-colors" value={datos.contacto} onChange={e => handleChange('contacto', e.target.value)} />
                 </div>
               )}

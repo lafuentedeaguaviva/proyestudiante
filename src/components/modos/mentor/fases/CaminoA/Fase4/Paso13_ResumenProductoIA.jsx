@@ -120,8 +120,8 @@ const Paso13_ResumenProductoIA = ({ setAyudanteText, onComplete, globalData, upd
           </div>
 
           <div style={cardStyle}>
-            <div style={titleStyle}>📊 Viabilidad (Demanda)</div>
-            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6' }}>{resumenIAData.resumen_demanda}</p>
+            <div style={titleStyle}>📊 Demanda Potencial</div>
+            <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', whiteSpace: 'pre-line' }}>{resumenIAData.resumen_demanda}</p>
           </div>
 
           <div style={{ ...cardStyle, gridColumn: '1 / -1', background: 'linear-gradient(135deg, #fefce8 0%, #fef08a 100%)', borderColor: '#fde047' }}>

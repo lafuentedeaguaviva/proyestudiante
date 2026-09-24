@@ -1,0 +1,295 @@
+      case 3: return (
+        <div className="animate-fade-in w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-1/3 bg-white p-6 rounded-3xl shadow-xl h-fit border border-slate-100">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                <Package size={20} />
+              </div>
+              <h3 className="font-bold text-slate-800 text-lg">Caja de Herramientas</h3>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">Añade los elementos de tu capital de operación:</p>
+            <div className="flex bg-slate-100 p-1 rounded-xl mb-4 text-xs font-medium">
+              <button onClick={() => { setToolboxCategory('materiales'); setToolboxSubcategory(Object.keys(cajaHerramientas.materiales.subgrupos)[0]); }} className={`flex-1 p-2 rounded-lg ${toolboxCategory === 'materiales' ? 'bg-white shadow-sm text-amber-700' : 'text-slate-500'}`}>Materiales</button>
+              <button onClick={() => { setToolboxCategory('infraestructura'); setToolboxSubcategory(Object.keys(cajaHerramientas.infraestructura.subgrupos)[0]); }} className={`flex-1 p-2 rounded-lg ${toolboxCategory === 'infraestructura' ? 'bg-white shadow-sm text-emerald-700' : 'text-slate-500'}`}>Infraestructura</button>
+              <button onClick={() => { setToolboxCategory('personal'); setToolboxSubcategory(Object.keys(cajaHerramientas.personal.subgrupos)[0]); }} className={`flex-1 p-2 rounded-lg ${toolboxCategory === 'personal' ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500'}`}>Personal</button>
+            </div>
+
+            <div className="space-y-3 mb-4 animate-fade-in">
+              {toolboxCategory && cajaHerramientas[toolboxCategory] && Object.entries(getCajaHerramientas()[toolboxCategory].subgrupos).map(([key, sub]) => (
+                <div key={key} className="flex flex-col">
+                  <button
+                    onClick={() => setToolboxSubcategory(toolboxSubcategory === key ? null : key)}
+                    className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all flex justify-between items-center ${toolboxSubcategory === key ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm rounded-b-none' : 'border-slate-200 bg-white text-slate-600 hover:border-amber-300'}`}
+                  >
+                    {sub.nombre}
+                    <span className="text-xl leading-none text-amber-600">{toolboxSubcategory === key ? '−' : '+'}</span>
+                  </button>
+                  {toolboxSubcategory === key && (
+                    <div className="bg-slate-50 p-4 border border-t-0 border-amber-200 rounded-b-xl animate-fade-in">
+                      <div className="flex flex-wrap gap-2">
+                        {sub.items.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              const tipo = toolboxCategory;
+                              updateGlobalData({
+                                inversiones: [...data.inversiones, { id: Date.now() + idx, concepto: item, cantidad: 1, precio: 0, monto: 0, tipo }]
+                              });
+                            }}
+                            className="bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-sm hover:border-amber-400 hover:text-amber-700 transition-colors flex items-center gap-1 shadow-sm"
+                          >
+                            <Plus size={14} /> {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:w-2/3 bg-white p-6 rounded-3xl shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
+                <Wallet size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">Costos de Materiales e Insumos</h2>
+                <p className="text-slate-500 font-medium">Determina el costo unitario por producto o servicio.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-6">
+
+              <div className="flex justify-end mb-6">
+                <div className="flex flex-wrap items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm max-w-full">
+                  <span className="text-sm font-bold text-slate-600 truncate">Producción o Servicios / mes:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-24 bg-slate-50 p-1.5 rounded-lg border border-slate-200 font-bold text-md focus:border-amber-400 outline-none text-center text-amber-700 shrink-0"
+                    placeholder="0"
+                    value={data.produccionMensual || ''}
+                    onChange={e => updateGlobalData({ produccionMensual: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-6">
+
+                {/* TABLA 1: MATERIALES E INSUMOS (RECETARIO POR PRODUCTO) */}
+                <div>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b border-slate-200 pb-2 gap-4">
+                    <h3 className="text-md font-bold text-slate-800">
+                      a. Costo de Materiales e Insumos por Producto
+                    </h3>
+                    <button 
+                      onClick={() => updateGlobalData({ productos: [...(data.productos || []), { id: Date.now(), nombre: '', demanda: data.produccionMensual || 1, ingredientes: [] }] })} 
+                      className="text-amber-600 font-bold text-sm hover:underline flex items-center gap-1 bg-amber-50 px-3 py-1.5 rounded-lg shrink-0"
+                    >
+                      <Plus size={14} /> Añadir Producto
+                    </button>
+                  </div>
+
+                  {(data.productos || []).length === 0 ? (
+                    <div className="text-center p-8 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-medium">
+                      <Package size={32} className="mx-auto mb-2 text-slate-300" />
+                      No tienes productos. Haz clic en "Añadir Producto" para comenzar a armar tus recetas.
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {(data.productos || []).map((prod, pIdx) => {
+                        const costoUnitarioProd = (prod.ingredientes || []).reduce((acc, ing) => acc + ((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0)), 0);
+                        const costoMensualProd = costoUnitarioProd * (parseInt(prod.demanda) || 1);
+                        
+                        return (
+                          <div key={prod.id} className="bg-white border-2 border-amber-200 rounded-2xl overflow-hidden shadow-sm">
+                            <div className="bg-amber-50 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div className="flex-1">
+                                <label className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-1">Nombre del Producto / Servicio</label>
+                                <input 
+                                  className="w-full bg-white p-2 rounded-lg border border-amber-200 font-bold text-lg text-slate-800 focus:border-amber-400 outline-none shadow-inner" 
+                                  placeholder="Ej. Torta de Chocolate, Revisión Mecánica, App Móvil" 
+                                  value={prod.nombre} 
+                                  onChange={e => {
+                                    const n = [...data.productos];
+                                    n[pIdx].nombre = e.target.value;
+                                    updateGlobalData({ productos: n });
+                                  }} 
+                                />
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div>
+                                  <label className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-1">Demanda Mensual</label>
+                                  <div className="flex items-center gap-2">
+                                    <input 
+                                      type="number" min="1"
+                                      className="w-24 bg-white p-2 rounded-lg border border-amber-200 font-bold text-lg text-center text-amber-900 focus:border-amber-400 outline-none shadow-inner" 
+                                      value={prod.demanda} 
+                                      onChange={e => {
+                                        const n = [...data.productos];
+                                        n[pIdx].demanda = e.target.value === '' ? '' : (parseInt(e.target.value) || 1);
+                                        updateGlobalData({ productos: n });
+                                      }} 
+                                    />
+                                    <span className="text-sm font-medium text-amber-600">unidades</span>
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    if(window.confirm('¿Eliminar este producto y su receta?')) {
+                                      updateGlobalData({ productos: data.productos.filter(x => x.id !== prod.id) });
+                                    }
+                                  }} 
+                                  className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-5"
+                                  title="Eliminar Producto"
+                                >
+                                  <Trash2 size={20} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="p-4">
+                              <h4 className="text-sm font-bold text-slate-600 mb-2 flex items-center gap-2">
+                                <List size={16} /> Receta / Insumos necesarios para fabricar 1 sola unidad
+                              </h4>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse text-sm">
+                                  <thead className="bg-slate-100 text-slate-600">
+                                    <tr>
+                                      <th className="p-2 border-b border-slate-200 rounded-tl-lg">Ingrediente / Insumo</th>
+                                      <th className="p-2 border-b border-slate-200 text-center w-24">Cantidad</th>
+                                      <th className="p-2 border-b border-slate-200 text-center w-32">Unidad</th>
+                                      <th className="p-2 border-b border-slate-200 text-center w-36">Costo por Unidad (Bs.)</th>
+                                      <th className="p-2 border-b border-slate-200 text-center w-28">Subtotal (Bs.)</th>
+                                      <th className="p-2 border-b border-slate-200 w-10 rounded-tr-lg"></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(prod.ingredientes || []).map((ing, iIdx) => (
+                                      <tr key={ing.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td className="p-2">
+                                          <input 
+                                            className="w-full p-2 outline-none bg-transparent border border-transparent focus:border-amber-300 focus:bg-white rounded-lg transition-all" 
+                                            placeholder="Ej. Harina, Cable, Licencia" 
+                                            value={ing.concepto} 
+                                            onChange={e => { 
+                                              const n = [...data.productos];
+                                              n[pIdx].ingredientes[iIdx].concepto = e.target.value;
+                                              updateGlobalData({ productos: n });
+                                            }} 
+                                          />
+                                        </td>
+                                        <td className="p-2">
+                                          <input 
+                                            type="number" min="0" step="any"
+                                            className="w-full p-2 outline-none text-center bg-transparent border border-transparent focus:border-amber-300 focus:bg-white rounded-lg transition-all" 
+                                            placeholder="0"
+                                            value={ing.cantidad ?? ''} 
+                                            onChange={e => { 
+                                              const n = [...data.productos];
+                                              n[pIdx].ingredientes[iIdx].cantidad = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                                              updateGlobalData({ productos: n });
+                                            }} 
+                                          />
+                                        </td>
+                                        <td className="p-2">
+                                          <select 
+                                            className="w-full p-2 outline-none text-center bg-transparent border border-transparent focus:border-amber-300 focus:bg-white rounded-lg transition-all text-slate-600 appearance-none"
+                                            value={ing.unidad || 'Unidades'}
+                                            onChange={e => {
+                                              const n = [...data.productos];
+                                              n[pIdx].ingredientes[iIdx].unidad = e.target.value;
+                                              updateGlobalData({ productos: n });
+                                            }}
+                                          >
+                                            {UNIDADES_MEDIDA.map(u => <option key={u} value={u}>{u}</option>)}
+                                          </select>
+                                        </td>
+                                        <td className="p-2">
+                                          <input 
+                                            type="number" min="0" step="any"
+                                            className="w-full p-2 outline-none text-center bg-transparent border border-transparent focus:border-amber-300 focus:bg-white rounded-lg transition-all" 
+                                            placeholder="0.00"
+                                            value={ing.precio ?? ''} 
+                                            onChange={e => { 
+                                              const n = [...data.productos];
+                                              n[pIdx].ingredientes[iIdx].precio = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                                              updateGlobalData({ productos: n });
+                                            }} 
+                                          />
+                                        </td>
+                                        <td className="p-2 text-center font-bold text-slate-700 bg-slate-50">
+                                          {(((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0))).toFixed(2)}
+                                        </td>
+                                        <td className="p-2 text-center">
+                                          <button 
+                                            onClick={() => {
+                                              const n = [...data.productos];
+                                              n[pIdx].ingredientes = n[pIdx].ingredientes.filter(x => x.id !== ing.id);
+                                              updateGlobalData({ productos: n });
+                                            }} 
+                                            className="text-slate-300 hover:text-red-500 p-1"
+                                          >
+                                            <Trash2 size={16} />
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                    {(prod.ingredientes || []).length === 0 && (
+                                      <tr><td colSpan="6" className="p-4 text-center text-slate-400 text-xs">No hay insumos. Añade tu primer ingrediente o material.</td></tr>
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
+                                <button 
+                                  onClick={() => {
+                                    const n = [...data.productos];
+                                    if(!n[pIdx].ingredientes) n[pIdx].ingredientes = [];
+                                    n[pIdx].ingredientes.push({ id: Date.now(), concepto: '', cantidad: 1, unidad: 'Unidades', precio: 0 });
+                                    updateGlobalData({ productos: n });
+                                  }} 
+                                  className="text-amber-600 font-bold text-xs hover:bg-amber-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 border border-amber-200"
+                                >
+                                  <Plus size={14} /> Añadir Material / Insumo
+                                </button>
+                                
+                                <div className="text-right">
+                                  <div className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Costo Unitario (1 producto)</div>
+                                  <div className="text-xl font-black text-slate-800">Bs. {costoUnitarioProd.toFixed(2)}</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-800 p-4 flex justify-between items-center text-white">
+                              <div>
+                                <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Costo Mensual de Materiales</div>
+                                <div className="text-sm font-medium text-slate-300">Bs. {costoUnitarioProd.toFixed(2)} × {prod.demanda || 1} uds</div>
+                              </div>
+                              <div className="text-2xl font-black text-amber-400">
+                                Bs. {costoMensualProd.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="mt-4 bg-slate-100 p-4 rounded-xl flex justify-between items-center border border-slate-200">
+                    <span className="font-bold text-slate-700">Total Global: Costo Mensual de Materiales e Insumos</span>
+                    <span className="text-2xl font-black text-amber-700">
+                      Bs. {((data.productos || []).reduce((sum, p) => {
+                        const unitCost = (p.ingredientes || []).reduce((acc, ing) => acc + ((parseFloat(ing.cantidad) || 0) * (parseFloat(ing.precio) || 0)), 0);
+                        return sum + (unitCost * (parseInt(p.demanda) || 1));
+                      }, 0)).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                
+          </div>
+        </div>
+      );
