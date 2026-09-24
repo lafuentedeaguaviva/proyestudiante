@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Cloud, ArrowRight, Sparkles, Lightbulb, BarChart3, CircleDollarSign, Printer, GraduationCap, Bot, Zap } from 'lucide-react';
+import { Cloud, ArrowRight, Sparkles, CheckCircle2, GraduationCap, Bot, Zap, Rocket } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -12,46 +12,27 @@ const LandingPage = () => {
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.15,
+        delay: i * 0.1,
         duration: 0.6,
         ease: "easeOut"
       },
     }),
   };
 
-  const fases = [
-    {
-      id: 'fase1',
-      icon: <Lightbulb size={32} color="#fff" />,
-      title: 'Fase 1: Ideación con IA',
-      desc: 'Desarrolla el núcleo de tu emprendimiento. Tu Mentor virtual te ayudará a aterrizar tu problema, encontrar tu público objetivo y validar tu propuesta.',
-      colorStart: '#3b82f6',
-      colorEnd: '#1d4ed8'
-    },
-    {
-      id: 'fase2',
-      icon: <BarChart3 size={32} color="#fff" />,
-      title: 'Fase 2: Mercado y Encuestas',
-      desc: '¿Matemáticas difíciles? Deja que la IA procese tus encuestas, analice a tu competencia y genere los gráficos automáticamente.',
-      colorStart: '#8b5cf6',
-      colorEnd: '#6d28d9'
-    },
-    {
-      id: 'fase3',
-      icon: <CircleDollarSign size={32} color="#fff" />,
-      title: 'Fase 3: Viabilidad Financiera',
-      desc: 'Calcula costos, ingresos y márgenes de ganancia con herramientas interactivas diseñadas para que los números tengan sentido.',
-      colorStart: '#ec4899',
-      colorEnd: '#be185d'
-    },
-    {
-      id: 'fase4',
-      icon: <Printer size={32} color="#fff" />,
-      title: 'Fase 4: Documento Listo para Imprimir',
-      desc: 'Al terminar, la IA consolida todo tu trabajo, le da formato académico y te entrega un archivo Word perfecto para presentar en tu colegio.',
-      colorStart: '#10b981',
-      colorEnd: '#047857'
-    }
+  const fasesReales = [
+    { id: 1, title: 'Encontrar la Idea', desc: 'Lluvia de ideas y selección de tu propuesta ganadora.' },
+    { id: 2, title: 'Validación de la Idea', desc: 'Diseño de encuestas, tabulación y análisis de resultados en el mercado.' },
+    { id: 3, title: 'Público Objetivo', desc: 'Definición exacta de a quién va dirigido tu emprendimiento.' },
+    { id: 4, title: 'Diseño del Producto', desc: 'Características, beneficios, empaque y demanda potencial.' },
+    { id: 5, title: 'Estrategia de Marketing', desc: 'Análisis de competencia, entorno y tu ventaja competitiva.' },
+    { id: 6, title: 'Distribución', desc: 'Elección de canales, localización física y métodos de pago.' },
+    { id: 7, title: 'Planteamiento', desc: 'Misión, visión, objetivos generales y justificación del proyecto.' },
+    { id: 8, title: 'La Operación', desc: 'Definición paso a paso de los procesos para crear tu producto/servicio.' },
+    { id: 9, title: 'Organigrama', desc: 'Estructura organizacional y roles de tu futuro equipo de trabajo.' },
+    { id: 10, title: 'Finanzas (Viabilidad)', desc: 'Costos, precio de venta, punto de equilibrio, VAN y TIR.' },
+    { id: 11, title: 'Consolidación', desc: 'Redacción de introducción, conclusiones y dedicatorias.' },
+    { id: 12, title: 'Proyecto de Vida', desc: 'Alineación de tu emprendimiento con tus metas personales a futuro.' },
+    { id: 13, title: 'Documento Final IA', desc: 'La Inteligencia Artificial genera y formatea tu documento en Word, ¡listo para imprimir!' }
   ];
 
   const features = [
@@ -190,7 +171,7 @@ const LandingPage = () => {
               onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
               onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
             >
-              Sellar mi Expediente Oficial 🚀
+              Comenzar mi Proyecto 🚀
             </button>
             <button 
               onClick={() => {
@@ -210,49 +191,67 @@ const LandingPage = () => {
               onMouseOver={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
               onMouseOut={(e) => { e.currentTarget.style.background = '#ffffff'; }}
             >
-              Ver cómo funciona
+              Ver las 13 Fases
             </button>
           </div>
         </motion.div>
 
-        {/* Las Fases Section */}
-        <div id="como-funciona" style={{ paddingTop: '4rem', marginBottom: '6rem' }}>
-          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>El Viaje del Emprendedor</h2>
-          <p style={{ color: '#64748b', marginBottom: '4rem', fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto 4rem auto' }}>
-            Sigue este camino estructurado y convierte una simple idea en un documento académico profesional.
+        {/* Las Fases Section - Roadmap Completo */}
+        <div id="como-funciona" style={{ paddingTop: '4rem', marginBottom: '8rem' }}>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>El Mapa hacia tu Éxito</h2>
+          <p style={{ color: '#64748b', marginBottom: '4rem', fontSize: '1.125rem', maxWidth: '700px', margin: '0 auto 4rem auto' }}>
+            Sigue este camino estructurado de 13 misiones y convierte una simple idea en un documento académico profesional listo para ser defendido e impreso.
           </p>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', textAlign: 'left' }}>
-            {fases.map((fase, idx) => (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: '1.5rem', 
+            textAlign: 'left' 
+          }}>
+            {fasesReales.map((fase, idx) => (
               <motion.div 
                 key={fase.id}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
-                custom={idx}
+                custom={idx % 4}
                 style={{
-                  background: '#ffffff',
-                  padding: '2.5rem 2rem',
-                  borderRadius: '1.5rem',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                  background: fase.id === 13 ? 'linear-gradient(135deg, #3b82f6, #6366f1)' : '#ffffff',
+                  padding: '1.5rem',
+                  borderRadius: '1rem',
+                  border: fase.id === 13 ? 'none' : '1px solid #e2e8f0',
+                  boxShadow: fase.id === 13 ? '0 10px 25px -5px rgba(59, 130, 246, 0.4)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
-                <div style={{ 
-                  display: 'inline-flex', padding: '1rem', borderRadius: '1rem', 
-                  background: `linear-gradient(135deg, ${fase.colorStart}, ${fase.colorEnd})`,
-                  marginBottom: '1.5rem',
-                  boxShadow: `0 10px 15px -3px ${fase.colorStart}40`
+                {/* Number Watermark */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  right: '5px',
+                  fontSize: '5rem',
+                  fontWeight: 900,
+                  color: fase.id === 13 ? 'rgba(255,255,255,0.1)' : 'rgba(226, 232, 240, 0.5)',
+                  zIndex: 0,
+                  userSelect: 'none'
                 }}>
-                  {fase.icon}
+                  {fase.id}
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 1rem 0', color: '#0f172a' }}>
-                  {fase.title}
-                </h3>
-                <p style={{ margin: 0, fontSize: '1rem', color: '#475569', lineHeight: 1.6 }}>
-                  {fase.desc}
-                </p>
+                
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    {fase.id === 13 ? <Rocket size={20} color="#fff" /> : <CheckCircle2 size={20} color="#3b82f6" />}
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 800, margin: 0, color: fase.id === 13 ? '#fff' : '#0f172a' }}>
+                      {fase.title}
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.95rem', color: fase.id === 13 ? 'rgba(255,255,255,0.9)' : '#475569', lineHeight: 1.5 }}>
+                    {fase.desc}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </div>
