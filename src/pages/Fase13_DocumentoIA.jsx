@@ -752,18 +752,9 @@ const Fase13_DocumentoIA = () => {
       );
     }
 
-    if (step === 1) {
-      return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>Video Documento Final IA</h2>
-          <div style={{ width: '100%', maxWidth: '800px' }}>
-            <YoutubePlayer videoKey="video_fase_13" title="Video Documento Final IA" fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
-          </div>
-        </div>
-      );
-    }
+    
 
-    if (step === 2) {
+    if (step === 1) {
       return (
         <motion.div key="step2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
           <div className={sectionClass}>
@@ -822,7 +813,7 @@ const Fase13_DocumentoIA = () => {
       );
     }
 
-    if (step === 3) {
+    if (step === 2) {
       return (
         <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={sectionClass + " text-center border-emerald-300 relative overflow-hidden w-full"}>
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-50 to-teal-100 opacity-50 z-0 pointer-events-none"></div>
@@ -862,17 +853,16 @@ const Fase13_DocumentoIA = () => {
       pasoActual={step}
       totalPasos={3}
       tabs={[
-          { id: 1, icon: <Video size={16} />, label: 'Video' },
-        { id: 2, icon: <Settings size={16} />, label: 'Configuración' },
-        { id: 3, icon: <CheckCircle size={16} />, label: 'Documento' }
-      ]}
+          { id: 1, icon: <Settings size={16} />, label: 'Configuración' },
+          { id: 2, icon: <CheckCircle size={16} />, label: 'Documento' }
+        ]}
       onTabClick={(id) => setStep(id)}
       onSiguiente={null}
       onAnterior={step > 1 ? () => setStep(step - 1) : null}
       mentorText={
-        step === 1 ? "Mira este video para entender cómo la IA te ayudará a consolidar todo." : step === 2 ? "La Inteligencia Artificial tomará toda la información que llenaste en las fases anteriores y le dará estructura y formato académico." : 
-        "¡Excelente trabajo! Hemos llegado al final de este recorrido. Revisa tu documento y prepárate para presentarlo."
-      }
+          step === 1 ? "La Inteligencia Artificial tomará toda la información que llenaste en las fases anteriores y le dará estructura y formato académico." : 
+          "¡Excelente trabajo! Hemos llegado al final de este recorrido. Revisa tu documento y prepárate para presentarlo."
+        }
     >
       <AnimatePresence mode="wait">
         <div className="w-full flex justify-center">
