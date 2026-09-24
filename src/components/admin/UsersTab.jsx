@@ -197,7 +197,7 @@ const UsersTab = ({ usuarios, setUsuarios, loadingUsuarios, setLoadingUsuarios, 
                     <td style={{ padding: '1rem 2rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <span style={{ color: '#fcd34d', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                          🪙 {usr.educoins ?? 50}
+                          🪙 {usr.educoins ?? 0}
                         </span>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
