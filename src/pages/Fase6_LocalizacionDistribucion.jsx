@@ -27,30 +27,12 @@ const Fase6_LocalizacionDistribucion = () => {
   if (!data.planDistribucion) data.planDistribucion = [];
   if (!data.presupuesto) data.presupuesto = [];
 
-  const renderVideoStep = (titulo, videoKey, botonTexto) => (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 animate-fade-in bg-white rounded-3xl shadow-xl w-full max-w-4xl mx-auto border border-slate-100">
-      <div className="bg-blue-50 p-4 rounded-full mb-6">
-        <Video size={48} className="text-blue-500" />
+  const renderVideoStep = (titulo) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+      <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{titulo}</h2>
+      <div style={{ width: '100%', maxWidth: '800px' }}>
+        <YoutubePlayer videoKey="video_fase_6" title={titulo} fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
       </div>
-      <h2 className="text-3xl font-black text-slate-800 mb-6 text-center">{titulo}</h2>
-      <div className="w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl relative mb-8 group cursor-pointer border-4 border-slate-800">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-20 h-20 bg-blue-600/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg backdrop-blur-sm">
-            <Play size={40} className="text-white ml-2" fill="currentColor" />
-          </div>
-        </div>
-        <div className="absolute bottom-4 left-4 right-4 text-center">
-          <p className="text-white/70 text-sm font-medium bg-black/50 py-2 px-4 rounded-full inline-block backdrop-blur-md">
-            Video explicativo - {titulo}
-          </p>
-        </div>
-      </div>
-      <button
-        onClick={() => siguientePaso()}
-        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2"
-      >
-        {botonTexto} <CheckCircle size={24} />
-      </button>
     </div>
   );
 
@@ -285,8 +267,8 @@ const Fase6_LocalizacionDistribucion = () => {
           </div>
         </div>
       );
-      case 7: return renderVideoStep("7. Plan de acción de distribución", "acciondistribucion", "Hacer Plan");
-      case 8: 
+      
+      case 7: 
         return (
         <div className="animate-fade-in p-6 bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-slate-800 mb-2">8. Plan de Acción de Distribución</h2>
@@ -322,7 +304,7 @@ const Fase6_LocalizacionDistribucion = () => {
           <button onClick={() => updateGlobalData({ planDistribucion: [...data.planDistribucion, { id: Date.now(), accion: '', cuando: '', quien: '', necesito: '' }] })} style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 'bold', cursor: 'pointer' }}>+ Añadir Acción</button>
         </div>
       );
-      case 9: 
+      case 8: 
         return <Paso10_ResumenLocDistIA setAyudanteText={()=>{}} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando || isFinalizando} />;
       default: return <div>Paso no definido</div>;
     }

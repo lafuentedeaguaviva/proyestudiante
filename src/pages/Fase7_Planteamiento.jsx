@@ -67,7 +67,7 @@ const Fase7_Planteamiento = () => {
 
   // Auto-generar resumen al entrar al paso 11 si está vacío
   useEffect(() => {
-    if (step === 11 && !data.resumen_ia && !isGeneratingResumen) {
+    if (step === 7 && !data.resumen_ia && !isGeneratingResumen) {
       generarResumenFase7();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,21 +176,9 @@ const Fase7_Planteamiento = () => {
           </div>
         );
 
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-3 mb-6 text-slate-800">
-              <Video size={28} className="text-red-500" />
-              <h2 className="text-2xl font-bold">Introducción a los Objetivos SMART</h2>
-            </div>
-            <p className="text-center text-slate-600 mb-6">Aprende a redactar objetivos claros y alcanzables para tu emprendimiento.</p>
-            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_fase_7" title="Video sobre Objetivos SMART" fallbackUrl="" />
-            </div>
-          </div>
-        );
       
-      case 4:
+      
+      case 3:
         return (
           <div className="space-y-8">
             <div className="bg-slate-800 p-4 rounded-xl text-white">
@@ -270,21 +258,9 @@ const Fase7_Planteamiento = () => {
           </div>
         );
 
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-3 mb-6 text-slate-800">
-              <Video size={28} className="text-red-500" />
-              <h2 className="text-2xl font-bold">Introducción a la Misión</h2>
-            </div>
-            <p className="text-center text-slate-600 mb-6">Descubre cómo definir la razón de ser de tu negocio hoy.</p>
-            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Misión" fallbackUrl="" />
-            </div>
-          </div>
-        );
+      
 
-      case 6:
+      case 4:
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center bg-slate-800 p-4 rounded-xl text-white">
@@ -342,21 +318,9 @@ const Fase7_Planteamiento = () => {
           </div>
         );
 
-      case 7:
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-3 mb-6 text-slate-800">
-              <Video size={28} className="text-red-500" />
-              <h2 className="text-2xl font-bold">Introducción a la Visión</h2>
-            </div>
-            <p className="text-center text-slate-600 mb-6">Aprende a proyectar tu emprendimiento hacia el futuro.</p>
-            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Visión" fallbackUrl="" />
-            </div>
-          </div>
-        );
+      
 
-      case 8:
+      case 5:
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center bg-slate-800 p-4 rounded-xl text-white">
@@ -409,21 +373,9 @@ const Fase7_Planteamiento = () => {
           </div>
         );
 
-      case 9:
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-3 mb-6 text-slate-800">
-              <Video size={28} className="text-red-500" />
-              <h2 className="text-2xl font-bold">Introducción a la Justificación</h2>
-            </div>
-            <p className="text-center text-slate-600 mb-6">Entiende por qué y para qué es importante tu proyecto.</p>
-            <div className="w-full rounded-xl overflow-hidden shadow-lg border-4 border-slate-800">
-              <YoutubePlayer videoKey="video_fase_7" title="Video sobre la Justificación" fallbackUrl="" />
-            </div>
-          </div>
-        );
+      
 
-      case 10:
+      case 6:
         return (
           <div className="space-y-6">
             <div className="bg-slate-800 p-4 rounded-xl text-white">
@@ -468,7 +420,7 @@ const Fase7_Planteamiento = () => {
           </div>
         );
 
-      case 11: {
+      case 7: {
         const seccionesResumen = [
           {
             key: 'resumen_diagnostico',

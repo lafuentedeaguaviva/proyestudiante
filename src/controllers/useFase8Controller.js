@@ -21,7 +21,7 @@ export const useFase8Controller = () => {
   // Todo el estado se guardará en `operacion`
   const baseController = useFaseController({
     faseId: 8,
-    totalPasos: 7,
+    totalPasos: 4,
     clavesDeGuardado: ['operacion'],
     estructuraJSON: true,
     defaultData: {

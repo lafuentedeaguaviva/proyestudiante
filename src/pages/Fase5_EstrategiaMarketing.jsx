@@ -67,14 +67,11 @@ const Fase5_EstrategiaMarketing = () => {
 
   if (cargando) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando datos de la Fase 5...</div>;
 
-  const renderVideoStep = (titulo, idVideo, txtBoton) => (
+  const renderVideoStep = (titulo) => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
-      <div style={{ width: '80px', height: '80px', background: '#dbeafe', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
-        <Play size={40} color="#2563eb" style={{ marginLeft: '0.5rem' }} />
-      </div>
       <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{titulo}</h2>
-      <div style={{ width: '100%', maxWidth: '800px', aspectRatio: '16/9', background: '#0f172a', borderRadius: '1rem', overflow: 'hidden', border: '4px solid #1e293b', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-        <img src={`https://picsum.photos/seed/${idVideo}/800/450`} alt={`Video de ${titulo}`} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+      <div style={{ width: '100%', maxWidth: '800px' }}>
+        <YoutubePlayer videoKey="video_fase_5" title={titulo} fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
       </div>
     </div>
   );
@@ -164,8 +161,8 @@ const Fase5_EstrategiaMarketing = () => {
           </div>
         </div>
       );
-      case 3: return renderVideoStep("3. Ventaja competitiva", "ventaja", "Definir Ventaja");
-      case 4: return (
+      
+      case 3: return (
         <div style={cardStyle}>
           <h2 style={titleStyle}>4. Tu Ventaja Competitiva</h2>
           <p style={subtitleStyle}>Define tu "Superpoder" único en el mercado.</p>
@@ -194,8 +191,8 @@ const Fase5_EstrategiaMarketing = () => {
           </div>
         </div>
       );
-      case 5: return renderVideoStep("5. Análisis del Entorno (PESTEL)", "entorno", "Hacer PESTEL");
-      case 6: return (
+      
+      case 4: return (
         <div style={cardStyle}>
           <h2 style={titleStyle}>6. Análisis del entorno (Factores externos)</h2>
           <p style={subtitleStyle}>¿Cómo te afectan las reglas del mundo exterior?</p>
@@ -229,8 +226,8 @@ const Fase5_EstrategiaMarketing = () => {
           </div>
         </div>
       );
-      case 7: return renderVideoStep("7. Estrategia de promoción", "promocion", "Definir Estrategia");
-      case 8: return (
+      
+      case 5: return (
         <div className="animate-fade-in p-8 bg-white rounded-3xl shadow-2xl w-full max-w-4xl mx-auto border border-slate-100">
           <div className="mb-8 border-b border-slate-100 pb-6">
             <h2 className="text-3xl font-extrabold text-slate-800 mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">8. Estrategia de promoción</h2>
@@ -298,7 +295,7 @@ const Fase5_EstrategiaMarketing = () => {
           </div>
         </div>
       );
-      case 9: return <Paso9_ResumenMarketingIA setAyudanteText={() => {}} onComplete={handleFinalizar} globalData={data} updateGlobalData={updateGlobalData} guardando={guardando} />;
+      case 6: return <Paso9_ResumenMarketingIA setAyudanteText={() => {}} onComplete={handleFinalizar} globalData={data} updateGlobalData={updateGlobalData} guardando={guardando} />;
       default: return <div>Paso no definido</div>;
     }
   };

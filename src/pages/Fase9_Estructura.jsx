@@ -49,7 +49,7 @@ const Fase9_Estructura = () => {
   } = useFase9Controller();
 
   useEffect(() => {
-    if (step === 3 && !data.resumen_estructura && !isGeneratingResumen) {
+    if (step === 4 && !data.resumen_estructura && !isGeneratingResumen) {
       generarResumenFase9();
     }
   }, [step]);
@@ -126,7 +126,7 @@ const Fase9_Estructura = () => {
 
   const getPasoContent = () => {
     switch(step) {
-      case 1: return (
+      case 4: return (
         <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-4">
             <div className="flex items-center gap-3">
@@ -470,7 +470,7 @@ const Fase9_Estructura = () => {
           </div>
         </div>
       );
-      case 2: return (
+      case 4: return (
         <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
@@ -570,7 +570,7 @@ const Fase9_Estructura = () => {
           </div>
         </div>
       );
-      case 3: return (
+      case 4: return (
         <div className="animate-fade-in p-6 bg-white/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl mx-auto border border-slate-100">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 border-b border-slate-100 pb-6">
             <div className="flex items-center gap-3">
@@ -673,7 +673,7 @@ const Fase9_Estructura = () => {
       onTabClick={(id) => {
         irAPaso(id);
       }}
-      onSiguiente={() => step < 3 ? siguientePaso() : handleFinalizar()}
+      onSiguiente={() => step < 4 ? siguientePaso() : handleFinalizar()}
       onAnterior={step > 1 ? pasoAnterior : null}
       mentorText={
         step === 1 

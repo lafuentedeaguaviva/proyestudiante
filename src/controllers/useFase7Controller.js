@@ -60,7 +60,7 @@ export const useFase7Controller = () => {
 
   const baseController = useFaseController({
     faseId: 7,
-    totalPasos: 11,
+    totalPasos: 7,
     clavesDeGuardado: claves,
     estructuraJSON: false, // Fase 7 guarda claves planas
   });

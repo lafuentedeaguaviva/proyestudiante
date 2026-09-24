@@ -129,14 +129,11 @@ const Fase8_Operacion = () => {
 
 
 
-  const renderVideoStep = (titulo, idVideo) => (
-    <div className="flex flex-col items-center justify-center space-y-8 animate-fade-in text-center p-8">
-      <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center shadow-lg">
-        <Play size={40} className="text-blue-600 ml-2" />
-      </div>
-      <h2 className="text-3xl font-bold text-slate-800">{titulo}</h2>
-      <div className="w-full max-w-2xl aspect-video bg-slate-900 rounded-2xl shadow-xl overflow-hidden border-4 border-slate-800">
-        <img src={`https://picsum.photos/seed/${idVideo}/800/450`} alt={`Video de ${titulo}`} className="w-full h-full object-cover opacity-60" />
+  const renderVideoStep = (titulo) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem', textAlign: 'center', padding: '2rem' }}>
+      <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{titulo}</h2>
+      <div style={{ width: '100%', maxWidth: '800px' }}>
+        <YoutubePlayer videoKey="video_fase_8" title={titulo} fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ" />
       </div>
     </div>
   );
@@ -791,9 +788,9 @@ Enumera los pasos desde la preparación inicial hasta la entrega final al client
         </div>
       );
 
-      case 4: return renderVideoStep("4. Diagrama de Procesos", "diagrama", "Jugar");
+      
 
-      case 5: 
+      case 4: 
         const categorias = [
           { id: 'almacenamiento', icon: <Box size={24} />, color: 'bg-orange-100 text-orange-700 border-orange-300', title: 'Almacenamiento' },
           { id: 'operacion', icon: <Settings size={24} />, color: 'bg-green-100 text-green-700 border-green-300', title: 'Operación' },

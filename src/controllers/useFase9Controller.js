@@ -15,7 +15,7 @@ export const useFase9Controller = () => {
 
   const baseController = useFaseController({
     faseId: 9,
-    totalPasos: 3,
+    totalPasos: 4,
     clavesDeGuardado: claves,
     estructuraJSON: true // Guarda en 'organigrama'
   });

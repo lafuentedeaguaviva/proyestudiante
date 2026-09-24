@@ -11,7 +11,7 @@ export const useFase5Controller = () => {
   // Todo el estado se guardará en `estrategia_marketing`
   const baseController = useFaseController({
     faseId: 5,
-    totalPasos: 9, // Se eliminaron 2 pasos de Soluciones Actuales pero se agregó 1 de Resumen IA
+    totalPasos: 6, // Se eliminaron 2 pasos de Soluciones Actuales pero se agregó 1 de Resumen IA
     clavesDeGuardado: ['estrategia_marketing'],
     estructuraJSON: true
   });
