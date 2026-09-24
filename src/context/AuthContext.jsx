@@ -68,7 +68,18 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    const handleEducoinGastado = () => {
+      setPerfil(prev => {
+        if (!prev) return prev;
+        return { ...prev, educoins: Math.max(0, (prev.educoins ?? 50) - 1) };
+      });
+    };
+    window.addEventListener('educoin_gastado', handleEducoinGastado);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('educoin_gastado', handleEducoinGastado);
+    };
   }, [fetchPerfil]);
 
   /**
@@ -81,11 +92,18 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user, fetchPerfil]);
 
+  const restarEducoinLocal = useCallback(() => {
+    setPerfil(prev => {
+      if (!prev) return prev;
+      return { ...prev, educoins: Math.max(0, (prev.educoins ?? 50) - 1) };
+    });
+  }, []);
+
   const rol = perfil?.rol || 'usuario';
   const isAdmin = rol === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, perfil, rol, isAdmin, loading, refetchPerfil }}>
+    <AuthContext.Provider value={{ user, perfil, rol, isAdmin, loading, refetchPerfil, restarEducoinLocal }}>
       {children}
     </AuthContext.Provider>
   );

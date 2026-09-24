@@ -1735,5 +1735,9 @@ export const cobrarEducoin = async () => {
   if (data === false) {
     throw new Error("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
   }
+  
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('educoin_gastado'));
+  }
   return true;
 };
