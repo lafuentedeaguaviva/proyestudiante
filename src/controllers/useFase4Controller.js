@@ -15,7 +15,7 @@ export const useFase4Controller = () => {
   // Todo el estado se guardará en `diseno_producto`
   const baseController = useFaseController({
     faseId: 4,
-    totalPasos: 14,
+    totalPasos: 7,
     clavesDeGuardado: ['diseno_producto'],
     estructuraJSON: true
   });

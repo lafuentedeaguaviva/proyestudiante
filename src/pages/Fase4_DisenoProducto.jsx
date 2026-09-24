@@ -10,12 +10,9 @@ import { useFase4Controller } from '../controllers/useFase4Controller';
 
 import Paso3_VideoProductoServicio from '../components/modos/mentor/fases/CaminoA/Fase4/Paso3_VideoProductoServicio';
 import Paso4_DisenoProducto from '../components/modos/mentor/fases/CaminoA/Fase4/Paso4_DisenoProducto';
-import Paso5_VideoCaracteristicas from '../components/modos/mentor/fases/CaminoA/Fase4/Paso5_VideoCaracteristicas';
 import Paso6_Caracteristicas from '../components/modos/mentor/fases/CaminoA/Fase4/Paso6_Caracteristicas';
-import Paso8_VideoEmpaque from '../components/modos/mentor/fases/CaminoA/Fase4/Paso8_VideoEmpaque';
 import Paso9_EmpaqueProducto from '../components/modos/mentor/fases/CaminoA/Fase4/Paso9_EmpaqueProducto';
 import Paso10_PresentacionServicio from '../components/modos/mentor/fases/CaminoA/Fase4/Paso10_PresentacionServicio';
-import Paso11_VideoDemandaPotencial from '../components/modos/mentor/fases/CaminoA/Fase4/Paso11_VideoDemandaPotencial';
 import Paso12_DemandaPotencial from '../components/modos/mentor/fases/CaminoA/Fase4/Paso12_DemandaPotencial';
 import Paso13_ResumenProductoIA from '../components/modos/mentor/fases/CaminoA/Fase4/Paso13_ResumenProductoIA';
 
@@ -38,22 +35,22 @@ const Fase4_DisenoProductoPage = () => {
 
   const handleNext = () => {
     let nextStep = step + 1;
-    if (globalData.tipoNegocio === 'Servicio' && step === 5) {
-      nextStep = 7;
+    if (globalData.tipoNegocio === 'Servicio' && step === 3) {
+      nextStep = 5;
     }
-    if (globalData.tipoNegocio === 'Producto' && step === 6) {
-      nextStep = 8;
+    if (globalData.tipoNegocio === 'Producto' && step === 4) {
+      nextStep = 6;
     }
-    irAPaso(Math.min(nextStep, 10));
+    irAPaso(Math.min(nextStep, 7));
   };
 
   const handlePrev = () => {
     let prevStep = step - 1;
-    if (globalData.tipoNegocio === 'Servicio' && step === 7) {
-      prevStep = 5;
+    if (globalData.tipoNegocio === 'Servicio' && step === 5) {
+      prevStep = 3;
     }
-    if (globalData.tipoNegocio === 'Producto' && step === 8) {
-      prevStep = 6;
+    if (globalData.tipoNegocio === 'Producto' && step === 6) {
+      prevStep = 4;
     }
     irAPaso(Math.max(prevStep, 1));
   };
@@ -77,22 +74,19 @@ const Fase4_DisenoProductoPage = () => {
           </div>
 
           <SubMenuFases 
-            tabs={[
-              { id: 1, icon: <Video size={18} />, label: 'Video Prod/Serv' },
-              { id: 2, icon: <FileText size={18} />, label: 'Concepto' },
-              { id: 3, icon: <Video size={18} />, label: 'Video Atributos' },
-              { id: 4, icon: <CheckCircle size={18} />, label: 'Características' },
-              { id: 5, icon: <Video size={18} />, label: 'Video Empaque' },
-              { id: 6, icon: <Package size={18} />, label: 'Empaque' },
-              { id: 7, icon: <Package size={18} />, label: 'Presentación' },
-              { id: 8, icon: <Video size={18} />, label: 'Video Demanda' },
-              { id: 9, icon: <Users size={18} />, label: 'Demanda Potencial' },
-              { id: 10, icon: <Bot size={18} />, label: 'Resumen IA' }
-            ].filter(t => {
-              if (globalData.tipoNegocio === 'Servicio' && (t.id === 5 || t.id === 6)) return false;
-              if (globalData.tipoNegocio === 'Producto' && t.id === 7) return false;
-              return true;
-            })}
+                          tabs={[
+                { id: 1, icon: <Video size={18} />, label: 'Video' },
+                { id: 2, icon: <FileText size={18} />, label: 'Concepto' },
+                { id: 3, icon: <CheckCircle size={18} />, label: 'Características' },
+                { id: 4, icon: <Package size={18} />, label: 'Empaque' },
+                { id: 5, icon: <Package size={18} />, label: 'Presentación' },
+                { id: 6, icon: <Users size={18} />, label: 'Demanda Potencial' },
+                { id: 7, icon: <Bot size={18} />, label: 'Resumen IA' }
+              ].filter(t => {
+                if (globalData.tipoNegocio === 'Servicio' && t.id === 4) return false;
+                if (globalData.tipoNegocio === 'Producto' && t.id === 5) return false;
+                return true;
+              })}}
             currentStep={step}
             onTabClick={async (id) => {
               irAPaso(id);
@@ -111,14 +105,14 @@ const Fase4_DisenoProductoPage = () => {
               <AnimatePresence mode="wait">
                 {step === 1 && <motion.div key="1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso3_VideoProductoServicio setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
                 {step === 2 && <motion.div key="2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso4_DisenoProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 3 && <motion.div key="3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso5_VideoCaracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
-                {step === 4 && <motion.div key="4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso6_Caracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 5 && <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso8_VideoEmpaque setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
-                {step === 6 && <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso9_EmpaqueProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 7 && <motion.div key="7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso10_PresentacionServicio setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
-                {step === 8 && <motion.div key="8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso11_VideoDemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} /></motion.div>}
-                {step === 9 && <motion.div key="9" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso12_DemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
-                {step === 10 && <motion.div key="10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso13_ResumenProductoIA setAyudanteText={setAyudanteText} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
+                
+                {step === 3 && <motion.div key="3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso6_Caracteristicas setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
+                
+                {step === 4 && <motion.div key="4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso9_EmpaqueProducto setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
+                {step === 5 && <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso10_PresentacionServicio setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} /></motion.div>}
+                
+                {step === 6 && <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso12_DemandaPotencial setAyudanteText={setAyudanteText} onComplete={handleNext} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
+                {step === 7 && <motion.div key="7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><Paso13_ResumenProductoIA setAyudanteText={setAyudanteText} onComplete={handleFinalizar} globalData={globalData} updateGlobalData={updateGlobalData} guardando={guardando} /></motion.div>}
               </AnimatePresence>
             ) : (
               <div style={{ padding: '4rem', textAlign: 'center', color: '#0f172a' }}>Cargando datos...</div>
@@ -135,7 +129,7 @@ const Fase4_DisenoProductoPage = () => {
               <ArrowLeft size={18} /> Anterior
             </button>
 
-            {step < 10 && (
+            {step < 7 && (
               <button 
                 onClick={handleNext}
                 disabled={cargando}

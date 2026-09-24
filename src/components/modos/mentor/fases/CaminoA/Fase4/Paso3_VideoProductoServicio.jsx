@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { PlayCircle } from 'lucide-react';
+import YoutubePlayer from '../../../../../ui/YoutubePlayer';
 
 const Paso3_VideoProductoServicio = ({ setAyudanteText, onComplete }) => {
   useEffect(() => {
@@ -18,14 +18,11 @@ const Paso3_VideoProductoServicio = ({ setAyudanteText, onComplete }) => {
       </div>
       
       <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', border: '1px solid #e2e8f0', marginBottom: '2rem', textAlign: 'center' }}>
-        <div style={{ 
-          width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '0.5rem', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem',
-          border: '2px dashed #cbd5e1', marginBottom: '1.5rem'
-        }}>
-          <PlayCircle size={64} color="#94a3b8" />
-          <span style={{ color: '#475569' }}>[ Video: Diferencias entre Producto y Servicio ]</span>
-        </div>
+        <YoutubePlayer 
+          videoKey="video_fase_4"
+          fallbackUrl="https://www.youtube.com/embed/dQw4w9WgXcQ"
+          title="Video Fase 4"
+        />
       </div>
     </div>
   );
