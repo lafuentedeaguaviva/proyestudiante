@@ -43,7 +43,7 @@ export const cerrarSesion = async () => {
   try {
     const { error } = await supabase.auth.signOut();
     if (error) console.error("Supabase signOut error:", error);
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Excepción en signOut:", err);
   } finally {
     // Forzar la limpieza de cualquier token residual
@@ -63,7 +63,7 @@ export const actualizarMetadatosUsuario = async (metadataUpdate) => {
       data: metadataUpdate
     });
     if (error) console.error("Error al actualizar metadatos:", error);
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Excepción actualizando metadatos:", err);
   }
 };
@@ -75,7 +75,7 @@ export const obtenerMetadatosUsuario = async () => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     return user?.user_metadata || {};
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     return {};
   }
 };
@@ -172,7 +172,7 @@ export const crearProyecto = async (entornoId, tipoProyecto) => {
       throw new Error(`Error BD: ${proyectoError.message}`);
     }
     return proyectoData;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error en crearProyecto:", error);
     throw error;
   }
@@ -231,7 +231,7 @@ export const crearPerfilYProyecto = async (datosPerfil, entornoId) => {
     localStorage.setItem('temp_proyecto_id', proyectoData.id);
 
     return { perfil: perfilData, proyecto: proyectoData };
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error en crearPerfilYProyecto:", error);
     throw error;
   }
@@ -247,7 +247,7 @@ export const obtenerRetoValidacion = async (fase) => {
 
     if (error) throw error;
     return data;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error(`Error obteniendo reto para la fase ${fase}:`, error);
     return null;
   }
@@ -314,7 +314,7 @@ export const guardarContenidoFase = async (fase, campo_clave, contenido) => {
     }
     return res.data;
 
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error guardando contenido:", error);
     throw error;
   }
@@ -344,7 +344,7 @@ export const obtenerContenidoFaseCompleto = async (fase) => {
       });
     }
     return resultado;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error obteniendo contenido de la fase:", error);
     return {};
   }
@@ -376,7 +376,7 @@ export const eliminarProyecto = async (proyectoId) => {
     }
 
     return true;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error en eliminarProyecto:", error);
     throw error;
   }
@@ -397,7 +397,7 @@ export const actualizarTituloProyecto = async (titulo, id = null) => {
 
     if (error) throw error;
     return true;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error al actualizar título:", error);
     throw error;
   }
@@ -490,7 +490,7 @@ export const obtenerPromptIA = async (fase_id, proposito) => {
       
     if (error || !data) return null;
     return data.prompt_texto;
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Error obteniendo prompt:", err);
     return null;
   }
@@ -508,7 +508,7 @@ export const guardarPromptIA = async (fase_id, proposito, prompt_texto) => {
       
     if (error) throw error;
     return data;
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Error guardando prompt:", err);
     throw err;
   }
@@ -531,7 +531,7 @@ export const obtenerTodosLosUsuarios = async () => {
 
     if (error) throw error;
     return data || [];
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error('Error obteniendo usuarios:', err);
     throw err;
   }
@@ -559,7 +559,7 @@ export const cambiarRolUsuario = async (targetUserId, nuevoRol) => {
 
     if (error) throw error;
     return data;
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error('Error cambiando rol:', err);
     throw err;
   }
@@ -577,7 +577,7 @@ export const contarAdmins = async () => {
 
     if (error) throw error;
     return data ? data.length : 0;
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error('Error contando admins:', err);
     return 0;
   }
@@ -633,7 +633,7 @@ export const generarIdeasDeepSeek = async (contextoData) => {
     } else {
       return JSON.parse(content);
     }
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek:", error);
     return [
       `App para resolver: ${contextoData.frase_problema}`,
@@ -687,7 +687,7 @@ export const generarNombresDeepSeek = async (ideaGanadora) => {
     const content = data.choices[0].message.content;
     const match = content.match(/\[.*\]/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek:", error);
     return [
       { nombre: "IdeaNova", representa: "Representa la innovación y la frescura de una nueva idea." },
@@ -740,7 +740,7 @@ export const generarPitchDeepSeek = async (contextoData) => {
 
     const data = await response.json();
     return data.choices[0].message.content.trim().replace(/^"|"$/g, '');
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek:", error);
     return `Ayudamos a ${contextoData.protagonista} a resolver ${contextoData.dolor} mediante ${contextoData.nombreElegido} basado en la idea ${contextoData.ideaGanadora}, mejorando sus opciones actuales.`;
   }
@@ -792,7 +792,7 @@ export const generarResumenFase1DeepSeek = async (contextoData) => {
     const content = data.choices[0].message.content.trim();
     const match = content.match(/\{.*\}/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek al generar resumen:", error);
     return {
       problema: contextoData.dolor || 'No definido',
@@ -837,7 +837,7 @@ export const crearProyectoMentor = async (tipoProyecto) => {
 
     if (proyectoError) throw new Error(`Error BD: ${proyectoError.message}`);
     return proyectoData;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error en crearProyectoMentor:", error);
     throw error;
   }
@@ -879,7 +879,7 @@ export const generarPasosPersonalizadoIA = async (promptUsuario) => {
     const content = data.choices[0].message.content;
     const match = content.match(/\[.*\]/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek:", error);
     return [{ texto: "Hubo un error al generar los pasos. Por favor, intenta de nuevo.", categoriaCorrecta: "operacion" }];
   }
@@ -921,7 +921,7 @@ export const evaluarClasificacionProcesosIA = async (pasos) => {
     const content = data.choices[0].message.content;
     const match = content.match(/\{.*\}/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek Evaluación:", error);
     // En caso de error, permitir que continúen
     const resultadoFallback = {};
@@ -979,7 +979,7 @@ export const obtenerTodoElContenidoProyecto = async () => {
     }
 
     return resultado;
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error obteniendo TODO el contenido del proyecto:", error);
     return {};
   }
@@ -1019,7 +1019,7 @@ Instrucciones extra: ${instrucciones}. NO agregues comentarios ni explicaciones 
 
     const data = await response.json();
     return data.choices[0].message.content.trim();
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek mejorando documento:", error);
     return textoBruto;
   }
@@ -1062,7 +1062,7 @@ Instrucciones específicas: ${instrucciones || 'Genera 1 o 2 párrafos concisos 
 
     const data = await response.json();
     return data.choices[0].message.content.trim();
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error en IA de redacción:", error);
     return `Error al generar la redacción para ${campoFaltante}.`;
   }
@@ -1135,7 +1135,7 @@ RESPONDE ÚNICA Y EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO. NO agregues comilla
       cleanContent = content.substring(firstBrace, lastBrace + 1);
     }
     return JSON.parse(cleanContent);
-  } catch (parseError) {
+  } catch (parseError) { if (parseError?.message === 'EDUCOINS_ERROR') throw parseError;
     console.error("Error parseando respuesta de IA:", content);
     throw new Error("La IA no devolvió un formato válido (JSON). Por favor, intenta de nuevo.");
   }
@@ -1219,7 +1219,7 @@ RESPONDE SOLO CON EL JSON VÁLIDO.`;
       cleanContent = content.substring(firstBrace, lastBrace + 1);
     }
     return JSON.parse(cleanContent);
-  } catch (parseError) {
+  } catch (parseError) { if (parseError?.message === 'EDUCOINS_ERROR') throw parseError;
     console.error("Error parseando respuesta de IA Financiera:", content);
     throw new Error("La IA no devolvió un formato válido (JSON). Intenta de nuevo.");
   }
@@ -1305,7 +1305,7 @@ Usa un tono positivo, alentador, profesional y muy práctico. RESPONDE SOLO CON 
       cleanContent = content.substring(firstBrace, lastBrace + 1);
     }
     return JSON.parse(cleanContent);
-  } catch (parseError) {
+  } catch (parseError) { if (parseError?.message === 'EDUCOINS_ERROR') throw parseError;
     console.error("Error parseando consejos de demanda IA:", content);
     throw new Error("La IA no devolvió un formato JSON válido.");
   }
@@ -1369,7 +1369,7 @@ Responde ÚNICAMENTE con el objeto JSON, sin formato markdown, para que sea pars
       cleanContent = content.substring(firstBrace, lastBrace + 1);
     }
     return JSON.parse(cleanContent);
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Error parseando respuesta de IA (Encuestas):", content);
     throw new Error("Formato inválido devuelto por la IA.");
   }
@@ -1452,7 +1452,7 @@ Responde ÚNICAMENTE con el objeto JSON puro.`;
     const content = data.choices[0].message.content.trim();
     const match = content.match(/\{.*\}/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek al generar resumen de marketing:", error);
     return {
       resumen_competencia: "Error al conectar con la IA.",
@@ -1541,7 +1541,7 @@ export const generarResumenFase4IA = async (dataFase4) => {
     let content = data.choices[0].message.content.trim();
     const match = content.match(/\{.*\}/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek en Fase 4:", error);
     return {
       resumen_concepto: "Error al conectar.",
@@ -1623,7 +1623,7 @@ export const generarResumenFase6IA = async (dataFase6) => {
     let content = data.choices[0].message.content.trim();
     const match = content.match(/\{.*\}/s);
     return match ? JSON.parse(match[0]) : JSON.parse(content);
-  } catch (error) {
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
     console.error("Error DeepSeek en Fase 6:", error);
     return {
       resumen_ubicacion: "Error al conectar.",
@@ -1657,13 +1657,13 @@ export const obtenerVideosConfig = async () => {
       data.forEach(item => {
         try {
           configs[item.proposito] = JSON.parse(item.prompt_texto);
-        } catch (e) {
+        } catch (e) { if (e?.message === 'EDUCOINS_ERROR') throw e;
           console.warn(`Error parseando config de video ${item.proposito}`, e);
         }
       });
     }
     return configs;
-  } catch (err) {
+  } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err;
     console.error("Error obteniendo configs de videos:", err);
     return {};
   }
@@ -1720,7 +1720,7 @@ export const buildYoutubeEmbedUrl = (config, fallbackUrl) => {
 
   return finalUrl;
 };
-export const recargarEducoins = async (targetUserId, amount) => { try { const { data, error } = await supabase.rpc('recargar_educoins', { user_id: targetUserId, amount: amount }); if (error) { const res = await supabase.from('perfiles_usuario').select('educoins').eq('id', targetUserId).single(); const newAmount = (res.data?.educoins || 0) + amount; const { data: updateData, error: updateError } = await supabase.from('perfiles_usuario').update({ educoins: newAmount }).eq('id', targetUserId).select(); if (updateError) throw updateError; return updateData; } return data; } catch (err) { console.error('Error al recargar EduCoins:', err); throw err; } };
+export const recargarEducoins = async (targetUserId, amount) => { try { const { data, error } = await supabase.rpc('recargar_educoins', { user_id: targetUserId, amount: amount }); if (error) { const res = await supabase.from('perfiles_usuario').select('educoins').eq('id', targetUserId).single(); const newAmount = (res.data?.educoins || 0) + amount; const { data: updateData, error: updateError } = await supabase.from('perfiles_usuario').update({ educoins: newAmount }).eq('id', targetUserId).select(); if (updateError) throw updateError; return updateData; } return data; } catch (err) { if (err?.message === 'EDUCOINS_ERROR') throw err; console.error('Error al recargar EduCoins:', err); throw err; } };
 
 
 export const cobrarEducoin = async () => {
@@ -1730,10 +1730,13 @@ export const cobrarEducoin = async () => {
   const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 10 });
   if (error) {
     console.error("Error consumiendo educoin:", error);
-    if (error.code === '42883') return true; 
+    if (typeof window !== 'undefined') alert("Error interno al consumir EduCoins. Revisa la consola o corre el script SQL.");
+    throw new Error("EDUCOINS_ERROR");
   }
-  if (data === false) {
-    throw new Error("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
+  
+  if (data !== true) {
+    if (typeof window !== 'undefined') alert("❌ SALDO INSUFICIENTE: No tienes suficientes EduCoins (🪙) para utilizar la Inteligencia Artificial. Contacta a tu Mentor o Administrador para una recarga.");
+    throw new Error("EDUCOINS_ERROR");
   }
   
   if (typeof window !== 'undefined') {
