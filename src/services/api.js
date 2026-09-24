@@ -1727,7 +1727,7 @@ export const cobrarEducoin = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Debes iniciar sesión para usar la IA.");
   
-  const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 1 });
+  const { data, error } = await supabase.rpc('consumir_educoin', { user_id: user.id, amount: 10 });
   if (error) {
     console.error("Error consumiendo educoin:", error);
     if (error.code === '42883') return true; 

@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     const handleEducoinGastado = () => {
       setPerfil(prev => {
         if (!prev) return prev;
-        return { ...prev, educoins: Math.max(0, (prev.educoins ?? 0) - 1) };
+        return { ...prev, educoins: Math.max(0, (prev.educoins ?? 0) - 10) };
       });
     };
     window.addEventListener('educoin_gastado', handleEducoinGastado);
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   const restarEducoinLocal = useCallback(() => {
     setPerfil(prev => {
       if (!prev) return prev;
-      return { ...prev, educoins: Math.max(0, (prev.educoins ?? 0) - 1) };
+      return { ...prev, educoins: Math.max(0, (prev.educoins ?? 0) - 10) };
     });
   }, []);
 
