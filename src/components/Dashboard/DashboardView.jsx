@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, Shield, Rocket, BookOpen, Plus, Folder, User, Settings, Lightbulb, LogOut } from 'lucide-react';
+import { Target, Shield, Rocket, BookOpen, Plus, Folder, User, Settings, Lightbulb, LogOut, Coins } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { cerrarSesion } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -92,6 +92,24 @@ const DashboardView = ({ state, actions }) => {
           </div>
           
           <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                background: 'rgba(234, 179, 8, 0.1)',
+                border: '1px solid rgba(234, 179, 8, 0.3)',
+                color: '#ca8a04',
+                padding: '0 var(--spacing-lg)',
+                borderRadius: 'var(--radius-full)',
+                fontWeight: 'bold',
+                cursor: 'default',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+              title="Tus EduCoins actuales"
+            >
+              <Coins size={20} />
+              <span>{perfil?.educoins || 0}</span>
+            </motion.div>
             {!state.showMundos && state.proyectos.length > 0 && (
               <motion.button 
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
