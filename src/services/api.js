@@ -662,9 +662,64 @@ export const generarNombresDeepSeek = async (ideaGanadora) => {
     
     if (promptTexto) {
       promptTexto = promptTexto.replace('{ideaGanadora}', ideaGanadora).replace('{idea}', ideaGanadora);
-      promptTexto += " IMPORTANTE: Sugiere los nombres en ESPAÑOL.";
+      promptTexto += ' IMPORTANTE: Sugiere los nombres en ESPAÑOL.';
     } else {
       promptTexto = `Basándote ÚNICAMENTE en esta idea ganadora de negocio: "${ideaGanadora}", genera 3 nombres atractivos y modernos en ESPAÑOL. No uses ninguna otra información externa. Responde solo con el array JSON: [{"nombre": "Nombre1", "representa": "Representa..."}, {"nombre": "Nombre2", "representa": "Representa..."}, {"nombre": "Nombre3", "representa": "Representa..."}].`;
+    }
+
+    await cobrarEducoin();
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: promptTexto }
+        ],
+        temperature: 0.8
+      })
+    });
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    const match = content.match(/\[.*\]/s);
+    return match ? JSON.parse(match[0]) : JSON.parse(content);
+  } catch (error) { if (error?.message === 'EDUCOINS_ERROR') throw error;
+    console.error("Error DeepSeek:", error);
+    return [
+      { nombre: "IdeaNova", representa: "Representa la innovación y la frescura de una nueva idea." },
+      { nombre: "Solvex", representa: "Evoca la capacidad de resolver problemas de forma eficaz." },
+      { nombre: "ProStart", representa: "Sugiere un comienzo profesional y estructurado." }
+    ];
+  }
+};
+
+/**
+ * REAL: Genera Pitch desde DeepSeek
+ */
+export const generarPitchDeepSeek = async (contextoData) => {
+  const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+  if (!apiKey) return "Ayudamos a nuestro cliente ideal a resolver su principal dolor mediante una solución que elimina la fricción de sus opciones actuales.";
+
+  try {
+    let promptTexto = await obtenerPromptIA(1, 'generar_pitch');
+    let systemPrompt = "Eres un mentor experto en innovación y oratoria. Tu tarea es generar un Discurso Comercial (Pitch) breve y motivador. Responde ÚNICAMENTE con el texto del pitch, sin explicaciones ni comillas adicionales.";
+    
+    if (promptTexto) {
+      promptTexto = promptTexto
+        .replace('{protagonista}', contextoData.protagonista || '')
+        .replace('{contexto}', contextoData.contexto || '')
+        .replace('{dolor}', contextoData.dolor || '')
+        .replace('{tarea}', contextoData.tarea || '')
+        .replace('{friccion}', contextoData.friccion || '')
+        .replace('{ideaGanadora}', contextoData.ideaGanadora || '')
+        .replace('{nombreElegido}', contextoData.nombreElegido || '');
+    } else {
+      promptTexto = `La idea ganadora del proyecto es: "${contextoData.ideaGanadora}". El protagonista al que va dirigida es: "${contextoData.protagonista}". El contexto es: "${contextoData.contexto}". Su dolor principal es: "${contextoData.dolor}". La tarea que intentan realizar es: "${contextoData.tarea}". La fricción de su solución actual es: "${contextoData.friccion}". La solución propuesta se llama: "${contextoData.nombreElegido}". Genera un "Discurso de Presentación (Pitch)" breve, persuasivo y motivacional de no más de 3 oraciones que resuma cómo esta idea ganadora resuelve su problema. No uses explicaciones adicionales, solo devuelve el texto del pitch.`;
     }
 
     await cobrarEducoin();
