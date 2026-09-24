@@ -13,7 +13,7 @@ const mundos = [
 ];
 
 const DashboardView = ({ state, actions }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, perfil } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -129,6 +129,37 @@ const DashboardView = ({ state, actions }) => {
             </motion.div>
           </div>
         </header>
+
+        <AnimatePresence>
+          {!isAdmin && (perfil?.educoins || 0) <= 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderLeft: '4px solid #ef4444',
+                padding: '1.5rem',
+                borderRadius: '1rem',
+                marginBottom: '2rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem'
+              }}
+            >
+              <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '0.75rem', borderRadius: '0.5rem', color: '#ef4444' }}>
+                <Shield size={28} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ef4444', fontWeight: 'bold' }}>Suministros Agotados (0 EduCoins)</h3>
+                <p style={{ margin: '0.5rem 0 0 0', color: 'var(--color-text-secondary)' }}>
+                  Tu saldo actual es insuficiente para iniciar nuevas misiones o continuar operativos vigentes. Por favor, <strong>contacta a tu administrador para solicitar una recarga</strong>.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {state.showMundos && (
