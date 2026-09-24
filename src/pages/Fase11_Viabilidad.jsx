@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import PasoLayout from '../layouts/PasoLayout';
 import { guardarContenidoFase, obtenerContenidoFaseCompleto } from '../services/api';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ShieldCheck, Wrench, TrendingUp } from 'lucide-react';
+import YoutubePlayer from '../components/ui/YoutubePlayer';
+import { Video, ShieldCheck, Wrench, TrendingUp } from 'lucide-react';
 import { NexusContext } from '../context/NexusContext';
 
 const Fase11_Viabilidad = () => {
@@ -88,7 +89,7 @@ const Fase11_Viabilidad = () => {
 
   const getPasoContent = () => {
     switch(step) {
-      case 1: return (
+      case 2: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
@@ -111,7 +112,7 @@ const Fase11_Viabilidad = () => {
           </div>
         </div>
       );
-      case 2: return (
+      case 3: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
@@ -134,7 +135,7 @@ const Fase11_Viabilidad = () => {
           </div>
         </div>
       );
-      case 3: return (
+      case 4: return (
         <div className="animate-fade-in p-6 bg-white rounded-3xl shadow-xl w-full max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
@@ -167,17 +168,18 @@ const Fase11_Viabilidad = () => {
       pasoActual={step}
       totalPasos={3}
       tabs={[
-        { id: 1, icon: <Wrench size={18} />, label: 'Viabilidad Técnica' },
-        { id: 2, icon: <TrendingUp size={18} />, label: 'Viabilidad Comercial' },
-        { id: 3, icon: <ShieldCheck size={18} />, label: 'Legal y Ambiental' }
-      ]}
+          { id: 1, icon: <Video size={18} />, label: 'Video' },
+          { id: 2, icon: <Wrench size={18} />, label: 'Viabilidad Técnica' },
+          { id: 3, icon: <TrendingUp size={18} />, label: 'Viabilidad Comercial' },
+          { id: 4, icon: <ShieldCheck size={18} />, label: 'Legal y Ambiental' }
+        ]}
       onTabClick={(id) => {
         setPendingSave(true);
         irAPaso(id);
       }}
       onSiguiente={() => irAPaso(step + 1)}
       onAnterior={step > 1 ? () => irAPaso(step - 1) : null}
-      mentorText={step === 1 ? "La idea es buena, ¿pero tienes cómo construirla de verdad? Analiza fría y objetivamente tu capacidad técnica." : step === 2 ? "Ahora que sabemos tus costos e indicadores, demuéstrame que realmente hay un mercado que está dispuesto a pagar tu precio." : "Nadie quiere un negocio clausurado. Asegúrate de tener los permisos claros y de no dañar el planeta."}
+      mentorText={step === 2 ? "La idea es buena, ¿pero tienes cómo construirla de verdad? Analiza fría y objetivamente tu capacidad técnica." : step === 3 ? "Ahora que sabemos tus costos e indicadores, demuéstrame que realmente hay un mercado que está dispuesto a pagar tu precio." : "Nadie quiere un negocio clausurado. Asegúrate de tener los permisos claros y de no dañar el planeta."}
       guardando={guardando}
     >
       <div onBlur={() => { if(typeof setPendingSave === 'function') setPendingSave(true); }}>
