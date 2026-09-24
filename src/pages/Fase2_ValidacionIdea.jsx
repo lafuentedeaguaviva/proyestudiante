@@ -9,7 +9,6 @@ import { NexusContext } from '../context/NexusContext';
 
 import Paso1_ValidacionVideo from '../components/modos/mentor/fases/CaminoA/Fase2/Paso1_ValidacionVideo';
 import Paso2_PresentacionEncuesta from '../components/modos/mentor/fases/CaminoA/Fase2/Paso2_PresentacionEncuesta';
-import Paso3_VideoMatriz from '../components/modos/mentor/fases/CaminoA/Fase2/Paso3_VideoMatriz';
 import Paso4_Codificacion from '../components/modos/mentor/fases/CaminoA/Fase2/Paso4_Codificacion';
 import Paso5_ExplicacionLlenado from '../components/modos/mentor/fases/CaminoA/Fase2/Paso5_ExplicacionLlenado';
 import Paso6_Resultados from '../components/modos/mentor/fases/CaminoA/Fase2/Paso6_Resultados';
@@ -39,11 +38,10 @@ const Fase2_ValidacionIdea = () => {
   const tabs = [
     { id: 1, icon: <Video size={18} />, label: 'Validar' },
     { id: 2, icon: <FileText size={18} />, label: 'Encuesta' },
-    { id: 3, icon: <Database size={18} />, label: 'Matriz' },
-    { id: 4, icon: <Code size={18} />, label: 'Códigos' },
-    { id: 5, icon: <CheckCircle size={18} />, label: 'Tabular' },
-    { id: 6, icon: <PieChart size={18} />, label: 'Resultados' },
-    { id: 7, icon: <Sparkles size={18} />, label: 'Resumen IA' }
+    { id: 3, icon: <Code size={18} />, label: 'Códigos' },
+    { id: 4, icon: <CheckCircle size={18} />, label: 'Tabular' },
+    { id: 5, icon: <PieChart size={18} />, label: 'Resultados' },
+    { id: 6, icon: <Sparkles size={18} />, label: 'Resumen IA' }
   ];
 
   return (
@@ -65,14 +63,14 @@ const Fase2_ValidacionIdea = () => {
           </div>
 
           {/* Progress Bar & Tabs */}
-          <SubMenuFases tabs={tabs} currentStep={step} onTabClick={(id) => irAPaso(id)} maxStep={7} />
+          <SubMenuFases tabs={tabs} currentStep={step} onTabClick={(id) => irAPaso(id)} maxStep={6} />
 
           {/* Pasos */}
           <div onBlur={() => setPendingSave(true)} style={{ background: 'white', borderRadius: '1rem', padding: '1rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div key="1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Paso1_ValidacionVideo setAyudanteText={setAyudanteText} onComplete={() => irAPaso(2)} onSkip={() => irAPaso(5)} />
+                  <Paso1_ValidacionVideo setAyudanteText={setAyudanteText} onComplete={() => irAPaso(2)} onSkip={() => irAPaso(4)} />
                 </motion.div>
               )}
               {step === 2 && (
@@ -80,31 +78,27 @@ const Fase2_ValidacionIdea = () => {
                   <Paso2_PresentacionEncuesta setAyudanteText={setAyudanteText} onComplete={() => irAPaso(3)} />
                 </motion.div>
               )}
+              
               {step === 3 && (
                 <motion.div key="3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Paso3_VideoMatriz setAyudanteText={setAyudanteText} onComplete={() => irAPaso(4)} />
+                  <Paso4_Codificacion setAyudanteText={setAyudanteText} onComplete={() => irAPaso(4)} />
                 </motion.div>
               )}
               {step === 4 && (
                 <motion.div key="4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Paso4_Codificacion setAyudanteText={setAyudanteText} onComplete={() => irAPaso(5)} />
-                </motion.div>
-              )}
-              {step === 5 && (
-                <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <Paso5_ExplicacionLlenado setAyudanteText={setAyudanteText} initialData={encuestasData} onComplete={async (datos) => {
                     setEncuestasData(datos);
                     irAPaso(6);
                   }} />
                 </motion.div>
               )}
-              {step === 6 && (
-                <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Paso6_Resultados setAyudanteText={setAyudanteText} encuestasData={encuestasData} updateData={updateData} onComplete={() => irAPaso(7)} />
+              {step === 5 && (
+                <motion.div key="5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <Paso6_Resultados setAyudanteText={setAyudanteText} encuestasData={encuestasData} updateData={updateData} onComplete={() => irAPaso(6)} />
                 </motion.div>
               )}
-              {step === 7 && (
-                <motion.div key="7" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              {step === 6 && (
+                <motion.div key="6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <Paso7_ResumenIA 
                     setAyudanteText={setAyudanteText} 
                     encuestasData={encuestasData} 

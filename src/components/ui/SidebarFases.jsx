@@ -44,7 +44,7 @@ const SidebarFases = () => {
       const mapaEstatico = [
         { id: 0, titulo: 'El Inicio del Viaje', path: '/fase/0', pasos: ['Bienvenida', 'Video', 'Cuestionario Orientador', 'Elección de Camino'] },
         { id: 1, titulo: 'Encontrar la idea', path: '/fase/1', pasos: ['Video', 'Selección de Área', 'Observación del Entorno', 'Análisis de Fricciones', 'Guía: Brainstorming Efectivo', 'Lluvia de Ideas', 'Matriz de Batalla', 'Idea Ganadora y Pitch'] },
-        { id: 2, titulo: 'Validación de la Idea', path: '/fase/2', pasos: ['Video', 'Introducción a la Validación', 'Diseño de la Encuesta', 'Explicación de la Matriz', 'Codificación de Preguntas', 'Tabulación de Resultados', 'Análisis de Resultados', 'Resumen IA'] },
+        { id: 2, titulo: 'Validación de la Idea', path: '/fase/2', pasos: ['Video', 'Introducción a la Validación', 'Diseño de la Encuesta', 'Codificación de Preguntas', 'Tabulación de Resultados', 'Análisis de Resultados', 'Resumen IA'] },
         { id: 3, titulo: 'Público Objetivo', path: '/fase/3', pasos: ['Video', 'Público Objetivo'] },
         { id: 4, titulo: 'Diseño de producto o servicio', path: '/fase/4', pasos: ['Video', 'Qué vas a vender', 'Características', 'Beneficios', 'Empaque', 'Presentación', 'Demanda Potencial', 'Resumen IA'] },
         { id: 5, titulo: 'La Estrategia de Marketing', path: '/fase/5', pasos: ['Video', 'Análisis de competencia', 'Tu Ventaja Competitiva', 'Análisis del entorno', 'Estrategia de promoción', 'Resumen IA'] },
